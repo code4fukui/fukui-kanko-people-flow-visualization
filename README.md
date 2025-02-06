@@ -8,7 +8,7 @@
 
 ## 開発者向け資料
 
-このプロジェクトは [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app) を利用して作成された [Next.js](https://nextjs.org) プロジェクトです。
+このプロジェクトは [vite](https://ja.vite.dev/) と [react](https://ja.react.dev/) で構成されています。
 
 ### 開発サーバーの起動
 

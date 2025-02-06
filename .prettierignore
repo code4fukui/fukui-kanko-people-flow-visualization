@@ -1,3 +1,9 @@
 # Ignore artifacts:
 build
 coverage
+
+# Ignore submodule
+data
+
+# Ignore shadcn/ui
+src/components/ui

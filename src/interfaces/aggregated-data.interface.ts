@@ -14,6 +14,13 @@ export type AggregatedDataBase = {
   "aggregate to": string;
   "total count": number;
 };
+export const KEYOF_AGGREGATED_DATA_BASE: (keyof AggregatedDataBase)[] = [
+  "placement",
+  "object class",
+  "aggregate from",
+  "aggregate to",
+  "total count",
+] as const;
 export type AggregatedData = AggregatedDataBase & Record<string, string | number>;
 
 export const OBJECT_CLASS_ATTRIBUTES = {
@@ -119,6 +126,13 @@ type AttributeValue<Attribute extends ObjectClassAttribute> = Attribute extends 
         ? keyof (typeof OBJECT_CLASS_ATTRIBUTES)["LicensePlate"][Attribute]
         : never;
 
+export const ATTRIBUTES = {
+  ageRanges: AGE_RANGES,
+  genders: GENDERS,
+  prefectures: PREFECTURES,
+  carCategories: CAR_CATEGORIES,
+} as const;
+
 function isValueOf<Attribute extends ObjectClassAttribute>(
   attribute: Attribute,
   value: string,
@@ -148,5 +162,5 @@ export function attributeValueText(
     return OBJECT_CLASS_ATTRIBUTES["LicensePlate"][objectClassAttribute][attributeValue];
   if (objectClassAttribute === "carCategories" && isValueOf(objectClassAttribute, attributeValue))
     return OBJECT_CLASS_ATTRIBUTES["LicensePlate"][objectClassAttribute][attributeValue];
-  throw new Error(`invalid arguments: (${objectClassAttribute}, ${attributeValue})`);
+  return "";
 }
