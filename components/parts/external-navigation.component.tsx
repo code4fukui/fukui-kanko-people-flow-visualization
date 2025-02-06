@@ -1,4 +1,4 @@
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import Image from "next/image";
 import {
   DatabaseIcon,
   FileCodeIcon,
@@ -6,6 +6,7 @@ import {
   MarkGithubIcon,
   ThreeBarsIcon,
 } from "@primer/octicons-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export function ExternalNavigaton() {
   return (
@@ -33,7 +34,7 @@ export function ExternalNavigaton() {
               ページソース
             </a>
             <a href="https://code4fukui.github.io/" target="_blank">
-              <img
+              <Image
                 aria-hidden
                 src="https://code4fukui.github.io/code4fukui_logo.svg"
                 alt="code4fukui logo"
@@ -71,7 +72,7 @@ export function ExternalNavigaton() {
 
         <Popover>
           <PopoverTrigger className="cursor-pointer transition-all hover:scale-110">
-            <img
+            <Image
               aria-hidden
               src="https://code4fukui.github.io/code4fukui_logo.svg"
               alt="code4fukui logo"

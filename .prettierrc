@@ -1,4 +1,3 @@
 {
-  "importOrder": ["^react", "^@?\\w", "^[./]"],
-  "plugins": ["prettier-plugin-tailwindcss", "@trivago/prettier-plugin-sort-imports"]
+  "plugins": ["prettier-plugin-tailwindcss"]
 }

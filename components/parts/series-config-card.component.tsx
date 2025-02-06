@@ -1,9 +1,7 @@
-import { Button } from "@/components/ui/button";
+"use client";
+
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -11,6 +9,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Placement, PLACEMENTS } from "@/interfaces/placement.interface";
 import {
   JAPANESE_ATTRIBUTE_NAME,
   OBJECT_CLASS,
@@ -18,17 +21,16 @@ import {
   ObjectClass,
   ObjectClassAttribute,
 } from "@/interfaces/aggregated-data.interface";
+import { TrashIcon } from "@primer/octicons-react";
 import {
-  defaultSeriesName,
-  GRAPH_TYPES,
-  GraphSeries,
   GraphType,
+  GraphSeries,
+  GRAPH_TYPES,
+  defaultSeriesName,
   SERIES_PROPERTY_EFFECT_TO,
 } from "@/interfaces/graph-series.interface";
-import { Placement, PLACEMENTS } from "@/interfaces/placement.interface";
-import { cn } from "@/lib/utils";
 import { MouseEventHandler } from "react";
-import { TrashIcon } from "@primer/octicons-react";
+import { cn } from "@/lib/utils";
 
 interface Props {
   series: GraphSeries;
@@ -76,7 +78,7 @@ export function SeriesConfigCard({ series, notify, onRemoveClick }: Props) {
           defaultValue={series.name}
           onChange={(v) =>
             notify(
-              updateSeriesProperty(["name", v.target.value ? v.target.value : undefined], series),
+              updateSeriesProperty(["name", !!v.target.value ? v.target.value : undefined], series),
             )
           }
           placeholder={defaultSeriesName(series)}
@@ -148,7 +150,7 @@ export function SeriesConfigCard({ series, notify, onRemoveClick }: Props) {
                 <div key={graphType + "radio"}>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value={graphType} id={graphType} />
-                    <Label htmlFor={graphType}>{graphTypeText}</Label>
+                    <Label htmlFor="simple">{graphTypeText}棒グラフ</Label>
                   </div>
                   {graphType !== "simple" &&
                   graphType === series.graphType &&

@@ -46,18 +46,28 @@ jobs:
           # You may remove this line if you want to manage the configuration yourself.
           static_site_generator: next
           generator_config_file: next.config.ts
+      - name: Restore cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .next/cache
+          # Generate a new cache whenever packages or source files change.
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock', '**/pnpm-lock.yaml') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          # If source files changed but packages didn't, rebuild from a prior cache.
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock', '**/pnpm-lock.yaml') }}-
       - name: Install dependencies
         run: pnpm install
       - name: Build with Next.js
         run: |
           date
-          pnpm build
+          pnpm next build
         env:
           PAGES: true
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: ./out
 
   # GitHub Pagesへデプロイ
   deploy:
