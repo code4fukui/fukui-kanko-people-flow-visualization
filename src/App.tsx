@@ -3,16 +3,19 @@ import { SeriesConfigCard } from "@/components/parts/series-config-card.componen
 import { ShareDialogTrigger } from "@/components/parts/share-dialog.component";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ATTRIBUTES } from "@/interfaces/aggregated-data.interface";
 import { GraphSeries, isSeriesValid } from "@/interfaces/graph-series.interface";
 import { getData } from "@/lib/data/csv";
 import { floorDate, getDateStringRange } from "@/lib/date";
+import { useLocalDefaultStar } from "@/lib/hooks/local-default-star";
 import { useLocalStars } from "@/lib/hooks/local-stars";
 import { useRecord } from "@/lib/hooks/record";
 import { useCallback, useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
-import { PlusIcon, StarFillIcon, StarIcon } from "@primer/octicons-react";
+import { PlusIcon, QuestionIcon, StarFillIcon, StarIcon } from "@primer/octicons-react";
 import { Graph } from "./components/parts/graph.component";
 import { ChartGroup, dataFromSeriesAll } from "./interfaces/graph-data.interface";
 
@@ -32,19 +35,24 @@ function getDefaultDateRange(): DateRange {
 }
 export default function App() {
   const { stars, appendStar, removeStar } = useLocalStars();
+  const { defaultStarKey, setDefaultStar, removeDefaultStar } = useLocalDefaultStar();
   const [title, setTitle] = useState<string | undefined>(
-    new URL(location.href).searchParams.get("starTitle") ?? undefined,
+    new URL(location.href).searchParams.get("starTitle") ?? defaultStarKey,
   );
   const [seriesAll, setSeries, removeSeries] = useRecord<GraphSeries>(
     (() => {
       const starSeriesAll = new URL(location.href).searchParams.get("starSeriesAll");
-      return starSeriesAll !== null ? JSON.parse(starSeriesAll) : undefined;
+      return starSeriesAll !== null
+        ? JSON.parse(starSeriesAll)
+        : JSON.parse(stars[defaultStarKey] ?? "{}");
     })(),
   );
   const [dateRange, setDateRange] = useState<DateRange | undefined>(getDefaultDateRange());
   const [data, setData] = useState<Record<string, string | number>[] | undefined>(undefined);
   const [chartGroup, setChartGroup] = useState<ChartGroup | undefined>(undefined);
-
+  const [checkedKey, setCheckedKey] = useState<string | undefined>(() => {
+    return defaultStarKey ?? undefined;
+  });
   const onClickAddSeries = () => {
     setSeries({ graphType: "simple", show: true });
   };
@@ -158,15 +166,42 @@ export default function App() {
     <>
       <aside className="relative flex h-[calc(100svh_-_96px)] min-h-[calc(100svh_-_96px)] w-72 flex-col items-center gap-y-4 overflow-y-auto border-r-2 px-2">
         <section className="min-h-44 max-h-44 overflow-y-auto w-full overflow-x-hidden">
-          <h2 className="text-lg font-bold sticky top-0 bg-background">⭐️ お気に入り</h2>
+          <div className="flex items-center gap-x-2">
+            <h2 className="text-lg font-bold sticky top-0 bg-background">⭐️ お気に入り </h2>
+            <TooltipProvider delayDuration={0} skipDelayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger>
+                  <QuestionIcon className="text-gray-400" size="small" />
+                </TooltipTrigger>
+                <TooltipContent className="bg-gray-300 text-black">
+                  <p>チェックを入れたグラフが初期表示として設定されます</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           {Object.keys(stars).length > 0 ? (
             Object.entries(stars).map(([starTitle, starSeriesAll], i) => (
-              <OpenStar
-                key={`${i}${starTitle}`}
-                title={starTitle}
-                seriesAll={starSeriesAll}
-                removeStar={removeStar}
-              />
+              <div className="flex items-center mt-2" key={`${i}${starTitle}`}>
+                <Checkbox
+                  checked={checkedKey === starTitle}
+                  onCheckedChange={() => {
+                    if (starTitle === checkedKey) {
+                      setCheckedKey(undefined);
+                      removeDefaultStar();
+                    } else {
+                      setCheckedKey(starTitle);
+                      setDefaultStar(starTitle);
+                    }
+                  }}
+                />
+                <OpenStar
+                  title={starTitle}
+                  seriesAll={starSeriesAll}
+                  removeStar={removeStar}
+                  defaultStarKey={defaultStarKey}
+                  removeDefaultStar={removeDefaultStar}
+                />
+              </div>
             ))
           ) : (
             <p className="pl-2 mx-auto my-auto">お気に入りがありません</p>

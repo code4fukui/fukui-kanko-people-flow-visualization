@@ -1,30 +1,35 @@
+import { DeleteDialogTrigger } from "@/components/parts/delete-dialog.component";
 import { linkPath } from "@/lib/utils";
-import { TrashIcon } from "@primer/octicons-react";
-import { Button } from "../ui/button";
 
 interface Props {
   title: string;
   seriesAll: string;
   removeStar: (title: string) => void;
+  defaultStarKey: string;
+  removeDefaultStar: () => void;
 }
 
-export function OpenStar({ title, seriesAll, removeStar }: Props) {
+export function OpenStar({
+  title,
+  seriesAll,
+  removeStar,
+  defaultStarKey,
+  removeDefaultStar,
+}: Props) {
   return (
-    <div className="group mt-2 flex max-w-full items-center gap-x-2">
+    <div className="group flex w-full max-w-full items-center gap-x-2">
       <a
         className="block w-full max-w-full cursor-pointer overflow-hidden text-ellipsis text-nowrap pl-2 underline group-hover:text-primary"
         href={linkPath(`/?${new URLSearchParams({ starTitle: title, starSeriesAll: seriesAll })}`)}
       >
         {title}
       </a>
-      <Button
-        className="shrink-0"
-        variant="destructive"
-        size="icon"
-        onClick={() => removeStar(title)}
-      >
-        <TrashIcon size="small" />
-      </Button>
+      <DeleteDialogTrigger
+        title={title}
+        removeStar={removeStar}
+        defaultStarKey={defaultStarKey}
+        removeDefaultStar={removeDefaultStar}
+      />
     </div>
   );
 }

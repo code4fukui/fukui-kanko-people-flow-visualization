@@ -5,7 +5,9 @@ import { getDateTimeString } from "../date";
 export const STAR_KEY = "stars";
 
 export function useLocalStars() {
-  const [stars, setStars] = useState<{ [title: string]: string }>({});
+  const [stars, setStars] = useState<{ [title: string]: string }>(
+    JSON.parse(localStorage.getItem(STAR_KEY) ?? "{}"),
+  );
 
   useEffect(() => {
     const res = JSON.parse(localStorage.getItem(STAR_KEY) ?? "{}");
