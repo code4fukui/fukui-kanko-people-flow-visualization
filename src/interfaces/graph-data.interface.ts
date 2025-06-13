@@ -1,4 +1,5 @@
 import { ChartConfig } from "@/components/ui/chart";
+import { KEYOF_AGGREGATED_DATA_BASE } from "@/interfaces/aggregated-data.interface";
 import { getData } from "@/lib/data/csv";
 import { getDateStringRange, WEEK_DAYS } from "@/lib/date";
 import { isKeyMatchingAttribute } from "@/lib/utils";
@@ -108,6 +109,30 @@ const flatData = <T extends Record<string, unknown>>(
   }, {});
 };
 
+// データを一度だけ走査して、属性ごとの合計を計算
+const computeAttributeCounts = (
+  rawDataRow: Record<string, string | number>,
+  focusedAttribute: string,
+  attributeValues: Record<string, string>,
+) => {
+  const attributeCounts: Record<string, number> = {};
+
+  for (const key in rawDataRow) {
+    // 基本データフィールドはスキップ
+    if ((KEYOF_AGGREGATED_DATA_BASE as string[]).includes(key)) continue;
+
+    // 各属性値についてマッチングをチェック
+    Object.keys(attributeValues).forEach((attributeValue) => {
+      if (isKeyMatchingAttribute(focusedAttribute, attributeValue, key)) {
+        if (attributeCounts[attributeValue] === undefined) attributeCounts[attributeValue] = 0;
+        const value = Number(rawDataRow[key]);
+        attributeCounts[attributeValue] += value;
+      }
+    });
+  }
+  return attributeCounts;
+};
+
 export async function dataFromSeriesAll(
   seriesAll: { [id: string]: GraphSeries },
   dateRange: { from: Date; to: Date },
@@ -125,7 +150,6 @@ export async function dataFromSeriesAll(
 
     if (isCartesian(series.graphType)) {
       let orientedData: { [date: string]: { [attribute: string]: Count } } = {};
-
       if (series.graphType === "simple") {
         for (const dateString of dateStrings) {
           const rawDataRowTheDay = rawData.find((rawDataRow) => {
@@ -148,35 +172,23 @@ export async function dataFromSeriesAll(
             return String(rawDataRow["aggregate from"].slice(0, 10)) === dateString;
           });
           if (rawDataRowTheDay === undefined) continue;
+          const dateData = orientedData[dateString] || {};
+          const dateTotal = Number(rawDataRowTheDay["total count"]);
           const list = ATTRIBUTES[series.focusedAttribute];
-          Object.keys(list)
-            .filter((listitem) => {
-              if (
-                series.exclude === undefined ||
-                series.focusedAttribute === undefined ||
-                series.exclude[series.focusedAttribute] === undefined
-              )
-                return true;
-              return !series.exclude[series.focusedAttribute].includes(listitem);
-            })
-            .forEach((listitem) => {
-              orientedData = {
-                ...orientedData,
-                [dateString]: {
-                  ...orientedData[dateString],
-                  [listitem]: {
-                    count: Object.keys(rawDataRowTheDay)
-                      .filter((key) =>
-                        series.focusedAttribute
-                          ? isKeyMatchingAttribute(series.focusedAttribute, listitem, key)
-                          : false,
-                      )
-                      .map((key) => Number(rawDataRowTheDay[key]))
-                      .reduce((sum, current) => (sum += current), 0),
-                  },
-                },
-              };
-            });
+          const attributeCounts = computeAttributeCounts(
+            rawDataRowTheDay,
+            series.focusedAttribute,
+            list,
+          );
+
+          Object.entries(attributeCounts).forEach(([listitem, itemCount]) => {
+            dateData[listitem] = { count: itemCount };
+          });
+          dateData.categoryTotal = { count: dateTotal };
+          orientedData = {
+            ...orientedData,
+            [dateString]: dateData,
+          };
         }
       }
 

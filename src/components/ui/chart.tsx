@@ -114,6 +114,7 @@ const ChartTooltipContent = React.forwardRef<
       indicator?: "line" | "dot" | "dashed"
       nameKey?: string
       labelKey?: string
+      isRatio?: boolean
     }
 >(
   (
@@ -131,16 +132,29 @@ const ChartTooltipContent = React.forwardRef<
       color,
       nameKey,
       labelKey,
+      isRatio = false,
     },
     ref
   ) => {
     const { config } = useChart()
 
+    const totalValue = React.useCallback((key: string) => {
+      if (!payload?.length || !payload[0]?.payload) return 0;
+      
+      // データオブジェクトを取得
+      const dataObj = payload[0].payload;
+      
+      // #より前のidを取得
+      const baseKey = key.includes('#') ? key.split('#')[0] : key;
+
+      const totalKey = `${baseKey}#categoryTotal`;
+      return typeof dataObj[totalKey] === 'number' ? dataObj[totalKey] : 0;
+    }, [payload]);
+
     const tooltipLabel = React.useMemo(() => {
       if (hideLabel || !payload?.length) {
         return null
       }
-
       const [item] = payload
       const key = `${labelKey || item.dataKey || item.name || "value"}`
       const itemConfig = getPayloadConfigFromPayload(config, item, key)
@@ -263,9 +277,14 @@ const ChartTooltipContent = React.forwardRef<
                           {itemConfig?.label || item.name}{": "}
                         </span>
                       </div>
-                      {item.value && (
+                      {item.value !== undefined && (
                         <span className="font-mono font-medium tabular-nums text-foreground">
-                          {item.value.toLocaleString()}
+                          {isRatio
+                            ? totalValue(key) !== 0
+                              ? `${(Number(item.value) / totalValue(key) * 100).toFixed(1)}%`
+                              : "0.0%"
+                            : item.value.toLocaleString()
+                          }
                         </span>
                       )}
                     </div>
