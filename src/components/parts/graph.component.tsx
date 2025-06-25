@@ -4,8 +4,9 @@ import {
 } from "@/interfaces/aggregated-data.interface";
 import { ChartGroup, getChartConfig } from "@/interfaces/graph-data.interface";
 import { defaultSeriesName, GraphSeries } from "@/interfaces/graph-series.interface";
-import { CARTESIAN_RENDER_THRESHOLD, cn } from "@/lib/utils";
-import { ReactNode } from "react";
+import { CARTESIAN_RENDER_THRESHOLD, cn, SCROLL_BOTTOM_THRESHOLD } from "@/lib/utils";
+import { Children, ReactNode, useEffect, useRef, useState } from "react";
+import { ChevronDownIcon } from "@primer/octicons-react";
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, XAxis, YAxis } from "recharts";
 import {
   ChartContainer,
@@ -16,13 +17,70 @@ import {
 } from "../ui/chart";
 
 function MultiChartContainer(props: { children: ReactNode; className?: string }) {
+  // 子要素（グラフ）の数を取得
+  const childCount = Children.count(props.children);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [showScrollIcon, setShowScrollIcon] = useState(false);
+
+  // スクロールイベントを監視
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (!containerRef.current) return;
+
+      const { scrollHeight, clientHeight } = containerRef.current;
+      // コンテンツがコンテナより大きい場合にのみアイコンを表示
+      const hasOverflow = scrollHeight > clientHeight;
+      setShowScrollIcon(hasOverflow);
+    };
+
+    const handleScroll = () => {
+      if (!containerRef.current) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+      // スクロール位置が下部に近づいたらアイコンを非表示
+      const isBottom = scrollTop + clientHeight >= scrollHeight - SCROLL_BOTTOM_THRESHOLD;
+      setShowScrollIcon(!isBottom);
+    };
+
+    checkOverflow();
+
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+    }
+
+    return () => {
+      if (container) {
+        container.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, [childCount]);
+
+  // グラフの数に応じてレイアウトを変更
+  let gridLayout = "";
+  if (childCount === 1) {
+    // 1つの場合は全画面表示
+    gridLayout = "grid-cols-1 grid-rows-1";
+  } else if (childCount === 2) {
+    // 2つの場合は縦に並べる
+    gridLayout = "grid-cols-1 grid-rows-2";
+  } else if (childCount === 3) {
+    // 3つの場合は上に1つ、下に2つ
+    gridLayout = "grid-cols-2 grid-rows-2";
+  } else {
+    // 4つ以上の場合は2×2のグリッドで固定高さ
+    gridLayout = "grid-cols-2 grid-rows-[repeat(auto-fill,_minmax(356px,_1fr))] overflow-y-auto";
+  }
   return (
-    <div
-      className={cn(
-        `grid overflow-x-hidden overflow-y-auto grid-cols-[repeat(auto-fit,_minmax(50%,_1fr))] grid-rows-1 w-full h-full`,
-      )}
-    >
-      {props.children}
+    <div className="relative w-full h-full">
+      <div ref={containerRef} className={cn(`grid w-full h-full ${gridLayout}`, props.className)}>
+        {props.children}
+        {showScrollIcon && (
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 animate-bounce pointer-events-none">
+            <ChevronDownIcon size={30} className="text-primary" />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -103,20 +161,29 @@ interface Props {
   className?: string;
 }
 export function Graph({ chartGroup, seriesAll, className }: Props) {
-  const isCartesianRatioOnly = !Object.values(seriesAll).some(
-    (item) => item.graphType === "stack" || item.graphType === "simple",
+  const chartIds = Object.keys(chartGroup).filter(
+    (chartId) =>
+      (chartId !== "cartesian" && chartId !== "ratio") ||
+      Object.keys(chartGroup[chartId].at(-1) ?? {}).length > CARTESIAN_RENDER_THRESHOLD,
   );
+
+  // グラフの種類を判定
+  const hasCartesian = chartIds.includes("cartesian");
+  const hasRatio = chartIds.includes("ratio");
+
   return (
     <MultiChartContainer className={className}>
-      {Object.keys(chartGroup)
-        .filter(
-          (chartId) =>
-            chartId !== "cartesian" ||
-            Object.keys(chartGroup[chartId].at(-1) ?? {}).length > CARTESIAN_RENDER_THRESHOLD,
-        )
-        .map((chartId) => (
-          <div key={chartId} className="h-full w-full first:col-span-2 flex flex-col items-center">
-            {seriesAll && chartId !== "cartesian" ? (
+      {chartIds.map((chartId) => {
+        // 3つ以上円グラフのみの場合、3種類のグラフがある場合、均等配置
+        const spanClass =
+          (!hasCartesian && !hasRatio) || (hasCartesian && hasRatio) ? "" : "first:col-span-2";
+
+        return (
+          <div
+            key={chartId}
+            className={`h-full w-full flex ${spanClass} flex-col items-center border border-muted rounded-md shadow-sm`}
+          >
+            {seriesAll && chartId !== "cartesian" && chartId !== "ratio" ? (
               <p className="-mb-4 pt-4">
                 {(() => {
                   const series = seriesAll[chartId];
@@ -129,13 +196,66 @@ export function Graph({ chartGroup, seriesAll, className }: Props) {
             ) : undefined}
             <ChartContainer
               config={getChartConfig(seriesAll, chartGroup[chartId], chartId)}
-              className="h-full w-full"
+              className="h-full w-full min-h-0"
             >
               {chartId === "cartesian" ? (
-                <BarChart
-                  data={chartGroup[chartId]}
-                  stackOffset={isCartesianRatioOnly ? "expand" : "none"}
-                >
+                <BarChart data={chartGroup[chartId]}>
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey={"date"}
+                    tickLine={false}
+                    tickMargin={7}
+                    axisLine={false}
+                    tick={(props: XAxisTickProps) => (
+                      <CustomizedXAxisTick {...props} data={chartGroup[chartId]} />
+                    )}
+                  />
+                  <YAxis type="number" tickLine={true} tickCount={10} allowDecimals={false} />
+                  {Object.keys(chartGroup[chartId].at(-1) ?? {})
+                    .filter(
+                      (key) =>
+                        key !== "date" &&
+                        key !== "holidayName" &&
+                        key !== "dayOfWeek" &&
+                        !key.includes("categoryTotal"),
+                    )
+                    .map((key) => [key, ...key.split("#")])
+                    .reverse()
+                    .map(([key, id, attributeKey], i) => (
+                      <Bar
+                        id={id}
+                        type="linear"
+                        key={key}
+                        dataKey={key}
+                        stackId={id}
+                        name={
+                          seriesAll
+                            ? (() => {
+                                const series = seriesAll[id];
+                                if (!series) return undefined;
+                                return series.name === undefined || series.name === ""
+                                  ? defaultSeriesName(series)
+                                  : series.name;
+                              })() + attributeKey
+                              ? JAPANESE_ATTRIBUTE_NAME[attributeKey as ObjectClassAttribute]
+                              : ""
+                            : key
+                        }
+                        fill={`hsl(var(--chart-${(i % 5) + 1}))`}
+                        radius={id.split("#")[1] === "" ? 2 : 0}
+                      />
+                    ))}
+                  <ChartTooltip
+                    cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
+                    content={<ChartTooltipContent className="bg-white" />}
+                    wrapperStyle={{ zIndex: "var(--tooltip-z-index)" }}
+                  />
+                  {Object.keys(chartGroup[chartId][0]).length <= 10 ? (
+                    <ChartLegend content={<ChartLegendContent />} />
+                  ) : undefined}
+                </BarChart>
+              ) : chartId === "ratio" ? (
+                <BarChart data={chartGroup[chartId]} stackOffset={"expand"}>
                   <CartesianGrid vertical={false} />
                   <XAxis
                     dataKey={"date"}
@@ -149,18 +269,10 @@ export function Graph({ chartGroup, seriesAll, className }: Props) {
                   <YAxis
                     type="number"
                     tickLine={true}
-                    tickCount={isCartesianRatioOnly ? 6 : 10}
-                    domain={
-                      isCartesianRatioOnly
-                        ? [0, 1] // 比率グラフの場合は0〜1の範囲
-                        : [0, "auto"] // それ以外の場合はdefault
-                    }
-                    tickFormatter={
-                      isCartesianRatioOnly
-                        ? (value: number) => `${Math.floor(value * 100)}%`
-                        : undefined
-                    }
-                    allowDecimals={isCartesianRatioOnly ? true : false}
+                    tickCount={6}
+                    domain={[0, 1]}
+                    tickFormatter={(value: number) => `${Math.floor(value * 100)}%`}
+                    allowDecimals={true}
                   />
                   {Object.keys(chartGroup[chartId].at(-1) ?? {})
                     .filter(
@@ -198,9 +310,7 @@ export function Graph({ chartGroup, seriesAll, className }: Props) {
                     ))}
                   <ChartTooltip
                     cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
-                    content={
-                      <ChartTooltipContent className="bg-white" isRatio={isCartesianRatioOnly} />
-                    }
+                    content={<ChartTooltipContent className="bg-white" isRatio={true} />}
                     wrapperStyle={{ zIndex: "var(--tooltip-z-index)" }}
                   />
                   {Object.keys(chartGroup[chartId][0]).length <= 10 ? (
@@ -237,7 +347,8 @@ export function Graph({ chartGroup, seriesAll, className }: Props) {
               )}
             </ChartContainer>
           </div>
-        ))}
+        );
+      })}
     </MultiChartContainer>
   );
 }

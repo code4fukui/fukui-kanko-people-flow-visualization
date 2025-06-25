@@ -333,7 +333,8 @@ export default function App() {
         </div>
         {chartGroup !== undefined &&
         (Object.keys(chartGroup["cartesian"].at(-1) ?? {}).length > CARTESIAN_RENDER_THRESHOLD ||
-          Object.keys(chartGroup).filter((k) => k !== "cartesian").length > 0) ? (
+          Object.keys(chartGroup["ratio"].at(-1) ?? {}).length > CARTESIAN_RENDER_THRESHOLD ||
+          Object.keys(chartGroup).filter((k) => k !== "cartesian" && k !== "ratio").length > 0) ? (
           <Graph
             className="flex-grow h-[calc(100svh_-_96px_-_48px)] min-h-[calc(100svh_-_96px_-_48px)]"
             chartGroup={chartGroup}

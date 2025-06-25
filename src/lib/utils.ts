@@ -7,6 +7,11 @@ import { twMerge } from "tailwind-merge";
  */
 export const CARTESIAN_RENDER_THRESHOLD = 3;
 
+/**
+ * スクロール位置が下部に近づいたらアイコンを非表示にするための閾値。
+ */
+export const SCROLL_BOTTOM_THRESHOLD = 20;
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

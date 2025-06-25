@@ -28,7 +28,20 @@ export const getChartConfig = (
         if (k === "date") return;
         const [id, attributeKey] = k.split("#");
         const series = seriesAll[id];
-        if (series === undefined) return id;
+        if (series === undefined) return;
+        let label = series.name ?? defaultSeriesName(series);
+        if (attributeKey !== undefined && attributeKey !== "" && series.focusedAttribute)
+          label += " " + attributeValueText(series.focusedAttribute, attributeKey);
+        config[k] = {
+          label,
+        };
+      });
+    } else if (chartId === "ratio") {
+      Object.keys(data.at(-1) ?? {}).forEach((k) => {
+        if (k === "date") return;
+        const [id, attributeKey] = k.split("#");
+        const series = seriesAll[id];
+        if (series === undefined) return;
         let label = series.name ?? defaultSeriesName(series);
         if (attributeKey !== undefined && attributeKey !== "" && series.focusedAttribute)
           label += " " + attributeValueText(series.focusedAttribute, attributeKey);
@@ -40,7 +53,7 @@ export const getChartConfig = (
       data.forEach((v) => {
         const [id, attributeKey] = String(v.name).split("#");
         const series = seriesAll[id];
-        if (series === undefined) return id;
+        if (series === undefined) return;
         let label = series.name ?? defaultSeriesName(series);
         if (attributeKey !== undefined && attributeKey !== "" && series.focusedAttribute)
           label = attributeValueText(series.focusedAttribute, attributeKey);
@@ -58,10 +71,15 @@ export const isCount = (v: object): v is Count => {
   return "count" in v && typeof v["count"] === "number";
 };
 
-const CARTESIAN_CHART_TYPES = ["simple", "stack", "ratio"] as const;
+const CARTESIAN_CHART_TYPES = ["simple", "stack"] as const;
 type CartesianChartType = (typeof CARTESIAN_CHART_TYPES)[number];
 export const isCartesian = (chartType: string): chartType is CartesianChartType => {
   return CARTESIAN_CHART_TYPES.some((v) => v === chartType);
+};
+const RATIO_CHART_TYPES = ["ratio"] as const;
+type RatioChartType = (typeof RATIO_CHART_TYPES)[number];
+export const isRatio = (chartType: string): chartType is RatioChartType => {
+  return RATIO_CHART_TYPES.some((v) => v === chartType);
 };
 const POLAR_CHART_TYPES = ["pie"] as const;
 type PolarChartType = (typeof POLAR_CHART_TYPES)[number];
@@ -72,7 +90,10 @@ export type ChartType = CartesianChartType | PolarChartType;
 
 export type Data = {
   [id: string]: {
-    [chartType in CartesianChartType | PolarChartType]?: chartType extends CartesianChartType
+    [chartType in
+      | CartesianChartType
+      | RatioChartType
+      | PolarChartType]?: chartType extends CartesianChartType
       ? {
           [crossAxisValue: string]: {
             [attribute in
@@ -164,7 +185,45 @@ export async function dataFromSeriesAll(
             },
           };
         }
-      } else if (series.graphType === "stack" || series.graphType === "ratio") {
+      } else if (series.graphType === "stack") {
+        if (series.focusedAttribute === undefined)
+          throw new Error("invalid focused attribute value");
+        for (const dateString of dateStrings) {
+          const rawDataRowTheDay = rawData.find((rawDataRow) => {
+            return String(rawDataRow["aggregate from"].slice(0, 10)) === dateString;
+          });
+          if (rawDataRowTheDay === undefined) continue;
+          const dateData = orientedData[dateString] || {};
+          const dateTotal = Number(rawDataRowTheDay["total count"]);
+          const list = ATTRIBUTES[series.focusedAttribute];
+          const attributeCounts = computeAttributeCounts(
+            rawDataRowTheDay,
+            series.focusedAttribute,
+            list,
+          );
+
+          Object.entries(attributeCounts).forEach(([listitem, itemCount]) => {
+            dateData[listitem] = { count: itemCount };
+          });
+          dateData.categoryTotal = { count: dateTotal };
+          orientedData = {
+            ...orientedData,
+            [dateString]: dateData,
+          };
+        }
+      }
+
+      data = {
+        ...data,
+        [id]: {
+          [series.graphType]: {
+            ...orientedData,
+          },
+        },
+      };
+    } else if (isRatio(series.graphType)) {
+      let orientedData: { [date: string]: { [attribute: string]: Count } } = {};
+      if (series.graphType === "ratio") {
         if (series.focusedAttribute === undefined)
           throw new Error("invalid focused attribute value");
         for (const dateString of dateStrings) {
@@ -255,6 +314,11 @@ export async function dataFromSeriesAll(
       dayOfWeek: WEEK_DAYS[new Date(v).getDay()],
       holidayName: holidayMap.get(v) ?? "",
     })),
+    ratio: dateStrings.map((v) => ({
+      date: v,
+      dayOfWeek: WEEK_DAYS[new Date(v).getDay()],
+      holidayName: holidayMap.get(v) ?? "",
+    })),
   };
 
   for (const [key, value] of Object.entries(flatten)) {
@@ -263,6 +327,13 @@ export async function dataFromSeriesAll(
       const index = result["cartesian"].findIndex((obj) => obj.date === x);
       result["cartesian"][index < 0 ? result["cartesian"].length : index] = {
         ...result["cartesian"][index],
+        [`${id}#${y}`]: Number(value),
+      };
+    } else if (isRatio(chartType)) {
+      const index = result["ratio"].findIndex((obj) => obj.date === x);
+
+      result["ratio"][index < 0 ? result["ratio"].length : index] = {
+        ...result["ratio"][index],
         [`${id}#${y}`]: Number(value),
       };
     } else if (isPolar(chartType)) {
@@ -275,6 +346,5 @@ export async function dataFromSeriesAll(
       ];
     }
   }
-
   return result;
 }
