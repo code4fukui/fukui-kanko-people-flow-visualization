@@ -10,11 +10,6 @@ import { isKeyMatchingAttribute } from "@/lib/utils";
 import Papa from "papaparse";
 import { isDateIncludedInRange } from "../date";
 
-// APIレスポンスをキャッシュするためのオブジェクト
-const licensePlateApiCache: Record<string, { timestamp: number, data: AggregatedData[] }> = {};
-// キャッシュの有効期限（ミリ秒）
-const CACHE_TTL = 60 * 60 * 1000;
-
 const getUrlPrefix = () => `${location.origin}${location.pathname}`;
 
 async function getRawData(
@@ -86,39 +81,18 @@ export async function getData(
   objectClass: ObjectClass,
   date: { from: Date; to: Date },
   exclude?: GraphSeries["exclude"],
-  setIsLoading?: (isLoading: boolean) => void,
 ): Promise<AggregatedData[]> {
-  // ナンバープレートを取得する場合はAPIを使用
-  if ((placement === "rainbow-line-parking-lot-1-gate" && objectClass === "LicensePlate") || (placement === "rainbow-line-parking-lot-2-gate" && objectClass === "LicensePlate")) {
-    if (setIsLoading) setIsLoading(true);
-    const toDate = new Date(date.to);
-    toDate.setDate(toDate.getDate() + 1); // APIの仕様上
-
-    const cacheKey = `${placement}_${objectClass}_${date.from.getTime()}_${toDate.getTime()}`;
-
-    const now = Date.now();
-    if (licensePlateApiCache[cacheKey] && (now - licensePlateApiCache[cacheKey].timestamp) < CACHE_TTL) {
-      let rawData = licensePlateApiCache[cacheKey].data;
-      rawData = reorderDataColumns(rawData);
-      return exclude ? removeColumnFromRawData(rawData, exclude) : rawData;
-    }
-
-    let rawData = Object.values((await (await fetch(`https://ktxs4d484a.execute-api.ap-northeast-3.amazonaws.com/prod/?placement=${placement}&objectClass=${objectClass}&dateFrom=${date.from.getTime()}&dateTo=${toDate.getTime() - 1}&likelihoodThreshold=0.75&matchingAttributes=2`)).json() as {message: string, body: Record<string, AggregatedData>}).body);
-    rawData = reorderDataColumns(rawData);
-    licensePlateApiCache[cacheKey] = {
-      timestamp: now,
-      data: rawData
-    };
-   if (setIsLoading) setIsLoading(false);
-    return exclude ? removeColumnFromRawData(rawData, exclude) : rawData;
-  }
-
-  // 通常のCSVファイルからデータを取得
   const rawData = await getRawData(placement, objectClass);
 
   let filteredData = [...rawData].filter((rawDataRow) =>
     isDateIncludedInRange(new Date(rawDataRow["aggregate from"]), date),
   );
+
+  // 都道府県の順番をPREFECTURESに従って並べ替える
+  if (objectClass === 'LicensePlate') {
+    filteredData = reorderDataColumns(filteredData);
+  }
+
   if (exclude) filteredData = removeColumnFromRawData(filteredData, exclude);
   return filteredData;
 }
