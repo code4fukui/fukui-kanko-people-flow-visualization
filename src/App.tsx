@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ATTRIBUTES } from "@/interfaces/aggregated-data.interface";
-import { GraphSeries } from "@/interfaces/graph-series.interface";
+import { GraphSeries, isSeriesValid } from "@/interfaces/graph-series.interface";
 import { getData } from "@/lib/data/csv";
 import { floorDate, getDateStringRange } from "@/lib/date";
 import { useLocalDefaultStar } from "@/lib/hooks/local-default-star";
@@ -19,7 +19,6 @@ import * as holidayJP from "@holiday-jp/holiday_jp";
 import { PlusIcon, QuestionIcon, StarFillIcon, StarIcon } from "@primer/octicons-react";
 import { Toaster, toast } from "sonner";
 import { Graph } from "./components/parts/graph.component";
-import { LoadingSpinner } from "./components/parts/loading-spinner.component";
 import { ChartGroup, dataFromSeriesAll } from "./interfaces/graph-data.interface";
 import { getDateTimeString } from "./lib/date";
 import { CARTESIAN_RENDER_THRESHOLD } from "./lib/utils";
@@ -39,7 +38,6 @@ function getDefaultDateRange(): DateRange {
   };
 }
 export default function App() {
-  const [hasChanges, setHasChanges] = useState(false);
   const { stars, appendStar, removeStar } = useLocalStars();
   const { defaultStarKey, setDefaultStar, removeDefaultStar } = useLocalDefaultStar();
   const [title, setTitle] = useState<string | undefined>(
@@ -60,7 +58,6 @@ export default function App() {
       ? holidayJP.between(dateRange.from, dateRange.to)
       : [];
   const [data, setData] = useState<Record<string, string | number>[] | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(false);
   const [chartGroup, setChartGroup] = useState<ChartGroup | undefined>(undefined);
   const [checkedKey, setCheckedKey] = useState<string | undefined>(() => {
     return defaultStarKey ?? undefined;
@@ -108,7 +105,6 @@ export default function App() {
           series.objectClass,
           dateRange as { from: Date; to: Date },
           series.exclude,
-          setIsLoading,
         );
 
         if (series.graphType === "simple") {
@@ -170,25 +166,17 @@ export default function App() {
         await dataFromSeriesAll(seriesAll, dateRange as { from: Date; to: Date }, holidays),
       );
       setData(newData);
-      setHasChanges(false);
       setGraphSeriesAll({ ...seriesAll });
     } catch {
       toast.error("データの処理中にエラーが発生しました");
-    } finally {
-      setIsLoading(false);
     }
   }, [dateRange, seriesAll]);
 
   useEffect(() => {
-    setHasChanges(true);
-  }, [seriesAll, dateRange]);
-
-  useEffect(() => {
-    // 初期表示時にお気に入りまたはURLパラメータがある場合は自動的にデータを読み込む
-    if (seriesAll && !isLoading && data === undefined) {
+    if (Object.values(seriesAll).every(isSeriesValid)) {
       apply();
     }
-  }, [seriesAll, isLoading, data, apply]);
+  }, [seriesAll, dateRange]);
 
   return (
     <>
@@ -274,24 +262,6 @@ export default function App() {
               ))}
           </div>
         </section>
-        <section className="flex justify-center w-full bg-background sticky bottom-0 py-2">
-          <Button
-            onClick={apply}
-            disabled={
-              !hasChanges ||
-              isLoading ||
-              dateRange === undefined ||
-              Object.values(seriesAll).some(
-                (series) =>
-                  series.placement === undefined ||
-                  series.objectClass === undefined ||
-                  (series.graphType !== "simple" && series.focusedAttribute === undefined),
-              )
-            }
-          >
-            グラフに反映する
-          </Button>
-        </section>
       </aside>
       <article className="flex-glow flex h-[calc(100svh_-_96px)] min-h-[calc(100svh_-_96px)] w-[calc(100%_-_288px)] flex-col items-center justify-center">
         <div className="flex h-12 w-full gap-x-2 pl-4">
@@ -344,8 +314,6 @@ export default function App() {
           <p className="flex-glow my-auto">グラフに表示するデータをサイドバーで設定して下さい</p>
         )}
       </article>
-
-      {isLoading && <LoadingSpinner />}
     </>
   );
 }
