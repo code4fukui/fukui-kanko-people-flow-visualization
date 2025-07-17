@@ -84,6 +84,8 @@ function App() {
   const [endWeekRange, setEndWeekRange] = useState<{ from: Date; to: Date } | undefined>(undefined);
   const [theme, setTheme] = useState<"month" | "week" | "day" | "hour">("month");
   const [csvData, setCsvData] = useState<AggregatedData[]>([]);
+  const [filteredData, setFilteredData] = useState<AggregatedData[]>([]);
+
   useEffect(() => {
     const fetchData = async () => {
       const rawData = await getData("Person");
@@ -91,6 +93,46 @@ function App() {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    let filtered = csvData;
+
+    if (theme === "month" && startMonth && endMonth) {
+      // 月末を取得
+      const end = new Date(endMonth.getFullYear(), endMonth.getMonth() + 1, 0);
+      // 範囲でフィルタ
+      filtered = filtered.filter((row) => {
+        const date = new Date(row["aggregate from"]);
+        return date >= startMonth && date <= end;
+      });
+
+      // 月ごとに集計
+      const monthlyMap = new Map<string, AggregatedData>();
+      filtered.forEach((row) => {
+        const date = new Date(row["aggregate from"]);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        if (!monthlyMap.has(monthKey)) {
+          monthlyMap.set(monthKey, {
+            ...row,
+            ["aggregate from"]: `${monthKey}`,
+            ["aggregate to"]: `${monthKey}`,
+            ["total count"]: Number(row["total count"]),
+          });
+        } else {
+          const prev = monthlyMap.get(monthKey)!;
+          monthlyMap.set(monthKey, {
+            ...prev,
+            ["total count"]: Number(prev["total count"]) + Number(row["total count"]),
+          });
+        }
+      });
+      setFilteredData(Array.from(monthlyMap.values()));
+      return;
+    }
+
+    // 他のthemeの場合はそのまま
+    setFilteredData(filtered);
+  }, [theme, startMonth, endMonth]);
 
   return (
     <>
@@ -154,7 +196,7 @@ function App() {
             />
           )}
           <div style={{ margin: "2rem 0" }}>
-            <Graph type={theme} data={csvData} />
+            <Graph theme={theme} data={filteredData} />
           </div>
           <a
             href={homeUrl}

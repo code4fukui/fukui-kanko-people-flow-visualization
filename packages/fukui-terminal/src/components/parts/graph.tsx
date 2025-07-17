@@ -6,17 +6,27 @@ type GraphProps = {
   data: AggregatedData[];
   xKey?: string;
   yKey?: string;
+  theme: "month" | "week" | "day" | "hour";
 };
 
-const Graph: React.FC<GraphProps> = ({ data, xKey = "aggregate from", yKey = "total count" }) => (
-  <LineChart width={500} height={300} data={data}>
-    <Line type="monotone" dataKey={yKey} />
-    <CartesianGrid />
-    <XAxis dataKey={xKey} />
-    <YAxis />
-    <Tooltip />
-    <Legend />
-  </LineChart>
-);
+const Graph: React.FC<GraphProps> = ({
+  data,
+  xKey = "aggregate from",
+  yKey = "total count",
+  theme,
+}) => {
+  if (theme === "month") {
+    return (
+      <LineChart width={500} height={300} data={data}>
+        <Line type="monotone" dataKey={yKey} />
+        <CartesianGrid />
+        <XAxis dataKey={xKey} />
+        <YAxis />
+        <Tooltip />
+        <Legend />
+      </LineChart>
+    );
+  }
+};
 
 export { Graph };

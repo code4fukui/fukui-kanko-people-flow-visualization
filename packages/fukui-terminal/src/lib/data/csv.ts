@@ -22,9 +22,5 @@ export async function getData(
 ): Promise<AggregatedData[]> {
   const rawData = await getRawData(objectClass);
 
-  // let filteredData = [...rawData].filter((rawDataRow) =>
-  //   isDateIncludedInRange(new Date(rawDataRow["aggregate from"]), date),
-  // );
-
   return rawData;
 }
