@@ -8,14 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AggregatedData } from "@/interfaces/aggregated-data.interface";
+import { getData } from "@/lib/data/csv";
 import { useEffect, useState } from "react";
-import Papa from "papaparse";
-
-type PersonCsvRow = {
-  "aggregate from": string;
-  "total count": string;
-  // 必要なら他のカラムも追加
-};
 
 function App() {
   useEffect(() => {
@@ -88,51 +83,14 @@ function App() {
   );
   const [endWeekRange, setEndWeekRange] = useState<{ from: Date; to: Date } | undefined>(undefined);
   const [theme, setTheme] = useState<"month" | "week" | "day" | "hour">("month");
-  const [csvData, setCsvData] = useState<{ day: string; サイト訪問者数: number; dateObj: Date }[]>(
-    [],
-  );
+  const [csvData, setCsvData] = useState<AggregatedData[]>([]);
   useEffect(() => {
-    fetch("/Person.csv")
-      .then((res) => res.text())
-      .then((text) => {
-        const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
-        const formatted = (parsed.data as PersonCsvRow[])
-          .filter((row) => row["aggregate from"] && row["total count"])
-          .map((row) => ({
-            day: row["aggregate from"].split(" ")[0],
-            dateObj: new Date(row["aggregate from"]),
-            サイト訪問者数: Number(row["total count"]),
-          }));
-        setCsvData(formatted);
-      });
+    const fetchData = async () => {
+      const rawData = await getData("Person");
+      setCsvData(rawData);
+    };
+    fetchData();
   }, []);
-
-  const monthlyData = (() => {
-    const map = new Map<string, number>();
-    csvData.forEach((row) => {
-      // "YYYY-MM"形式で月を抽出
-      const month = row.day.slice(0, 7);
-      map.set(month, (map.get(month) ?? 0) + row.サイト訪問者数);
-    });
-    // [{ day: "2024-10", サイト訪問者数: 12345 }, ...] の形に
-    return Array.from(map.entries()).map(([month, count]) => ({
-      day: month,
-      サイト訪問者数: count,
-    }));
-  })();
-
-  // 月別テーマ用のフィルタ
-  const filteredData =
-    theme === "month" && startMonth && endMonth
-      ? monthlyData.filter((row) => {
-          const [y, m] = row.day.split("-").map(Number);
-          const d = new Date(y, m - 1, 1);
-          return (
-            d >= new Date(startMonth.getFullYear(), startMonth.getMonth(), 1) &&
-            d <= new Date(endMonth.getFullYear(), endMonth.getMonth(), 1)
-          );
-        })
-      : monthlyData;
 
   return (
     <>
@@ -196,7 +154,7 @@ function App() {
             />
           )}
           <div style={{ margin: "2rem 0" }}>
-            <Graph data={filteredData} />
+            <Graph type={theme} data={csvData} />
           </div>
           <a
             href={homeUrl}
