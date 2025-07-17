@@ -31,7 +31,11 @@ export function MonthPicker({
   minDate = new Date(2024, 9, 1),
 }: MonthPickerProps) {
   const [year, setYear] = React.useState(new Date().getFullYear());
-  const maxDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const maxDate = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth(),
+    new Date().getDate() - 1,
+  );
 
   const selectedMonth =
     selected && selected.getFullYear() === year ? selected.getMonth() : undefined;
