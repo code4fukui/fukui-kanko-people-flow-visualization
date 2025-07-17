@@ -23,6 +23,14 @@ type Props =
       setEnd: (date: Date | undefined) => void;
     };
 
+const MIN_DATE = new Date(2024, 9, 17);
+const MAX_DATE = new Date();
+MAX_DATE.setDate(MAX_DATE.getDate() - 1);
+
+function isOutOfRange(date: Date) {
+  return date < MIN_DATE || date > MAX_DATE;
+}
+
 /**
  * 週の範囲選択時の処理関数
  */
@@ -122,6 +130,7 @@ export const RangeSelector = (props: Props) => {
                 mode="range"
                 selected={props.start}
                 captionLayout="dropdown"
+                disabled={isOutOfRange}
                 onSelect={(date) => {
                   handleWeekRangeSelect(date, props.start, props.setStart, () =>
                     setOpenStart(false),
@@ -170,7 +179,9 @@ export const RangeSelector = (props: Props) => {
                 mode="range"
                 selected={props.end}
                 captionLayout="dropdown"
-                disabled={isBeforeStart(props.start?.from)}
+                disabled={(date) =>
+                  isOutOfRange(date) || (props.start?.from ? date < props.start.from : false)
+                }
                 onSelect={(date) => {
                   handleWeekRangeSelect(date, props.end, props.setEnd, () => setOpenEnd(false));
                 }}
