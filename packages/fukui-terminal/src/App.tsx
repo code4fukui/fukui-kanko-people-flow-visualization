@@ -196,7 +196,11 @@ function App() {
             />
           )}
           <div style={{ margin: "2rem 0" }}>
-            <Graph theme={theme} data={filteredData} />
+            {startMonth && endMonth ? (
+              <Graph theme={theme} data={filteredData} />
+            ) : (
+              <p>範囲を選択してください。</p>
+            )}
           </div>
           <a
             href={homeUrl}
