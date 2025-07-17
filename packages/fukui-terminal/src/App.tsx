@@ -42,11 +42,8 @@ function App() {
   const contentStyle = {
     textAlign: "center" as const,
     padding: "2rem",
-  };
-
-  const emojiStyle = {
-    fontSize: "6rem",
-    marginBottom: "2rem",
+    maxWidth: "1600px", // 追加: コンテンツの最大幅を広げる
+    width: "70%", // 追加: 幅いっぱいに広げる
   };
 
   const titleStyle = {
@@ -54,12 +51,6 @@ function App() {
     fontWeight: "bold",
     color: "#1f2937",
     marginBottom: "1rem",
-  };
-
-  const messageStyle = {
-    fontSize: "1.25rem",
-    color: "#4b5563",
-    marginBottom: "2rem",
   };
 
   const buttonStyle = {
@@ -138,63 +129,63 @@ function App() {
     <>
       <div style={containerStyle}>
         <div style={contentStyle}>
-          <div style={emojiStyle}>🚧</div>
           <h1 style={titleStyle}>福井駅周辺データ可視化</h1>
-          <p style={messageStyle}>現在開発中です</p>
-          <Select
-            value={theme}
-            onValueChange={(v) => {
-              const newTheme = v as "month" | "week" | "day" | "hour";
-              setTheme(newTheme);
-              // テーマ変更時に値をリセット
-              setStartMonth(undefined);
-              setEndMonth(undefined);
-              setStartDate(undefined);
-              setEndDate(undefined);
-              setStartWeekRange(undefined);
-              setEndWeekRange(undefined);
-            }}
-          >
-            <SelectTrigger className="w-[180px] bg-white text-black">
-              <SelectValue placeholder="Theme" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="month">月別</SelectItem>
-              <SelectItem value="week">週別</SelectItem>
-              <SelectItem value="day">日別</SelectItem>
-              <SelectItem value="hour">時間別</SelectItem>
-            </SelectContent>
-          </Select>
-          {theme === "month" && (
-            <MonthRangePicker
-              startMonth={startMonth}
-              endMonth={endMonth}
-              onChange={(start, end) => {
-                setStartMonth(start);
-                setEndMonth(end);
+          <div className="flex flex-col items-center gap-6 my-8">
+            <Select
+              value={theme}
+              onValueChange={(v) => {
+                const newTheme = v as "month" | "week" | "day" | "hour";
+                setTheme(newTheme);
+                // テーマ変更時に値をリセット
+                setStartMonth(undefined);
+                setEndMonth(undefined);
+                setStartDate(undefined);
+                setEndDate(undefined);
+                setStartWeekRange(undefined);
+                setEndWeekRange(undefined);
               }}
-            />
-          )}
+            >
+              <SelectTrigger className="w-[180px] bg-white text-black">
+                <SelectValue placeholder="Theme" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="month">月別</SelectItem>
+                <SelectItem value="week">週別</SelectItem>
+                <SelectItem value="day">日別</SelectItem>
+                <SelectItem value="hour">時間別</SelectItem>
+              </SelectContent>
+            </Select>
+            {theme === "month" && (
+              <MonthRangePicker
+                startMonth={startMonth}
+                endMonth={endMonth}
+                onChange={(start, end) => {
+                  setStartMonth(start);
+                  setEndMonth(end);
+                }}
+              />
+            )}
 
-          {theme === "week" && (
-            <RangeSelector
-              type="week"
-              start={startWeekRange}
-              end={endWeekRange}
-              setStart={setStartWeekRange}
-              setEnd={setEndWeekRange}
-            />
-          )}
+            {theme === "week" && (
+              <RangeSelector
+                type="week"
+                start={startWeekRange}
+                end={endWeekRange}
+                setStart={setStartWeekRange}
+                setEnd={setEndWeekRange}
+              />
+            )}
 
-          {(theme === "day" || theme === "hour") && (
-            <RangeSelector
-              type="date"
-              start={startDate}
-              end={endDate}
-              setStart={setStartDate}
-              setEnd={setEndDate}
-            />
-          )}
+            {(theme === "day" || theme === "hour") && (
+              <RangeSelector
+                type="date"
+                start={startDate}
+                end={endDate}
+                setStart={setStartDate}
+                setEnd={setEndDate}
+              />
+            )}
+          </div>
           <div style={{ margin: "2rem 0" }}>
             {startMonth && endMonth ? (
               <Graph theme={theme} data={filteredData} />
