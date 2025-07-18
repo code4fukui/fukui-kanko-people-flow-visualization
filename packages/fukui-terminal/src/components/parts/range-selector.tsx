@@ -75,10 +75,24 @@ function formatWeekLabel(date: Date, mode: "start" | "end" = "start") {
 }
 
 function getWeekRange(date: Date) {
-  const startDay = new Date(date);
+  let startDay = new Date(date);
+  let endDay: Date;
+
   startDay.setDate(date.getDate() - startDay.getDay());
-  const endDay = new Date(startDay);
-  endDay.setDate(startDay.getDate() + 6);
+  if (startDay < MIN_DATE) {
+    startDay = new Date(MIN_DATE);
+  }
+
+  if (startDay.getTime() === MIN_DATE.getTime()) {
+    endDay = new Date(2024, 9, 19);
+  } else {
+    endDay = new Date(startDay);
+    endDay.setDate(startDay.getDate() + 6);
+    // 最新データ日を超えないようにする
+    if (endDay > MAX_DATE) {
+      endDay = new Date(MAX_DATE);
+    }
+  }
   return { from: startDay, to: endDay };
 }
 
