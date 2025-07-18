@@ -45,17 +45,17 @@ jobs:
         run: |
           date
           # 全アプリをビルド
-          pnpm build:all
-          
+          pnpm build
+
           # デプロイ用ディレクトリ作成
           mkdir -p deploy
-          
+
           # 各アプリのdistをコピー
           cp -r packages/whole/dist deploy/whole
           cp -r packages/fukui-terminal/dist deploy/fukui-terminal
           cp -r packages/tojinbo/dist deploy/tojinbo
           cp -r packages/rainbow-line/dist deploy/rainbow-line
-          
+
           # ランディングページをルートにコピー
           cp -r packages/landing-page/dist/* deploy/
         env:
