@@ -121,9 +121,46 @@ function App() {
       return;
     }
 
+    if (theme === "week" && startWeekRange && endWeekRange) {
+      // 週の範囲でフィルタ
+      filtered = filtered.filter((row) => {
+        const date = new Date(row["aggregate from"]);
+        return date >= startWeekRange.from && date <= endWeekRange.to;
+      });
+
+      const weeklyAggregated: AggregatedData[] = [];
+      let i = 0;
+      while (i < filtered.length) {
+        let weekRows;
+        if (i === 0) {
+          // 最初の週はstartWeekRange.from〜startWeekRange.toまで
+          weekRows = filtered.filter((row) => {
+            const d = new Date(row["aggregate from"]);
+            return d >= startWeekRange.from && d <= startWeekRange.to;
+          });
+          i += weekRows.length;
+        } else {
+          // 以降は7日ごと
+          weekRows = filtered.slice(i, i + 7);
+          i += 7;
+        }
+        const formatDate = (date: Date) =>
+          `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+        const total = weekRows.reduce((sum, row) => sum + Number(row["total count"]), 0);
+        weeklyAggregated.push({
+          ...weekRows[0],
+          ["aggregate from"]: `${formatDate(new Date(weekRows[0]["aggregate from"]))}〜`,
+          ["aggregate to"]: `${formatDate(new Date(weekRows[weekRows.length - 1]["aggregate from"]))}`,
+          ["total count"]: total,
+        });
+      }
+      setFilteredData(weeklyAggregated);
+      return;
+    }
+
     // 他のthemeの場合はそのまま
     setFilteredData(filtered);
-  }, [theme, startMonth, endMonth]);
+  }, [theme, startMonth, endMonth, startWeekRange, endWeekRange]);
 
   return (
     <>
@@ -187,7 +224,7 @@ function App() {
             )}
           </div>
           <div style={{ margin: "2rem 0" }}>
-            {startMonth && endMonth ? (
+            {(startMonth && endMonth) || (startWeekRange && endWeekRange) ? (
               <Graph theme={theme} data={filteredData} />
             ) : (
               <p>範囲を選択してください。</p>

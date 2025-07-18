@@ -26,11 +26,11 @@ const Graph: React.FC<GraphProps> = ({
   yKey = "total count",
   theme,
 }) => {
-  if (theme === "month") {
+  if (theme === "month" || theme === "week") {
     return (
       <ChartContainer config={chartConfig}>
         <LineChart width={500} height={300} data={data}>
-          <Line type="monotone" dataKey={yKey} />
+          <Line dataKey={yKey} />
           <CartesianGrid />
           <XAxis dataKey={xKey} />
           <YAxis />
