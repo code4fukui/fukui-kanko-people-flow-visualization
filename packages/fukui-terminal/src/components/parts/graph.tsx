@@ -30,7 +30,7 @@ const Graph: React.FC<GraphProps> = ({
     return (
       <ChartContainer config={chartConfig}>
         <LineChart width={500} height={300} data={data}>
-          <Line type="monotone" dataKey={yKey} />
+          <Line dataKey={yKey} />
           <CartesianGrid />
           <XAxis dataKey={xKey} />
           <YAxis />
