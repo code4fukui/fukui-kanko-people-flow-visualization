@@ -3,7 +3,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useEffect, useState } from "react";
-import { ChevronDownIcon } from "lucide-react";
+import { CalendarIcon } from "@primer/octicons-react";
 
 type WeekRange = { from: Date; to: Date } | undefined;
 
@@ -48,22 +48,13 @@ function formatDate(date: Date) {
 }
 
 /**
- * 週の開始日から「YYYY年M月第N週」の形式で返す
+ * 週の開始日から「YYYY/MM/DD〜」の形式で返す
  */
-function formatWeekLabel(date: Date, mode: "start" | "end" = "start") {
-  const weekBaseDate = new Date(date);
-  // 基準を水曜日に設定
-  if (mode === "start") {
-    weekBaseDate.setDate(weekBaseDate.getDate() + 3);
-  } else {
-    weekBaseDate.setDate(weekBaseDate.getDate() - 3);
-  }
-  const year = weekBaseDate.getFullYear();
-  const month = weekBaseDate.getMonth() + 1;
-  const firstDay = new Date(year, weekBaseDate.getMonth(), 1);
-  const firstDayWeekDay = firstDay.getDay();
-  const weekNumber = Math.floor((weekBaseDate.getDate() + firstDayWeekDay - 1) / 7) + 1;
-  return `${year}年${month}月第${weekNumber}週`;
+function formatWeekLabel(date: Date) {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return `${year}/${month}/${day}〜`;
 }
 
 function getWeekRange(date: Date) {
@@ -107,13 +98,13 @@ export const RangeSelector = (props: Props) => {
               <span>
                 {props.type === "week"
                   ? props.start
-                    ? formatWeekLabel(props.start.from, "start")
+                    ? formatWeekLabel(props.start.from)
                     : "Select week"
                   : props.start
                     ? formatDate(props.start)
                     : "Select date"}
               </span>
-              <ChevronDownIcon />
+              <CalendarIcon size={24} />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto overflow-hidden p-0" align="start">
@@ -155,13 +146,13 @@ export const RangeSelector = (props: Props) => {
               <span>
                 {props.type === "week"
                   ? props.end
-                    ? formatWeekLabel(props.end.to, "end")
+                    ? formatWeekLabel(props.end.from)
                     : "Select week"
                   : props.end
                     ? formatDate(props.end)
                     : "Select date"}
               </span>
-              <ChevronDownIcon />
+              <CalendarIcon size={24} />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto overflow-hidden p-0" align="start">

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useEffect, useState } from "react";
-import { ChevronDownIcon } from "lucide-react";
+import { CalendarIcon } from "@primer/octicons-react";
 
 type MonthRangePickerProps = {
   startMonth: Date | undefined;
@@ -40,7 +40,7 @@ export function MonthRangePicker({ startMonth, endMonth, onChange }: MonthRangeP
                   ? `${startMonth.getFullYear()}/${String(startMonth.getMonth() + 1).padStart(2, "0")}`
                   : "Select month"}
               </span>
-              <ChevronDownIcon />
+              <CalendarIcon size={24} />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto overflow-hidden p-0" align="start">
@@ -69,7 +69,7 @@ export function MonthRangePicker({ startMonth, endMonth, onChange }: MonthRangeP
                   ? `${endMonth.getFullYear()}/${String(endMonth.getMonth() + 1).padStart(2, "0")}`
                   : "Select month"}
               </span>
-              <ChevronDownIcon />
+              <CalendarIcon size={24} />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto overflow-hidden p-0" align="start">
