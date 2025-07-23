@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { MAX_DATE, MIN_DATE } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { ChevronDownIcon } from "lucide-react";
 
@@ -22,10 +23,6 @@ type Props =
       setStart: (date: Date | undefined) => void;
       setEnd: (date: Date | undefined) => void;
     };
-
-const MIN_DATE = new Date(2024, 9, 17);
-const MAX_DATE = new Date();
-MAX_DATE.setDate(MAX_DATE.getDate() - 1);
 
 function isOutOfRange(date: Date) {
   return date < MIN_DATE || date > MAX_DATE;
