@@ -52,16 +52,6 @@ function formatDate(date: Date) {
   return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
 }
 
-/**
- * 週の開始日から「YYYY/MM/DD〜」の形式で返す
- */
-function formatWeekLabel(date: Date) {
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  return `${year}/${month}/${day}〜`;
-}
-
 function getWeekRange(date: Date) {
   let startDay = new Date(date);
   let endDay: Date;
@@ -117,7 +107,7 @@ export const RangeSelector = (props: Props) => {
               <span>
                 {props.type === "week"
                   ? props.start
-                    ? formatWeekLabel(props.start.from)
+                    ? `${formatDate(props.start.from)}〜`
                     : "Select week"
                   : props.start
                     ? formatDate(props.start)
@@ -166,7 +156,7 @@ export const RangeSelector = (props: Props) => {
               <span>
                 {props.type === "week"
                   ? props.end
-                    ? formatWeekLabel(props.end.from)
+                    ? `${formatDate(props.end.from)}〜`
                     : "Select week"
                   : props.end
                     ? formatDate(props.end)
