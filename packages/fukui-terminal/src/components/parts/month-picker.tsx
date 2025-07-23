@@ -59,7 +59,7 @@ export function MonthPicker({ onChange, className, selected, minDate }: MonthPic
               key={m}
               variant={selectedMonth === i ? "default" : "outline"}
               onClick={() => handleMonthClick(i)}
-              className={cn("w-16", selectedMonth === i && "bg-black text-white")}
+              className={cn("w-16")}
               disabled={isDisabled}
             >
               {m}
