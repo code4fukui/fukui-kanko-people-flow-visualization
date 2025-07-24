@@ -9,9 +9,28 @@ import { AggregatedData } from "@/interfaces/aggregated-data.interface";
 import React from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
+type GraphProps = {
+  data: AggregatedData[];
+  xKey?: string;
+  yKey?: string;
+  theme: "month" | "week" | "day" | "hour";
+};
+
+type XAxisTickProps = {
+  x: number;
+  y: number;
+  payload: { value: string };
+  index?: number;
+};
+
 const chartConfig = {
   "total count": { label: "人物検出回数" },
 };
+
+function renderTick(props: XAxisTickProps, data: AggregatedData[], xKey: string) {
+  const d = data.find((row) => row[xKey] === props.payload.value);
+  return <CustomizedXAxisTick {...props} dayOfWeek={d?.dayOfWeek} holidayName={d?.holidayName} />;
+}
 
 const CustomizedXAxisTick = ({
   x,
@@ -26,14 +45,13 @@ const CustomizedXAxisTick = ({
   dayOfWeek?: string;
   holidayName?: string;
 }) => {
-  const value = payload.value;
   return (
     <g transform={`translate(${x},${y})`}>
       <text x={0} y={0} dy={0} textAnchor="middle" fill="#666" fontSize={12}>
         <tspan x={0} dy={5}>
-          {value}
+          {payload.value}
         </tspan>
-        {holidayName && holidayName !== "" ? (
+        {holidayName ? (
           <tspan x={0} dy={16} fill="red" fontSize={10}>
             {holidayName}
           </tspan>
@@ -54,25 +72,6 @@ const CustomizedXAxisTick = ({
   );
 };
 
-type GraphProps = {
-  data: AggregatedData[];
-  xKey?: string;
-  yKey?: string;
-  theme: "month" | "week" | "day" | "hour";
-};
-
-type XAxisTickProps = {
-  x: number;
-  y: number;
-  payload: { value: string };
-  index?: number;
-};
-
-function getTickProps(props: XAxisTickProps, data: AggregatedData[], xKey: string) {
-  const d = data.find((row) => row[xKey] === props.payload.value);
-  return <CustomizedXAxisTick {...props} dayOfWeek={d?.dayOfWeek} holidayName={d?.holidayName} />;
-}
-
 const Graph: React.FC<GraphProps> = ({
   data,
   xKey = "aggregate from",
@@ -82,12 +81,12 @@ const Graph: React.FC<GraphProps> = ({
   if (theme === "month" || theme === "week" || theme === "day") {
     return (
       <ChartContainer config={chartConfig}>
-        <LineChart width={500} height={300} data={data} margin={{ top: 10, right: 40 }}>
+        <LineChart data={data} margin={{ top: 10, right: 40 }}>
           <Line dataKey={yKey} />
           <CartesianGrid />
           <XAxis
             dataKey={xKey}
-            tick={theme === "day" ? (props) => getTickProps(props, data, xKey) : undefined}
+            tick={theme === "day" ? (props) => renderTick(props, data, xKey) : undefined}
             tickMargin={8}
           />
           <YAxis />
