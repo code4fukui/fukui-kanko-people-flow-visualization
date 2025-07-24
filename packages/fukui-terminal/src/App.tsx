@@ -171,11 +171,13 @@ function App() {
         const date = new Date(row["aggregate from"]);
         const dayKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
         if (!dailyMap.has(dayKey)) {
+          const dayOfWeek = ["日", "月", "火", "水", "木", "金", "土"][date.getDay()];
           dailyMap.set(dayKey, {
             ...row,
             ["aggregate from"]: `${dayKey}`,
             ["aggregate to"]: `${dayKey}`,
             ["total count"]: Number(row["total count"]),
+            dayOfWeek,
           });
         }
       });

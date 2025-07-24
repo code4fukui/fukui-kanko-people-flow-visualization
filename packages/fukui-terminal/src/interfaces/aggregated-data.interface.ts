@@ -8,6 +8,7 @@ export type AggregatedDataBase = {
   "object class": ObjectClass;
   "aggregate from": string;
   "aggregate to": string;
+  dayOfWeek: string;
   "total count": number;
 };
 export type AggregatedData = AggregatedDataBase & Record<string, string | number>;
