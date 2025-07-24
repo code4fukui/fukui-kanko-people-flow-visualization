@@ -158,9 +158,34 @@ function App() {
       return;
     }
 
+    if (theme === "day" && startDate && endDate) {
+      // 日付の範囲でフィルタ
+      filtered = filtered.filter((row) => {
+        const date = new Date(row["aggregate from"]);
+        return date >= startDate && date <= endDate;
+      });
+
+      // 日ごとに集計
+      const dailyMap = new Map<string, AggregatedData>();
+      filtered.forEach((row) => {
+        const date = new Date(row["aggregate from"]);
+        const dayKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+        if (!dailyMap.has(dayKey)) {
+          dailyMap.set(dayKey, {
+            ...row,
+            ["aggregate from"]: `${dayKey}`,
+            ["aggregate to"]: `${dayKey}`,
+            ["total count"]: Number(row["total count"]),
+          });
+        }
+      });
+      setFilteredData(Array.from(dailyMap.values()));
+      return;
+    }
+
     // 他のthemeの場合はそのまま
     setFilteredData(filtered);
-  }, [theme, startMonth, endMonth, startWeekRange, endWeekRange]);
+  }, [theme, startMonth, endMonth, startWeekRange, endWeekRange, startDate, endDate]);
 
   return (
     <>
@@ -224,7 +249,9 @@ function App() {
             )}
           </div>
           <div style={{ margin: "2rem 0" }}>
-            {(startMonth && endMonth) || (startWeekRange && endWeekRange) ? (
+            {(startMonth && endMonth) ||
+            (startWeekRange && endWeekRange) ||
+            (startDate && endDate) ? (
               <Graph theme={theme} data={filteredData} />
             ) : (
               <p>範囲を選択してください。</p>

@@ -26,7 +26,7 @@ const Graph: React.FC<GraphProps> = ({
   yKey = "total count",
   theme,
 }) => {
-  if (theme === "month" || theme === "week") {
+  if (theme === "month" || theme === "week" || theme === "day") {
     return (
       <ChartContainer config={chartConfig}>
         <LineChart width={500} height={300} data={data}>
