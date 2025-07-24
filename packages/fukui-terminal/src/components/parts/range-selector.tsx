@@ -24,8 +24,11 @@ type Props =
       setEnd: (date: Date | undefined) => void;
     };
 
-function isOutOfRange(date: Date) {
-  return date < MIN_DATE || date > MAX_DATE;
+/**
+ * データが無い日、または開始日より前の日付を選択できないようにする
+ */
+function isDisabledDate(date: Date, start?: Date) {
+  return date < MIN_DATE || date > MAX_DATE || (start ? date < start : false);
 }
 
 /**
@@ -74,13 +77,6 @@ function getWeekRange(date: Date) {
   return { from: startDay, to: endDay };
 }
 
-/**
- * 終了日が開始日より前の日付を選択できないようにする
- */
-function isBeforeStart(start: Date | undefined) {
-  return start ? (date: Date) => date < start : undefined;
-}
-
 export const RangeSelector = (props: Props) => {
   const [openStart, setOpenStart] = useState(false);
   const [openEnd, setOpenEnd] = useState(false);
@@ -122,7 +118,7 @@ export const RangeSelector = (props: Props) => {
                 mode="range"
                 selected={props.start}
                 captionLayout="dropdown"
-                disabled={isOutOfRange}
+                disabled={isDisabledDate}
                 onSelect={(date) => {
                   handleWeekRangeSelect(date, props.start, props.setStart, () =>
                     setOpenStart(false),
@@ -134,6 +130,7 @@ export const RangeSelector = (props: Props) => {
                 mode="single"
                 selected={props.start}
                 captionLayout="dropdown"
+                disabled={isDisabledDate}
                 onSelect={(date) => {
                   props.setStart(date);
                   setOpenStart(false);
@@ -171,9 +168,7 @@ export const RangeSelector = (props: Props) => {
                 mode="range"
                 selected={props.end}
                 captionLayout="dropdown"
-                disabled={(date) =>
-                  isOutOfRange(date) || (props.start?.from ? date < props.start.from : false)
-                }
+                disabled={(date) => isDisabledDate(date, props.start?.from)}
                 onSelect={(date) => {
                   handleWeekRangeSelect(date, props.end, props.setEnd, () => setOpenEnd(false));
                 }}
@@ -183,7 +178,7 @@ export const RangeSelector = (props: Props) => {
                 mode="single"
                 selected={props.end}
                 captionLayout="dropdown"
-                disabled={isBeforeStart(props.start)}
+                disabled={(date) => isDisabledDate(date, props.start)}
                 onSelect={(date) => {
                   props.setEnd(date);
                   setOpenEnd(false);
