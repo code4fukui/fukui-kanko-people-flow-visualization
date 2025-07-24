@@ -2,6 +2,7 @@ import { Graph } from "@/components/parts/graph";
 import { useEffect, useState } from "react";
 import { AggregatedData, formatDate, getRawData, TOTAL_COUNT_KEY } from "@fukui-kanko/shared";
 import { MonthRangePicker, RangeSelector, TypeSelect } from "@fukui-kanko/shared/components/parts";
+import * as holiday_jp from "@holiday-jp/holiday_jp";
 
 function App() {
   // 開発環境かどうかを判定
@@ -126,12 +127,20 @@ function App() {
         const dayKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
         if (!dailyMap.has(dayKey)) {
           const dayOfWeek = ["日", "月", "火", "水", "木", "金", "土"][date.getDay()];
+          const holiday = holiday_jp.isHoliday(date);
+          let holidayName: string = "";
+          if (holiday) {
+            // 祝日一覧から該当日を検索
+            const found = holiday_jp.between(date, date)[0];
+            holidayName = found ? found.name : "";
+          }
           dailyMap.set(dayKey, {
             ...row,
             ["aggregate from"]: `${dayKey}`,
             ["aggregate to"]: `${dayKey}`,
             ["total count"]: Number(row["total count"]),
             dayOfWeek,
+            holidayName,
           });
         }
       });
@@ -141,7 +150,7 @@ function App() {
 
     // TODO:他の期間の処理を実装する
     setFilteredData(filtered);
-  }, [type, startMonth, endMonth, startWeekRange, endWeekRange, startDate, endDate]);
+  }, [type, startMonth, endMonth, startWeekRange, endWeekRange, startDate, endDate, csvData]);
 
   return (
     <>
