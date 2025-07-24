@@ -13,6 +13,40 @@ const chartConfig = {
   totalCount: { label: "人物検出回数" },
 };
 
+const CustomizedXAxisTick = ({
+  x,
+  y,
+  payload,
+}: {
+  x: number;
+  y: number;
+  payload: { value: string };
+}) => {
+  const value = payload.value;
+  const date = new Date(value);
+  const days = ["日", "月", "火", "水", "木", "金", "土"];
+  const dayOfWeek = !isNaN(date.getTime()) ? days[date.getDay()] : "";
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text x={0} y={0} dy={0} textAnchor="middle" fill="#666" fontSize={12}>
+        <tspan x={0} dy={5}>
+          {value}
+        </tspan>
+        {dayOfWeek && (
+          <tspan
+            x={0}
+            dy={16}
+            fill={dayOfWeek === "土" ? "blue" : dayOfWeek === "日" ? "red" : undefined}
+            fontSize={10}
+          >
+            {dayOfWeek}
+          </tspan>
+        )}
+      </text>
+    </g>
+  );
+};
+
 type GraphProps = {
   data: AggregatedData[];
   xKey?: string;
@@ -34,7 +68,7 @@ const Graph: React.FC<GraphProps> = ({
         <LineChart data={data}>
           <Line dataKey={yKey} />
           <CartesianGrid />
-          <XAxis dataKey={xKey} />
+          <XAxis dataKey={xKey} tick={theme === "day" ? CustomizedXAxisTick : undefined} />
           <YAxis />
           <ChartTooltip
             cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
