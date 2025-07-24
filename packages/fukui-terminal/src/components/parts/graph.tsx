@@ -63,10 +63,14 @@ const Graph: React.FC<GraphProps> = ({
   if (theme === "month" || theme === "week" || theme === "day") {
     return (
       <ChartContainer config={chartConfig}>
-        <LineChart width={500} height={300} data={data}>
+        <LineChart width={500} height={300} data={data} margin={{ top: 10, right: 40 }}>
           <Line dataKey={yKey} />
           <CartesianGrid />
-          <XAxis dataKey={xKey} tick={theme === "day" ? CustomizedXAxisTick : undefined} />
+          <XAxis
+            dataKey={xKey}
+            tick={theme === "day" ? CustomizedXAxisTick : undefined}
+            tickMargin={8}
+          />
           <YAxis />
           <ChartTooltip
             cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
