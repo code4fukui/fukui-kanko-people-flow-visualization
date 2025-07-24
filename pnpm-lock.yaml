@@ -42,6 +42,9 @@ importers:
 
   packages/fukui-terminal:
     dependencies:
+      "@holiday-jp/holiday_jp":
+        specifier: ^2.4.0
+        version: 2.5.1
       "@radix-ui/react-label":
         specifier: ^2.1.1
         version: 2.1.7(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)

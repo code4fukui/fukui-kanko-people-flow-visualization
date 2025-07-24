@@ -11,6 +11,7 @@ import {
 import { AggregatedData } from "@/interfaces/aggregated-data.interface";
 import { getData } from "@/lib/data/csv";
 import { useEffect, useState } from "react";
+import * as holiday_jp from "@holiday-jp/holiday_jp";
 
 function App() {
   useEffect(() => {
@@ -172,12 +173,20 @@ function App() {
         const dayKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
         if (!dailyMap.has(dayKey)) {
           const dayOfWeek = ["日", "月", "火", "水", "木", "金", "土"][date.getDay()];
+          const holiday = holiday_jp.isHoliday(date);
+          let holidayName: string = "";
+          if (holiday) {
+            // 祝日一覧から該当日を検索
+            const found = holiday_jp.between(date, date)[0];
+            holidayName = found ? found.name : "";
+          }
           dailyMap.set(dayKey, {
             ...row,
             ["aggregate from"]: `${dayKey}`,
             ["aggregate to"]: `${dayKey}`,
             ["total count"]: Number(row["total count"]),
             dayOfWeek,
+            holidayName,
           });
         }
       });
@@ -187,7 +196,7 @@ function App() {
 
     // 他のthemeの場合はそのまま
     setFilteredData(filtered);
-  }, [theme, startMonth, endMonth, startWeekRange, endWeekRange, startDate, endDate]);
+  }, [theme, startMonth, endMonth, startWeekRange, endWeekRange, startDate, endDate, csvData]);
 
   return (
     <>

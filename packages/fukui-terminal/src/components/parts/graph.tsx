@@ -17,30 +17,37 @@ const CustomizedXAxisTick = ({
   x,
   y,
   payload,
+  dayOfWeek,
+  holidayName,
 }: {
   x: number;
   y: number;
   payload: { value: string };
+  dayOfWeek?: string;
+  holidayName?: string;
 }) => {
   const value = payload.value;
-  const date = new Date(value);
-  const days = ["日", "月", "火", "水", "木", "金", "土"];
-  const dayOfWeek = !isNaN(date.getTime()) ? days[date.getDay()] : "";
   return (
     <g transform={`translate(${x},${y})`}>
       <text x={0} y={0} dy={0} textAnchor="middle" fill="#666" fontSize={12}>
         <tspan x={0} dy={5}>
           {value}
         </tspan>
-        {dayOfWeek && (
-          <tspan
-            x={0}
-            dy={16}
-            fill={dayOfWeek === "土" ? "blue" : dayOfWeek === "日" ? "red" : undefined}
-            fontSize={10}
-          >
-            {dayOfWeek}
+        {holidayName && holidayName !== "" ? (
+          <tspan x={0} dy={16} fill="red" fontSize={10}>
+            {holidayName}
           </tspan>
+        ) : (
+          dayOfWeek && (
+            <tspan
+              x={0}
+              dy={16}
+              fill={dayOfWeek === "土" ? "blue" : dayOfWeek === "日" ? "red" : undefined}
+              fontSize={10}
+            >
+              {dayOfWeek}
+            </tspan>
+          )
         )}
       </text>
     </g>
@@ -53,6 +60,18 @@ type GraphProps = {
   yKey?: string;
   theme: "month" | "week" | "day" | "hour";
 };
+
+type XAxisTickProps = {
+  x: number;
+  y: number;
+  payload: { value: string };
+  index?: number;
+};
+
+function getTickProps(props: XAxisTickProps, data: AggregatedData[], xKey: string) {
+  const d = data.find((row) => row[xKey] === props.payload.value);
+  return <CustomizedXAxisTick {...props} dayOfWeek={d?.dayOfWeek} holidayName={d?.holidayName} />;
+}
 
 const Graph: React.FC<GraphProps> = ({
   data,
@@ -68,7 +87,7 @@ const Graph: React.FC<GraphProps> = ({
           <CartesianGrid />
           <XAxis
             dataKey={xKey}
-            tick={theme === "day" ? CustomizedXAxisTick : undefined}
+            tick={theme === "day" ? (props) => getTickProps(props, data, xKey) : undefined}
             tickMargin={8}
           />
           <YAxis />

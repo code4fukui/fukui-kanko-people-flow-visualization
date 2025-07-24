@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@holiday-jp/holiday_jp": "^2.4.0",
     "@radix-ui/react-label": "^2.1.1",
     "@radix-ui/react-popover": "^1.1.5",
     "@radix-ui/react-select": "^2.1.5",
