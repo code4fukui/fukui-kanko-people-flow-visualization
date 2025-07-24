@@ -28,7 +28,7 @@ const Graph: React.FC<GraphProps> = ({
   yKey = "totalCount",
   type,
 }) => {
-  if (type === "month" || type === "week") {
+  if (type === "month" || type === "week" || type === "day") {
     return (
       <ChartContainer config={chartConfig}>
         <LineChart data={data}>
