@@ -26,7 +26,7 @@ export function MonthRangePicker({ startMonth, endMonth, onChange }: MonthRangeP
     ) {
       onChange(startMonth, undefined);
     }
-  }, [startMonth]);
+  }, [startMonth, endMonth, onChange]);
 
   return (
     <div className="flex flex-row gap-6 mb-6">

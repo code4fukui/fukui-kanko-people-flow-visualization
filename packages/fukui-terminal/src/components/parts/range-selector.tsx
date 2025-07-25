@@ -86,7 +86,7 @@ export const RangeSelector = (props: Props) => {
         props.setEnd(undefined);
       }
     }
-  }, [props.start]);
+  }, [props.type, props.start, props.end, props.setEnd]);
 
   return (
     <div className="flex flex-row gap-6 mb-6">
