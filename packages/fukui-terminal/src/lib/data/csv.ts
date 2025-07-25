@@ -37,7 +37,10 @@ async function getHourlyRawData(
     const csvResponse = await fetch(csvUrl);
     if (csvResponse.ok) {
       const csvRawText = await csvResponse.text();
-      const csvFormattedText = csvRawText.replaceAll(/\n{2,}/g, "\n");
+      const csvFormattedText = csvRawText
+        .split("\n")
+        .filter(line => line.trim() !== "")
+        .join("\n");
       const rawData = Papa.parse<AggregatedData>(csvFormattedText, { header: true }).data;
       results.push(...rawData);
     }
