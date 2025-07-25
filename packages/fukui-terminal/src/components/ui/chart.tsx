@@ -276,7 +276,7 @@ const ChartTooltipContent = React.forwardRef<
                 </div>
               );
             })}
-          {payload.length >= 10 ? (
+          {payload.length >= 10 && payload.some((item) => item.value === 0) ? (
             <p className="mx-auto mt-1 text-muted-foreground">
               ⚠️ 値が0の系統は
               <br />
