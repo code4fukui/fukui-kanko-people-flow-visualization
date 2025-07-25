@@ -102,7 +102,7 @@ function App() {
               setEndWeekRange(undefined);
             }}
           >
-            <SelectTrigger className="w-[180px] bg-white text-black">
+            <SelectTrigger className="w-[180px] bg-background text-foreground">
               <SelectValue placeholder="Theme" />
             </SelectTrigger>
             <SelectContent>
