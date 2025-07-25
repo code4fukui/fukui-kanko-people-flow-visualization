@@ -12,19 +12,23 @@ type MonthRangePickerProps = {
   onChange: (start: Date | undefined, end: Date | undefined) => void;
 };
 
+/**
+ * startがendより前の月かどうかを判定するユーティリティ関数
+ */
+function isMonthBefore(start: Date, end: Date) {
+  return (
+    end.getFullYear() < start.getFullYear() ||
+    (end.getFullYear() === start.getFullYear() && end.getMonth() < start.getMonth())
+  );
+}
+
 export function MonthRangePicker({ startMonth, endMonth, onChange }: MonthRangePickerProps) {
   const [openStartMonth, setOpenStartMonth] = useState(false);
   const [openEndMonth, setOpenEndMonth] = useState(false);
 
   // 終了月が開始月より前になったらリセット
   useEffect(() => {
-    if (
-      startMonth &&
-      endMonth &&
-      (endMonth.getFullYear() < startMonth.getFullYear() ||
-        (endMonth.getFullYear() === startMonth.getFullYear() &&
-          endMonth.getMonth() < startMonth.getMonth()))
-    ) {
+    if (startMonth && endMonth && isMonthBefore(startMonth, endMonth)) {
       onChange(startMonth, undefined);
     }
   }, [startMonth, endMonth, onChange]);
