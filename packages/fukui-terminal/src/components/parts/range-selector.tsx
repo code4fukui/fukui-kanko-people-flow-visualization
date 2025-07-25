@@ -24,23 +24,6 @@ type Props =
     };
 
 /**
- * 週の範囲選択時の処理関数
- */
-function handleWeekRangeSelect(
-  date: { from?: Date; to?: Date } | undefined,
-  current: WeekRange,
-  setRange: (range: WeekRange) => void,
-  close: () => void,
-) {
-  if (date?.from && current?.from && date.from < current.from) {
-    setRange(getWeekRange(date.from));
-  } else if (date?.to) {
-    setRange(getWeekRange(date.to));
-  }
-  close();
-}
-
-/**
  * 日付を "YYYY/MM/DD" 形式で返す
  */
 function formatDate(date: Date) {
@@ -75,6 +58,23 @@ function isBeforeStart(start: Date | undefined) {
 export const RangeSelector = (props: Props) => {
   const [openStart, setOpenStart] = useState(false);
   const [openEnd, setOpenEnd] = useState(false);
+
+  /**
+   * 週の範囲選択時の処理関数
+   */
+  function handleWeekRangeSelect(
+    date: { from?: Date; to?: Date } | undefined,
+    current: WeekRange,
+    setRange: (range: WeekRange) => void,
+    close: () => void,
+  ) {
+    if (date?.from && current?.from && date.from < current.from) {
+      setRange(getWeekRange(date.from));
+    } else if (date?.to) {
+      setRange(getWeekRange(date.to));
+    }
+    close();
+  }
 
   useEffect(() => {
     if (props.type === "week") {
