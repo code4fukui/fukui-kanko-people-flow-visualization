@@ -78,6 +78,45 @@ const Graph: React.FC<GraphProps> = ({
   yKey = "total count",
   theme,
 }) => {
+  if (theme === "hour") {
+    // 日付ごとにグループ化し、xKeyを時間のみに変換
+    const grouped: { [date: string]: AggregatedData[] } = {};
+    data.forEach((row) => {
+      const value = String(row[xKey]);
+      const [date, hour] = value.split(" ");
+      if (!grouped[date]) grouped[date] = [];
+      // 新しいオブジェクトでxKeyを時間のみに
+      grouped[date].push({
+        ...row,
+        [xKey]: hour, // "HH:00" のみ
+      });
+    });
+
+    return (
+      <ChartContainer config={chartConfig}>
+        <LineChart margin={{ top: 10, right: 40 }}>
+          {Object.entries(grouped).map(([date, rows], idx) => (
+            <Line
+              key={date}
+              data={rows}
+              dataKey={yKey}
+              name={date}
+              stroke={`hsl(${(idx * 60) % 360}, 70%, 50%)`}
+            />
+          ))}
+          <CartesianGrid />
+          <XAxis dataKey={xKey} tickMargin={8} type="category" allowDuplicatedCategory={false} />
+          <YAxis />
+          <ChartTooltip
+            cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
+            content={<ChartTooltipContent className="bg-white" />}
+          />
+          <ChartLegend content={<ChartLegendContent />} />
+        </LineChart>
+      </ChartContainer>
+    );
+  }
+
   if (theme === "month" || theme === "week" || theme === "day") {
     return (
       <ChartContainer config={chartConfig}>

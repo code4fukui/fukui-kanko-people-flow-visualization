@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AggregatedData } from "@/interfaces/aggregated-data.interface";
-import { getData } from "@/lib/data/csv";
+import { getDailyData, getData } from "@/lib/data/csv";
 import { useEffect, useState } from "react";
 import * as holidayJP from "@holiday-jp/holiday_jp";
 
@@ -76,7 +76,9 @@ function App() {
   const [endWeekRange, setEndWeekRange] = useState<{ from: Date; to: Date } | undefined>(undefined);
   const [theme, setTheme] = useState<"month" | "week" | "day" | "hour">("month");
   const [csvData, setCsvData] = useState<AggregatedData[]>([]);
+  const [csvDailyData, setCsvDailyData] = useState<AggregatedData[]>([]);
   const [filteredData, setFilteredData] = useState<AggregatedData[]>([]);
+  const [filteredDailyData, setFilteredDailyData] = useState<AggregatedData[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -87,7 +89,20 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const fetchData = async () => {
+      if (startDate && endDate) {
+        const rawData = await getDailyData("Person", startDate, endDate);
+        setCsvDailyData(rawData);
+      } else {
+        setCsvDailyData([]);
+      }
+    };
+    fetchData();
+  }, [startDate, endDate]);
+
+  useEffect(() => {
     let filtered = csvData;
+    const filteredDaily = csvDailyData;
 
     if (theme === "month" && startMonth && endMonth) {
       // 月末を取得
@@ -193,8 +208,34 @@ function App() {
       return;
     }
 
+    if (theme === "hour" && startDate && endDate) {
+      // 時間ごとに集計
+      const hourlyMap = new Map<string, AggregatedData>();
+      filteredDaily.forEach((row) => {
+        const date = new Date(row["aggregate from"]);
+        const hourKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:00`;
+        if (!hourlyMap.has(hourKey)) {
+          hourlyMap.set(hourKey, {
+            ...row,
+            ["aggregate from"]: hourKey,
+            ["aggregate to"]: hourKey,
+            ["total count"]: Number(row["total count"]),
+          });
+        } else {
+          const prev = hourlyMap.get(hourKey)!;
+          hourlyMap.set(hourKey, {
+            ...prev,
+            ["total count"]: Number(prev["total count"]) + Number(row["total count"]),
+          });
+        }
+      });
+      setFilteredDailyData(Array.from(hourlyMap.values()));
+      return;
+    }
+
     // 他のthemeの場合はそのまま
     setFilteredData(filtered);
+    setFilteredDailyData(filteredDaily);
   }, [theme, startMonth, endMonth, startWeekRange, endWeekRange, startDate, endDate, csvData]);
 
   return (
@@ -262,7 +303,7 @@ function App() {
             {(startMonth && endMonth) ||
             (startWeekRange && endWeekRange) ||
             (startDate && endDate) ? (
-              <Graph theme={theme} data={filteredData} />
+              <Graph theme={theme} data={theme === "hour" ? filteredDailyData : filteredData} />
             ) : (
               <p>範囲を選択してください。</p>
             )}
