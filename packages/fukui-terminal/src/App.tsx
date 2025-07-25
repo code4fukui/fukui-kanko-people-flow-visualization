@@ -89,6 +89,7 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (theme !== "hour") return;
     const fetchData = async () => {
       if (startDate && endDate) {
         const rawData = await getDailyData("Person", startDate, endDate);
@@ -98,7 +99,7 @@ function App() {
       }
     };
     fetchData();
-  }, [startDate, endDate]);
+  }, [theme, startDate, endDate]);
 
   useEffect(() => {
     let filtered = csvData;
