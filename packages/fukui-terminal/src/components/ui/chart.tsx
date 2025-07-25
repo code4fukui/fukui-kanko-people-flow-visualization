@@ -220,7 +220,7 @@ const ChartTooltipContent = React.forwardRef<
 
         <div className="grid gap-1.5">
           {Object.values(groupedById)
-            .flatMap((group) => [...group].reverse())
+            .flatMap((group) => [...group])
             .map((item, index) => {
               const key = `${nameKey || item.name || item.dataKey || "value"}`;
               const itemConfig = getPayloadConfigFromPayload(config, item, key);
@@ -336,7 +336,7 @@ const ChartLegendContent = React.forwardRef<
                 }}
               />
             )}
-            {itemConfig?.label}
+            {itemConfig?.label || item.value}
           </div>
         );
       })}

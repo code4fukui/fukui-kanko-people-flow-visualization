@@ -106,7 +106,7 @@ const Graph: React.FC<GraphProps> = ({
             />
           ))}
           <CartesianGrid />
-          <XAxis dataKey={xKey} tickMargin={8} type="category" allowDuplicatedCategory={false} />
+          <XAxis dataKey={xKey} tickMargin={8} allowDuplicatedCategory={false} />
           <YAxis />
           <ChartTooltip
             cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
