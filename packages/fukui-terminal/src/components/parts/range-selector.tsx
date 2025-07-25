@@ -68,12 +68,11 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
     setRange: (range: WeekRange) => void,
     close: () => void,
   ) {
-    if (
-      date?.from &&
-      current?.from &&
-      getWeekRange(date.from).from < getWeekRange(current.from).from
-    ) {
-      setRange(getWeekRange(date.from));
+    const newWeek = date?.from ? getWeekRange(date.from) : undefined;
+    const currentWeek = current?.from ? getWeekRange(current.from) : undefined;
+
+    if (newWeek && currentWeek && newWeek.from < currentWeek.from) {
+      setRange(newWeek);
     } else if (date?.to) {
       setRange(getWeekRange(date.to));
     }
