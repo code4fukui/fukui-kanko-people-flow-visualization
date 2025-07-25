@@ -2,6 +2,7 @@ import { MonthPicker } from "@/components/parts/month-picker";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { CalendarIcon } from "@primer/octicons-react";
 
@@ -61,7 +62,10 @@ export function MonthRangePicker({ startMonth, endMonth, onChange }: MonthRangeP
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className={`w-48 justify-between font-normal ${!startMonth ? "opacity-50 pointer-events-none" : ""}`}
+              className={cn(
+                "w-48 justify-between font-normal",
+                !startMonth && "opacity-50 pointer-events-none",
+              )}
               disabled={!startMonth}
             >
               <span>
