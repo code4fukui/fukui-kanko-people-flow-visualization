@@ -236,7 +236,17 @@ function App() {
     // 他のthemeの場合はそのまま
     setFilteredData(filtered);
     setFilteredDailyData(filteredDaily);
-  }, [theme, startMonth, endMonth, startWeekRange, endWeekRange, startDate, endDate, csvData]);
+  }, [
+    theme,
+    startMonth,
+    endMonth,
+    startWeekRange,
+    endWeekRange,
+    startDate,
+    endDate,
+    csvData,
+    csvDailyData,
+  ]);
 
   return (
     <>

@@ -89,6 +89,7 @@ const Graph: React.FC<GraphProps> = ({
       grouped[date].push({
         ...row,
         [xKey]: hour, // "HH:00" のみ
+        [`${date}_${yKey}`]: row[yKey],
       });
     });
 
@@ -99,7 +100,7 @@ const Graph: React.FC<GraphProps> = ({
             <Line
               key={date}
               data={rows}
-              dataKey={yKey}
+              dataKey={`${date}_${yKey}`}
               name={date}
               stroke={`hsl(${(idx * 60) % 360}, 70%, 50%)`}
             />
