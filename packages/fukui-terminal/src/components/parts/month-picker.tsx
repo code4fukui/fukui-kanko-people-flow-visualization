@@ -31,10 +31,11 @@ export function MonthPicker({
   minDate = DEFAULT_MIN_DATE,
 }: MonthPickerProps) {
   const [year, setYear] = React.useState(new Date().getFullYear());
+  const currentDate = new Date();
   const maxDate = new Date(
-    new Date().getFullYear(),
-    new Date().getMonth(),
-    new Date().getDate() - 1,
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    currentDate.getDate() - 1,
   );
 
   const selectedMonth =
