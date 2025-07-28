@@ -18,6 +18,8 @@ type GraphProps = {
   xKey?: string;
   yKey?: string;
   theme: "month" | "week" | "day" | "hour";
+  width?: number;
+  height?: number;
 };
 
 const Graph: React.FC<GraphProps> = ({
@@ -25,11 +27,13 @@ const Graph: React.FC<GraphProps> = ({
   xKey = "aggregateFrom",
   yKey = "totalCount",
   theme,
+  width = 500,
+  height = 300,
 }) => {
   if (theme === "month") {
     return (
       <ChartContainer config={chartConfig}>
-        <LineChart width={500} height={300} data={data}>
+        <LineChart width={width} height={height} data={data}>
           <Line dataKey={yKey} />
           <CartesianGrid />
           <XAxis dataKey={xKey} />
