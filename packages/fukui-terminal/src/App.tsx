@@ -91,7 +91,10 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (theme !== "hour") return;
+    if (theme !== "hour") {
+      setIsLoading(false);
+      return;
+    }
     let isCurrent = true;
     const fetchData = async () => {
       if (startDate && endDate) {
