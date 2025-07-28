@@ -27,6 +27,19 @@ const chartConfig = {
   "total count": { label: "人物検出回数" },
 };
 
+const lineColors = [
+  "#E05B53",
+  "#E063AA",
+  "#E59562",
+  "#E5C930",
+  "#61C558",
+  "#50AC6E",
+  "#57CBD4",
+  "#456DE1",
+  "#3248A9",
+  "#7E55E1",
+];
+
 function renderTick(props: XAxisTickProps, data: AggregatedData[], xKey: string) {
   const d = data.find((row) => row[xKey] === props.payload.value);
   return <CustomizedXAxisTick {...props} dayOfWeek={d?.dayOfWeek} holidayName={d?.holidayName} />;
@@ -102,7 +115,7 @@ const Graph: React.FC<GraphProps> = ({
               data={rows}
               dataKey={`${date}_${yKey}`}
               name={date}
-              stroke={`hsl(${(idx * 60) % 360}, 70%, 50%)`}
+              stroke={lineColors[idx % lineColors.length]}
             />
           ))}
           <CartesianGrid />
