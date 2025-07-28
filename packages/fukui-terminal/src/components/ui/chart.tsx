@@ -227,6 +227,7 @@ const ChartTooltipContent = React.forwardRef<
               }
               return 0;
             })
+            .slice(0, 31)
             .map((item, index) => {
               const key = `${nameKey || item.name || item.dataKey || "value"}`;
               const itemConfig = getPayloadConfigFromPayload(config, item, key);
@@ -282,7 +283,13 @@ const ChartTooltipContent = React.forwardRef<
                 </div>
               );
             })}
-          {payload.length >= 10 && payload.some((item) => item.value === 0) ? (
+          {payload.filter((item) => item.value !== 0).length > 31 ? (
+            <p className="mx-auto mt-1 text-muted-foreground">
+              ⚠️ 31日分の系統を
+              <br />
+              表示しています
+            </p>
+          ) : payload.length >= 10 && payload.some((item) => item.value === 0) ? (
             <p className="mx-auto mt-1 text-muted-foreground">
               ⚠️ 値が0の系統は
               <br />
