@@ -92,15 +92,22 @@ function App() {
 
   useEffect(() => {
     if (theme !== "hour") return;
+    let isCurrent = true;
     const fetchData = async () => {
       if (startDate && endDate) {
         setIsLoading(true);
         const rawData = await getDailyData("Person", startDate, endDate);
-        setCsvDailyData(rawData);
-        setIsLoading(false);
+        if (isCurrent) {
+          setCsvDailyData(rawData);
+          setIsLoading(false);
+        }
       }
     };
     fetchData();
+
+    return () => {
+      isCurrent = false;
+    };
   }, [theme, startDate, endDate]);
 
   useEffect(() => {
