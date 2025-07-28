@@ -12,6 +12,7 @@ import { AggregatedData } from "@/interfaces/aggregated-data.interface";
 import { getDailyData, getData } from "@/lib/data/csv";
 import { useEffect, useState } from "react";
 import * as holidayJP from "@holiday-jp/holiday_jp";
+import { LoadingSpinner } from "./components/parts/loading-spinner";
 
 function App() {
   useEffect(() => {
@@ -79,6 +80,7 @@ function App() {
   const [csvDailyData, setCsvDailyData] = useState<AggregatedData[]>([]);
   const [filteredData, setFilteredData] = useState<AggregatedData[]>([]);
   const [filteredDailyData, setFilteredDailyData] = useState<AggregatedData[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -92,10 +94,10 @@ function App() {
     if (theme !== "hour") return;
     const fetchData = async () => {
       if (startDate && endDate) {
+        setIsLoading(true);
         const rawData = await getDailyData("Person", startDate, endDate);
         setCsvDailyData(rawData);
-      } else {
-        setCsvDailyData([]);
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -311,9 +313,11 @@ function App() {
             )}
           </div>
           <div style={{ margin: "2rem 0" }}>
-            {(startMonth && endMonth) ||
-            (startWeekRange && endWeekRange) ||
-            (startDate && endDate) ? (
+            {isLoading && theme === "hour" ? (
+              <LoadingSpinner />
+            ) : (startMonth && endMonth) ||
+              (startWeekRange && endWeekRange) ||
+              (startDate && endDate) ? (
               <Graph theme={theme} data={theme === "hour" ? filteredDailyData : filteredData} />
             ) : (
               <p>範囲を選択してください。</p>
