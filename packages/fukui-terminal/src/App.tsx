@@ -14,6 +14,13 @@ import { useEffect, useState } from "react";
 import * as holidayJP from "@holiday-jp/holiday_jp";
 import { LoadingSpinner } from "./components/parts/loading-spinner";
 
+function filterByRange(data: AggregatedData[], from: Date, to: Date) {
+  return data.filter((row) => {
+    const date = new Date(row["aggregate from"]);
+    return date >= from && date <= to;
+  });
+}
+
 function App() {
   useEffect(() => {
     // bodyとhtmlのマージン・パディングをリセット
@@ -120,11 +127,8 @@ function App() {
     if (theme === "month" && startMonth && endMonth) {
       // 月末を取得
       const end = new Date(endMonth.getFullYear(), endMonth.getMonth() + 1, 0);
-      // 範囲でフィルタ
-      filtered = filtered.filter((row) => {
-        const date = new Date(row["aggregate from"]);
-        return date >= startMonth && date <= end;
-      });
+
+      filtered = filterByRange(filtered, startMonth, end);
 
       // 月ごとに集計
       const monthlyMap = new Map<string, AggregatedData>();
@@ -151,11 +155,7 @@ function App() {
     }
 
     if (theme === "week" && startWeekRange && endWeekRange) {
-      // 週の範囲でフィルタ
-      filtered = filtered.filter((row) => {
-        const date = new Date(row["aggregate from"]);
-        return date >= startWeekRange.from && date <= endWeekRange.to;
-      });
+      filtered = filterByRange(filtered, startWeekRange.from, endWeekRange.to);
 
       const weeklyAggregated: AggregatedData[] = [];
       let i = 0;
@@ -188,11 +188,7 @@ function App() {
     }
 
     if (theme === "day" && startDate && endDate) {
-      // 日付の範囲でフィルタ
-      filtered = filtered.filter((row) => {
-        const date = new Date(row["aggregate from"]);
-        return date >= startDate && date <= endDate;
-      });
+      filtered = filterByRange(filtered, startDate, endDate);
 
       // 日ごとに集計
       const dailyMap = new Map<string, AggregatedData>();
