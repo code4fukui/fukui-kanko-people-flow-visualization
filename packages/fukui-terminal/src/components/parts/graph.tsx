@@ -30,12 +30,10 @@ const Graph: React.FC<GraphProps> = ({
   width = 500,
   height = 300,
 }) => {
-  const chartWidth = width;
-  const chartHeight = height;
   if (theme === "month") {
     return (
       <ChartContainer config={chartConfig}>
-        <LineChart width={chartWidth} height={chartHeight} data={data}>
+        <LineChart width={width} height={height} data={data}>
           <Line dataKey={yKey} />
           <CartesianGrid />
           <XAxis dataKey={xKey} />
@@ -53,8 +51,8 @@ const Graph: React.FC<GraphProps> = ({
   return (
     <div
       style={{
-        width: chartWidth,
-        height: chartHeight,
+        width: width,
+        height: height,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
