@@ -43,6 +43,21 @@ const Graph: React.FC<GraphProps> = ({
       </ChartContainer>
     );
   }
+
+  return (
+    <div
+      style={{
+        width: 500,
+        height: 300,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        border: "1px solid #eee",
+      }}
+    >
+      <span>このテーマ（{theme}）のグラフは開発中です。</span>
+    </div>
+  );
 };
 
 export { Graph };
