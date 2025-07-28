@@ -10,7 +10,7 @@ import React from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 const chartConfig = {
-  "total count": { label: "人物検出回数" },
+  totalCount: { label: "人物検出回数" },
 };
 
 type GraphProps = {
@@ -22,8 +22,8 @@ type GraphProps = {
 
 const Graph: React.FC<GraphProps> = ({
   data,
-  xKey = "aggregate from",
-  yKey = "total count",
+  xKey = "aggregateFrom",
+  yKey = "totalCount",
   theme,
 }) => {
   if (theme === "month") {

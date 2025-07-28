@@ -105,15 +105,15 @@ function App() {
         if (!monthlyMap.has(monthKey)) {
           monthlyMap.set(monthKey, {
             ...row,
-            ["aggregate from"]: `${monthKey}`,
-            ["aggregate to"]: `${monthKey}`,
-            ["total count"]: Number(row["total count"]),
+            aggregateFrom: `${monthKey}`,
+            aggregateTo: `${monthKey}`,
+            totalCount: Number(row["total count"]),
           });
         } else {
           const prev = monthlyMap.get(monthKey)!;
           monthlyMap.set(monthKey, {
             ...prev,
-            ["total count"]: Number(prev["total count"]) + Number(row["total count"]),
+            totalCount: Number(prev.totalCount) + Number(row["total count"]),
           });
         }
       });
