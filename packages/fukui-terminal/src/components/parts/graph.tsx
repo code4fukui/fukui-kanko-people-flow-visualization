@@ -33,7 +33,7 @@ const Graph: React.FC<GraphProps> = ({
   if (theme === "month") {
     return (
       <ChartContainer config={chartConfig}>
-        <LineChart width={width} height={height} data={data}>
+        <LineChart data={data}>
           <Line dataKey={yKey} />
           <CartesianGrid />
           <XAxis dataKey={xKey} />
