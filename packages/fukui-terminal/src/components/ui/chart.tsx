@@ -221,6 +221,12 @@ const ChartTooltipContent = React.forwardRef<
         <div className="grid gap-1.5">
           {Object.values(groupedById)
             .flatMap((group) => [...group])
+            .sort((a, b) => {
+              if (typeof a.value === "number" && typeof b.value === "number") {
+                return b.value - a.value;
+              }
+              return 0;
+            })
             .map((item, index) => {
               const key = `${nameKey || item.name || item.dataKey || "value"}`;
               const itemConfig = getPayloadConfigFromPayload(config, item, key);
