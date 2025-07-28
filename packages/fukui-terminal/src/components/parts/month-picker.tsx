@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, DEFAULT_MIN_DATE } from "@/lib/utils";
 import * as React from "react";
 
 const months = [
@@ -28,7 +28,7 @@ export function MonthPicker({
   onChange,
   className,
   selected,
-  minDate = new Date(2024, 9, 1),
+  minDate = DEFAULT_MIN_DATE,
 }: MonthPickerProps) {
   const [year, setYear] = React.useState(new Date().getFullYear());
   const maxDate = new Date(
