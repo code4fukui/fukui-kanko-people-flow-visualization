@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AggregatedData } from "@/interfaces/aggregated-data.interface";
-import { getData } from "@/lib/data/csv";
+import { getRawData } from "@/lib/data/csv";
 import { useEffect, useState } from "react";
 
 function App() {
@@ -79,7 +79,7 @@ function App() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const rawData = await getData("Person");
+      const rawData = await getRawData("Person");
       setCsvData(rawData);
     };
     fetchData();
