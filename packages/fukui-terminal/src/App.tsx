@@ -1,4 +1,13 @@
-import { useEffect } from "react";
+import { MonthRangePicker } from "@/components/parts/month-range-picker";
+import { RangeSelector } from "@/components/parts/range-selector";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useEffect, useState } from "react";
 
 function App() {
   useEffect(() => {
@@ -62,22 +71,88 @@ function App() {
     cursor: "pointer",
   };
 
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [startMonth, setStartMonth] = useState<Date | undefined>(undefined);
+  const [endMonth, setEndMonth] = useState<Date | undefined>(undefined);
+  const [startWeekRange, setStartWeekRange] = useState<{ from: Date; to: Date } | undefined>(
+    undefined,
+  );
+  const [endWeekRange, setEndWeekRange] = useState<{ from: Date; to: Date } | undefined>(undefined);
+  const [theme, setTheme] = useState<"month" | "week" | "day" | "hour">("month");
+
   return (
-    <div style={containerStyle}>
-      <div style={contentStyle}>
-        <div style={emojiStyle}>🚧</div>
-        <h1 style={titleStyle}>福井駅周辺データ可視化</h1>
-        <p style={messageStyle}>現在開発中です</p>
-        <a
-          href={homeUrl}
-          style={buttonStyle}
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#059669")}
-          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#10b981")}
-        >
-          ← トップページに戻る
-        </a>
+    <>
+      <div style={containerStyle}>
+        <div style={contentStyle}>
+          <div style={emojiStyle}>🚧</div>
+          <h1 style={titleStyle}>福井駅周辺データ可視化</h1>
+          <p style={messageStyle}>現在開発中です</p>
+          <Select
+            value={theme}
+            onValueChange={(v) => {
+              const newTheme = v as "month" | "week" | "day" | "hour";
+              setTheme(newTheme);
+              // テーマ変更時に値をリセット
+              setStartMonth(undefined);
+              setEndMonth(undefined);
+              setStartDate(undefined);
+              setEndDate(undefined);
+              setStartWeekRange(undefined);
+              setEndWeekRange(undefined);
+            }}
+          >
+            <SelectTrigger className="w-[180px] bg-background text-foreground">
+              <SelectValue placeholder="Theme" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="month">月別</SelectItem>
+              <SelectItem value="week">週別</SelectItem>
+              <SelectItem value="day">日別</SelectItem>
+              <SelectItem value="hour">時間別</SelectItem>
+            </SelectContent>
+          </Select>
+          {theme === "month" && (
+            <MonthRangePicker
+              startMonth={startMonth}
+              endMonth={endMonth}
+              onChange={(start, end) => {
+                setStartMonth(start);
+                setEndMonth(end);
+              }}
+            />
+          )}
+
+          {theme === "week" && (
+            <RangeSelector
+              type="week"
+              start={startWeekRange}
+              end={endWeekRange}
+              setStart={setStartWeekRange}
+              setEnd={setEndWeekRange}
+            />
+          )}
+
+          {(theme === "day" || theme === "hour") && (
+            <RangeSelector
+              type="date"
+              start={startDate}
+              end={endDate}
+              setStart={setStartDate}
+              setEnd={setEndDate}
+            />
+          )}
+          <a
+            href={homeUrl}
+            style={buttonStyle}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#059669")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#10b981")}
+          >
+            ← トップページに戻る
+          </a>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
