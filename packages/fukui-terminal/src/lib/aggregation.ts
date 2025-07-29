@@ -81,11 +81,29 @@ export function aggregateWeekly(
     const formatDate = (date: Date) =>
       `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     const total = weekRows.reduce((sum, row) => sum + Number(row["total count"]), 0);
+
+    let weekdayTotal = 0;
+    let weekendTotal = 0;
+    weekRows.forEach((row) => {
+      const date = new Date(row["aggregate from"]);
+      const dayOfWeek = date.getDay();
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+      const isHoliday = holidayJP.isHoliday(date);
+      const isWeekendOrHoliday = isWeekend || isHoliday;
+      if (isWeekendOrHoliday) {
+        weekendTotal += Number(row["total count"]);
+      } else {
+        weekdayTotal += Number(row["total count"]);
+      }
+    });
+
     weeklyAggregated.push({
       ...weekRows[0],
       ["aggregate from"]: `${formatDate(new Date(weekRows[0]["aggregate from"]))}〜`,
       ["aggregate to"]: `${formatDate(new Date(weekRows[weekRows.length - 1]["aggregate from"]))}`,
       ["total count"]: total,
+      weekdayTotal,
+      weekendTotal,
     });
   }
   return weeklyAggregated;

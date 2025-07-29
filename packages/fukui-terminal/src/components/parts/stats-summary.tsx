@@ -6,6 +6,9 @@ type StatsSummaryProps = {
   data?: AggregatedData[];
 };
 
+/**
+ * 集計データ配列から合計値と平均値を計算
+ */
 function getStats(data: AggregatedData[]) {
   if (!data || data.length === 0) return { sum: 0, avg: 0 };
   const sum = data.reduce((acc, cur) => acc + Number(cur["total count"] ?? 0), 0);
@@ -13,6 +16,9 @@ function getStats(data: AggregatedData[]) {
   return { sum, avg };
 }
 
+/**
+ * 集計データ配列から平日・土日祝の平均値を計算
+ */
 function getWeekdayAverages(data: AggregatedData[], theme: string) {
   if (!data) return { weekdayAvg: 0, weekendAvg: 0 };
 
