@@ -13,40 +13,48 @@ function getStats(data: AggregatedData[]) {
   return { sum, avg };
 }
 
-function getWeekdayAverages(data: AggregatedData[]) {
+function getWeekdayAverages(data: AggregatedData[], theme: string) {
   if (!data) return { weekdayAvg: 0, weekendAvg: 0 };
-  const weekdays = data.filter(
-    (d) => d.dayOfWeek && !["土", "日"].includes(d.dayOfWeek) && !d.holidayName,
-  );
-  const weekends = data.filter(
-    (d) => (d.dayOfWeek && ["土", "日"].includes(d.dayOfWeek)) || d.holidayName,
-  );
-  const weekdayAvg =
-    weekdays.length > 0
-      ? weekdays.reduce((acc, cur) => acc + Number(cur["total count"] ?? 0), 0) / weekdays.length
-      : 0;
-  const weekendAvg =
-    weekends.length > 0
-      ? weekends.reduce((acc, cur) => acc + Number(cur["total count"] ?? 0), 0) / weekends.length
-      : 0;
-  return { weekdayAvg, weekendAvg };
+
+  if (theme === "month" || theme === "week") {
+    // 月・週集計はweekdayTotal, weekendTotalを使う
+    const weekdaySum = data.reduce((acc, cur) => acc + Number(cur["weekdayTotal"] ?? 0), 0);
+    const weekendSum = data.reduce((acc, cur) => acc + Number(cur["weekendTotal"] ?? 0), 0);
+    const count = data.length;
+    return {
+      weekdayAvg: count > 0 ? weekdaySum / count : 0,
+      weekendAvg: count > 0 ? weekendSum / count : 0,
+    };
+  }
+  if (theme === "day") {
+    const weekdays = data.filter(
+      (d) => d.dayOfWeek && !["土", "日"].includes(d.dayOfWeek) && !d.holidayName,
+    );
+    const weekends = data.filter(
+      (d) => (d.dayOfWeek && ["土", "日"].includes(d.dayOfWeek)) || d.holidayName,
+    );
+    const weekdayAvg =
+      weekdays.length > 0
+        ? weekdays.reduce((acc, cur) => acc + Number(cur["total count"] ?? 0), 0) / weekdays.length
+        : 0;
+    const weekendAvg =
+      weekends.length > 0
+        ? weekends.reduce((acc, cur) => acc + Number(cur["total count"] ?? 0), 0) / weekends.length
+        : 0;
+    return { weekdayAvg, weekendAvg };
+  }
+  return { weekdayAvg: 0, weekendAvg: 0 };
 }
 
 export const StatsSummary: React.FC<StatsSummaryProps> = ({ theme, data }) => {
   const { sum, avg } = getStats(data ?? []);
-  let weekdayAvg = 0;
-  let weekendAvg = 0;
-  if (theme === "day" && data) {
-    const result = getWeekdayAverages(data);
-    weekdayAvg = result.weekdayAvg;
-    weekendAvg = result.weekendAvg;
-  }
+  const { weekdayAvg, weekendAvg } = getWeekdayAverages(data ?? [], theme);
 
   return (
     <div style={{ margin: "1rem 0", fontSize: "1.1rem", color: "#374151" }}>
       <div>合計人数: {Math.round(sum).toLocaleString()} 人</div>
       <div>平均人数: {Math.round(avg).toLocaleString()} 人</div>
-      {theme === "day" && (
+      {theme !== "hour" && (
         <>
           <div>平日平均: {Math.round(weekdayAvg).toLocaleString()} 人</div>
           <div>土日祝平均: {Math.round(weekendAvg).toLocaleString()} 人</div>

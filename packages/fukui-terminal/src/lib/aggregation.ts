@@ -13,22 +13,38 @@ function filterByRange(data: AggregatedData[], from: Date, to: Date) {
  */
 export function aggregateMonthly(data: AggregatedData[], start: Date, end: Date): AggregatedData[] {
   const filtered = filterByRange(data, start, end);
-  const monthlyMap = new Map<string, AggregatedData>();
+  const monthlyMap = new Map<
+    string,
+    AggregatedData & {
+      weekdayTotal?: number;
+      weekendTotal?: number;
+    }
+  >();
   filtered.forEach((row) => {
     const date = new Date(row["aggregate from"]);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    const dayOfWeek = date.getDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const isHoliday = holidayJP.isHoliday(date);
+    const isWeekendOrHoliday = isWeekend || isHoliday;
     if (!monthlyMap.has(monthKey)) {
       monthlyMap.set(monthKey, {
         ...row,
         ["aggregate from"]: `${monthKey}`,
         ["aggregate to"]: `${monthKey}`,
         ["total count"]: Number(row["total count"]),
+        weekdayTotal: !isWeekendOrHoliday ? Number(row["total count"]) : 0,
+        weekendTotal: isWeekendOrHoliday ? Number(row["total count"]) : 0,
       });
     } else {
       const prev = monthlyMap.get(monthKey)!;
       monthlyMap.set(monthKey, {
         ...prev,
         ["total count"]: Number(prev["total count"]) + Number(row["total count"]),
+        weekdayTotal:
+          (prev.weekdayTotal ?? 0) + (!isWeekendOrHoliday ? Number(row["total count"]) : 0),
+        weekendTotal:
+          (prev.weekendTotal ?? 0) + (isWeekendOrHoliday ? Number(row["total count"]) : 0),
       });
     }
   });
