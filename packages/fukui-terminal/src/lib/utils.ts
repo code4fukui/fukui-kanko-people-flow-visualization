@@ -8,4 +8,4 @@ export function cn(...inputs: ClassValue[]) {
 /**
  * アプリケーション内で利用可能なデータの最小日付
  */
-export const DEFAULT_MIN_DATE = new Date(2024, 9, 1);
+export const DEFAULT_MIN_DATE = new Date("2024-10-01");
