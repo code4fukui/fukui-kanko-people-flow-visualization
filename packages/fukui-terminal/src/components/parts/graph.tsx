@@ -27,8 +27,6 @@ const Graph: React.FC<GraphProps> = ({
   xKey = "aggregateFrom",
   yKey = "totalCount",
   mode,
-  width = 500,
-  height = 300,
 }) => {
   if (mode === "month") {
     return (
@@ -49,17 +47,8 @@ const Graph: React.FC<GraphProps> = ({
   }
 
   return (
-    <div
-      style={{
-        width: width,
-        height: height,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        border: "1px solid #eee",
-      }}
-    >
-      <span>このモード（{mode}）のグラフは開発中です。</span>
+    <div>
+      <p>このモード（{mode}）のグラフは開発中です。</p>
     </div>
   );
 };
