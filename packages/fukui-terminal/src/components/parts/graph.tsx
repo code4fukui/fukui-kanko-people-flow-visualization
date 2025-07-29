@@ -1,3 +1,4 @@
+import { StatsSummary } from "@/components/parts/stats-summary";
 import {
   ChartContainer,
   ChartLegend,
@@ -43,6 +44,13 @@ const lineColors = [
 function renderTick(props: XAxisTickProps, data: AggregatedData[], xKey: string) {
   const d = data.find((row) => row[xKey] === props.payload.value);
   return <CustomizedXAxisTick {...props} dayOfWeek={d?.dayOfWeek} holidayName={d?.holidayName} />;
+}
+
+function getStats(data: AggregatedData[]) {
+  if (!data || data.length === 0) return { sum: 0, avg: 0 };
+  const sum = data.reduce((acc, cur) => acc + Number(cur["total count"] ?? 0), 0);
+  const avg = sum / data.length;
+  return { sum, avg };
 }
 
 const CustomizedXAxisTick = ({
@@ -91,6 +99,7 @@ const Graph: React.FC<GraphProps> = ({
   yKey = "total count",
   theme,
 }) => {
+  const stats = getStats(data);
   if (theme === "hour") {
     // 日付ごとにグループ化し、xKeyを時間のみに変換
     const grouped: { [date: string]: AggregatedData[] } = {};
@@ -107,49 +116,55 @@ const Graph: React.FC<GraphProps> = ({
     });
 
     return (
-      <ChartContainer config={chartConfig}>
-        <LineChart margin={{ top: 10, right: 40 }}>
-          {Object.entries(grouped).map(([date, rows], idx) => (
-            <Line
-              key={date}
-              data={rows}
-              dataKey={`${date}_${yKey}`}
-              name={date}
-              stroke={lineColors[idx % lineColors.length]}
+      <div>
+        <ChartContainer config={chartConfig}>
+          <LineChart margin={{ top: 10, right: 40 }}>
+            {Object.entries(grouped).map(([date, rows], idx) => (
+              <Line
+                key={date}
+                data={rows}
+                dataKey={`${date}_${yKey}`}
+                name={date}
+                stroke={lineColors[idx % lineColors.length]}
+              />
+            ))}
+            <CartesianGrid />
+            <XAxis dataKey={xKey} tickMargin={8} allowDuplicatedCategory={false} />
+            <YAxis />
+            <ChartTooltip
+              cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
+              content={<ChartTooltipContent className="bg-white" />}
             />
-          ))}
-          <CartesianGrid />
-          <XAxis dataKey={xKey} tickMargin={8} allowDuplicatedCategory={false} />
-          <YAxis />
-          <ChartTooltip
-            cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
-            content={<ChartTooltipContent className="bg-white" />}
-          />
-          <ChartLegend content={<ChartLegendContent />} />
-        </LineChart>
-      </ChartContainer>
+            <ChartLegend content={<ChartLegendContent />} />
+          </LineChart>
+        </ChartContainer>
+        <StatsSummary sum={stats.sum} avg={stats.avg} />
+      </div>
     );
   }
 
   if (theme === "month" || theme === "week" || theme === "day") {
     return (
-      <ChartContainer config={chartConfig}>
-        <LineChart data={data} margin={{ top: 10, right: 40 }}>
-          <Line dataKey={yKey} />
-          <CartesianGrid />
-          <XAxis
-            dataKey={xKey}
-            tick={theme === "day" ? (props) => renderTick(props, data, xKey) : undefined}
-            tickMargin={8}
-          />
-          <YAxis />
-          <ChartTooltip
-            cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
-            content={<ChartTooltipContent className="bg-white" />}
-          />
-          <ChartLegend content={<ChartLegendContent />} />
-        </LineChart>
-      </ChartContainer>
+      <div>
+        <ChartContainer config={chartConfig}>
+          <LineChart data={data} margin={{ top: 10, right: 40 }}>
+            <Line dataKey={yKey} />
+            <CartesianGrid />
+            <XAxis
+              dataKey={xKey}
+              tick={theme === "day" ? (props) => renderTick(props, data, xKey) : undefined}
+              tickMargin={8}
+            />
+            <YAxis />
+            <ChartTooltip
+              cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
+              content={<ChartTooltipContent className="bg-white" />}
+            />
+            <ChartLegend content={<ChartLegendContent />} />
+          </LineChart>
+        </ChartContainer>
+        <StatsSummary sum={stats.sum} avg={stats.avg} />
+      </div>
     );
   }
 };

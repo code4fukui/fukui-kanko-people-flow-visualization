@@ -87,13 +87,6 @@ function App() {
   const [filteredDailyData, setFilteredDailyData] = useState<AggregatedData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  function getStats(data: AggregatedData[]) {
-    if (!data || data.length === 0) return { sum: 0, avg: 0 };
-    const sum = data.reduce((acc, cur) => acc + Number(cur["total count"] ?? 0), 0);
-    const avg = sum / data.length;
-    return { sum, avg };
-  }
-
   useEffect(() => {
     const fetchData = async () => {
       const rawData = await getData("Person");
@@ -237,18 +230,6 @@ function App() {
             ) : (
               <p>範囲を選択してください。</p>
             )}
-          </div>
-          <div style={{ margin: "1rem 0", fontSize: "1.1rem", color: "#374151" }}>
-            {(theme === "hour" ? filteredDailyData : filteredData).length > 0 &&
-              (() => {
-                const stats = getStats(theme === "hour" ? filteredDailyData : filteredData);
-                return (
-                  <div>
-                    <div>合計人数: {Math.round(stats.sum).toLocaleString()} 人</div>
-                    <div>平均人数: {Math.round(stats.avg).toLocaleString()} 人</div>
-                  </div>
-                );
-              })()}
           </div>
           <a
             href={homeUrl}
