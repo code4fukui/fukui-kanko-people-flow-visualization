@@ -26,7 +26,7 @@ function App() {
     undefined,
   );
   const [endWeekRange, setEndWeekRange] = useState<{ from: Date; to: Date } | undefined>(undefined);
-  const [theme, setTheme] = useState<"month" | "week" | "day" | "hour">("month");
+  const [mode, setMode] = useState<"month" | "week" | "day" | "hour">("month");
   const [csvData, setCsvData] = useState<AggregatedData[]>([]);
   const [filteredData, setFilteredData] = useState<AggregatedData[]>([]);
 
@@ -41,7 +41,7 @@ function App() {
   useEffect(() => {
     let filtered = csvData;
 
-    if (theme === "month" && startMonth && endMonth) {
+    if (mode === "month" && startMonth && endMonth) {
       // 月末を取得
       const end = new Date(endMonth.getFullYear(), endMonth.getMonth() + 1, 0);
       // 範囲でフィルタ
@@ -74,9 +74,9 @@ function App() {
       return;
     }
 
-    // 他のthemeの場合はそのまま
+    // 他のmodeの場合はそのまま
     setFilteredData(filtered);
-  }, [theme, startMonth, endMonth]);
+  }, [mode, startMonth, endMonth]);
 
   return (
     <>
@@ -85,11 +85,11 @@ function App() {
           <h1 className="text-4xl font-bold text-gray-800 mb-4">福井駅周辺データ可視化</h1>
           <div className="flex flex-col items-center gap-6 my-8">
             <Select
-              value={theme}
+              value={mode}
               onValueChange={(v) => {
-                const newTheme = v as "month" | "week" | "day" | "hour";
-                setTheme(newTheme);
-                // テーマ変更時に値をリセット
+                const newMode = v as "month" | "week" | "day" | "hour";
+                setMode(newMode);
+                // モード変更時に値をリセット
                 setStartMonth(undefined);
                 setEndMonth(undefined);
                 setStartDate(undefined);
@@ -99,7 +99,7 @@ function App() {
               }}
             >
               <SelectTrigger className="w-[180px] bg-white text-black">
-                <SelectValue placeholder="Theme" />
+                <SelectValue placeholder="Mode" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="month">月別</SelectItem>
@@ -108,7 +108,7 @@ function App() {
                 <SelectItem value="hour">時間別</SelectItem>
               </SelectContent>
             </Select>
-            {theme === "month" && (
+            {mode === "month" && (
               <MonthRangePicker
                 startMonth={startMonth}
                 endMonth={endMonth}
@@ -119,7 +119,7 @@ function App() {
               />
             )}
 
-            {theme === "week" && (
+            {mode === "week" && (
               <RangeSelector
                 type="week"
                 start={startWeekRange}
@@ -129,7 +129,7 @@ function App() {
               />
             )}
 
-            {(theme === "day" || theme === "hour") && (
+            {(mode === "day" || mode === "hour") && (
               <RangeSelector
                 type="date"
                 start={startDate}
@@ -141,7 +141,7 @@ function App() {
           </div>
           <div className="my-8">
             {startMonth && endMonth ? (
-              <Graph theme={theme} data={filteredData} />
+              <Graph mode={mode} data={filteredData} />
             ) : (
               <p>範囲を選択してください。</p>
             )}
