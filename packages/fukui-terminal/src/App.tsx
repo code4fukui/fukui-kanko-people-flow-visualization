@@ -74,7 +74,7 @@ function App() {
       return;
     }
 
-    // 他のmodeの場合はそのまま
+    // TODO:他の期間の処理を実装する
     setFilteredData(filtered);
   }, [mode, startMonth, endMonth]);
 
