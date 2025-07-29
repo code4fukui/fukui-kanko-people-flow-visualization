@@ -32,8 +32,14 @@ function App() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const rawData = await getRawData("Person");
-      setCsvData(rawData);
+      try {
+        const rawData = await getRawData("Person");
+        setCsvData(rawData);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error("データの取得に失敗しました:", error);
+        setCsvData([]);
+      }
     };
     fetchData();
   }, []);
