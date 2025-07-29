@@ -1,4 +1,5 @@
 import { Graph } from "@/components/parts/graph";
+import { LoadingSpinner } from "@/components/parts/loading-spinner";
 import { MonthRangePicker } from "@/components/parts/month-range-picker";
 import { RangeSelector } from "@/components/parts/range-selector";
 import {
@@ -17,7 +18,6 @@ import {
 } from "@/lib/aggregation";
 import { getDailyData, getData } from "@/lib/data/csv";
 import { useEffect, useState } from "react";
-import { LoadingSpinner } from "./components/parts/loading-spinner";
 
 function App() {
   useEffect(() => {
