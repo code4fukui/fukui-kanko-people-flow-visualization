@@ -46,13 +46,6 @@ function renderTick(props: XAxisTickProps, data: AggregatedData[], xKey: string)
   return <CustomizedXAxisTick {...props} dayOfWeek={d?.dayOfWeek} holidayName={d?.holidayName} />;
 }
 
-function getStats(data: AggregatedData[]) {
-  if (!data || data.length === 0) return { sum: 0, avg: 0 };
-  const sum = data.reduce((acc, cur) => acc + Number(cur["total count"] ?? 0), 0);
-  const avg = sum / data.length;
-  return { sum, avg };
-}
-
 const CustomizedXAxisTick = ({
   x,
   y,
@@ -99,7 +92,6 @@ const Graph: React.FC<GraphProps> = ({
   yKey = "total count",
   theme,
 }) => {
-  const stats = getStats(data);
   if (theme === "hour") {
     // 日付ごとにグループ化し、xKeyを時間のみに変換
     const grouped: { [date: string]: AggregatedData[] } = {};
@@ -138,7 +130,7 @@ const Graph: React.FC<GraphProps> = ({
             <ChartLegend content={<ChartLegendContent />} />
           </LineChart>
         </ChartContainer>
-        <StatsSummary sum={stats.sum} avg={stats.avg} />
+        <StatsSummary theme={theme} data={data} />
       </div>
     );
   }
@@ -163,7 +155,7 @@ const Graph: React.FC<GraphProps> = ({
             <ChartLegend content={<ChartLegendContent />} />
           </LineChart>
         </ChartContainer>
-        <StatsSummary sum={stats.sum} avg={stats.avg} />
+        <StatsSummary theme={theme} data={data} />
       </div>
     );
   }
