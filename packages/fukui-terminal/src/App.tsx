@@ -7,6 +7,7 @@ import {
   RangeSelector,
   TypeSelect,
 } from "@fukui-kanko/shared/components/parts";
+import { Checkbox, Label } from "@fukui-kanko/shared/components/ui";
 import {
   aggregateDaily,
   aggregateHourly,
@@ -144,6 +145,8 @@ function App() {
                 setEndWeekRange(undefined);
               }}
             />
+            <Checkbox />
+            <Label htmlFor="terms">2期間比較</Label>
             {type === "month" && (
               <MonthRangePicker
                 startMonth={startMonth}
