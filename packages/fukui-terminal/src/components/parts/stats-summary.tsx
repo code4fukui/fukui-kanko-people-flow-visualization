@@ -57,15 +57,25 @@ export const StatsSummary: React.FC<StatsSummaryProps> = ({ theme, data }) => {
   const { weekdayAvg, weekendAvg } = getWeekdayAverages(data ?? [], theme);
 
   return (
-    <div style={{ margin: "1rem 0", fontSize: "1.1rem", color: "#374151" }}>
-      <div>合計人数: {Math.round(sum).toLocaleString()} 人</div>
-      <div>平均人数: {Math.round(avg).toLocaleString()} 人</div>
-      {theme !== "hour" && (
-        <>
-          <div>平日平均: {Math.round(weekdayAvg).toLocaleString()} 人</div>
-          <div>土日祝平均: {Math.round(weekendAvg).toLocaleString()} 人</div>
-        </>
-      )}
+    <div className="flex justify-center">
+      <div className="my-4">
+        <div className="flex justify-end">
+          <p>
+            合計人数: {Math.round(sum).toLocaleString()} 人 / 平均人数:{" "}
+            {Math.round(avg).toLocaleString()} 人
+          </p>
+        </div>
+        {theme !== "hour" && (
+          <div>
+            <div className="flex justify-end">
+              <p>平日平均: {Math.round(weekdayAvg).toLocaleString()} 人</p>
+            </div>
+            <div className="flex justify-end">
+              <p>土日祝平均: {Math.round(weekendAvg).toLocaleString()} 人</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
