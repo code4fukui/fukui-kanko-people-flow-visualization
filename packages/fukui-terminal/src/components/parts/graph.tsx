@@ -17,7 +17,7 @@ type GraphProps = {
   data: AggregatedData[];
   xKey?: string;
   yKey?: string;
-  mode: "month" | "week" | "day" | "hour";
+  type: "month" | "week" | "day" | "hour";
   width?: number;
   height?: number;
 };
@@ -26,9 +26,9 @@ const Graph: React.FC<GraphProps> = ({
   data,
   xKey = "aggregateFrom",
   yKey = "totalCount",
-  mode,
+  type,
 }) => {
-  if (mode === "month") {
+  if (type === "month") {
     return (
       <ChartContainer config={chartConfig}>
         <LineChart data={data}>
@@ -48,7 +48,7 @@ const Graph: React.FC<GraphProps> = ({
 
   return (
     <div>
-      <p>このモード（{mode}）のグラフは開発中です。</p>
+      <p>このタイプ（{type}）のグラフは開発中です。</p>
     </div>
   );
 };
