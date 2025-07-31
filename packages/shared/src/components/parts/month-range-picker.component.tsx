@@ -38,7 +38,7 @@ export function MonthRangePicker({ startMonth, endMonth, onChange }: MonthRangeP
   }, [startMonth, endMonth, onChange]);
 
   return (
-    <div className="flex flex-row gap-6 mb-6">
+    <div className="flex flex-row gap-6">
       <div className="flex flex-col gap-3">
         <Label className="px-1">開始</Label>
         <Popover open={openStartMonth} onOpenChange={setOpenStartMonth}>

@@ -26,7 +26,7 @@ export function PeriodGraphPanel({
   className,
 }: PeriodGraphPanelProps) {
   return (
-    <div className={cn(className)}>
+    <div className={cn("w-full flex flex-col items-center", className)}>
       {type === "month" && (
         <MonthRangePicker
           startMonth={period.startMonth}
@@ -57,7 +57,7 @@ export function PeriodGraphPanel({
         />
       )}
 
-      <div className="my-8">
+      <div className="w-2/3">
         {isLoading && type === "hour" ? (
           <LoadingSpinner />
         ) : (period.startMonth && period.endMonth) ||
