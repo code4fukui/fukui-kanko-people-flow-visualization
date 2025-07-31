@@ -1,3 +1,4 @@
+import { Period } from "@fukui-kanko/shared";
 import * as holidayJP from "@holiday-jp/holiday_jp";
 import { AGGREGATE_FROM_KEY, AggregatedData, TOTAL_COUNT_KEY } from "../types";
 import { WEEK_DAYS } from "./date";
@@ -177,4 +178,32 @@ export function aggregateHourly(data: AggregatedData[]): AggregatedData[] {
     }
   });
   return Array.from(hourlyMap.values());
+}
+
+/**
+ * テーマ・期間ごとに適切な集計データを返す共通関数
+ */
+export function getFilteredData(
+  theme: "month" | "week" | "day" | "hour",
+  period: Period,
+  csvData: AggregatedData[],
+  csvDailyData: AggregatedData[],
+) {
+  if (theme === "month" && period.startMonth && period.endMonth) {
+    const end = new Date(period.endMonth.getFullYear(), period.endMonth.getMonth() + 1, 0);
+    return { data: aggregateMonthly(csvData, period.startMonth, end), daily: undefined };
+  }
+  if (theme === "week" && period.startWeekRange && period.endWeekRange) {
+    return {
+      data: aggregateWeekly(csvData, period.startWeekRange, period.endWeekRange),
+      daily: undefined,
+    };
+  }
+  if (theme === "day" && period.startDate && period.endDate) {
+    return { data: aggregateDaily(csvData, period.startDate, period.endDate), daily: undefined };
+  }
+  if (theme === "hour" && period.startDate && period.endDate) {
+    return { data: undefined, daily: aggregateHourly(csvDailyData) };
+  }
+  return { data: csvData, daily: csvDailyData };
 }

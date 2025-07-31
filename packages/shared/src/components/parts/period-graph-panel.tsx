@@ -1,4 +1,4 @@
-import { AggregatedData } from "@fukui-kanko/shared";
+import { AggregatedData, Period } from "@fukui-kanko/shared";
 import {
   Graph,
   LoadingSpinner,
@@ -6,84 +6,60 @@ import {
   RangeSelector,
 } from "@fukui-kanko/shared/components/parts";
 
-type Props = {
+type PeriodGraphPanelProps = {
   type: "month" | "week" | "day" | "hour";
-  startMonth?: Date;
-  endMonth?: Date;
-  setStartMonth?: (date?: Date) => void;
-  setEndMonth?: (date?: Date) => void;
-  startWeekRange?: { from: Date; to: Date };
-  endWeekRange?: { from: Date; to: Date };
-  setStartWeekRange?: (range?: { from: Date; to: Date }) => void;
-  setEndWeekRange?: (range?: { from: Date; to: Date }) => void;
-  startDate?: Date;
-  endDate?: Date;
-  setStartDate?: (date?: Date) => void;
-  setEndDate?: (date?: Date) => void;
+  period: Period;
+  setPeriod: React.Dispatch<React.SetStateAction<Period>>;
   isLoading: boolean;
   filteredData: AggregatedData[];
   filteredDailyData: AggregatedData[];
 };
-
-export function PeriodGraphPanel(props: Props) {
-  const {
-    type,
-    startMonth,
-    endMonth,
-    setStartMonth,
-    setEndMonth,
-    startWeekRange,
-    endWeekRange,
-    setStartWeekRange,
-    setEndWeekRange,
-    startDate,
-    endDate,
-    setStartDate,
-    setEndDate,
-    isLoading,
-    filteredData,
-    filteredDailyData,
-  } = props;
-
+export function PeriodGraphPanel({
+  type,
+  period,
+  setPeriod,
+  isLoading,
+  filteredData,
+  filteredDailyData,
+}: PeriodGraphPanelProps) {
   return (
     <div>
-      {type === "month" && setStartMonth && setEndMonth && (
+      {type === "month" && (
         <MonthRangePicker
-          startMonth={startMonth}
-          endMonth={endMonth}
+          startMonth={period.startMonth}
+          endMonth={period.endMonth}
           onChange={(start, end) => {
-            setStartMonth(start);
-            setEndMonth(end);
+            setPeriod((prev) => ({ ...prev, startMonth: start, endMonth: end }));
           }}
         />
       )}
 
-      {type === "week" && setStartWeekRange && setEndWeekRange && (
+      {type === "week" && (
         <RangeSelector
           type="week"
-          start={startWeekRange}
-          end={endWeekRange}
-          setStart={setStartWeekRange}
-          setEnd={setEndWeekRange}
+          start={period.startWeekRange}
+          end={period.endWeekRange}
+          setStart={(range) => setPeriod((prev) => ({ ...prev, startWeekRange: range }))}
+          setEnd={(range) => setPeriod((prev) => ({ ...prev, endWeekRange: range }))}
         />
       )}
 
-      {(type === "day" || type === "hour") && setStartDate && setEndDate && (
+      {(type === "day" || type === "hour") && (
         <RangeSelector
           type="date"
-          start={startDate}
-          end={endDate}
-          setStart={setStartDate}
-          setEnd={setEndDate}
+          start={period.startDate}
+          end={period.endDate}
+          setStart={(date) => setPeriod((prev) => ({ ...prev, startDate: date }))}
+          setEnd={(date) => setPeriod((prev) => ({ ...prev, endDate: date }))}
         />
       )}
 
       <div className="my-8">
         {isLoading && type === "hour" ? (
           <LoadingSpinner />
-        ) : (startMonth && endMonth) ||
-          (startWeekRange && endWeekRange) ||
-          (startDate && endDate) ? (
+        ) : (period.startMonth && period.endMonth) ||
+          (period.startWeekRange && period.endWeekRange) ||
+          (period.startDate && period.endDate) ? (
           <Graph type={type} data={type === "hour" ? filteredDailyData : filteredData} />
         ) : (
           <p>範囲を選択してください。</p>
