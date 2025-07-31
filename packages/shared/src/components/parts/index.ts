@@ -1,5 +1,7 @@
 export * from "./average-bar.component";
+export * from "./external-navigation.component";
 export * from "./graph.component";
+export * from "./header.component";
 export * from "./loading-spinner.component";
 export * from "./month-picker.component";
 export * from "./month-range-picker.component";
