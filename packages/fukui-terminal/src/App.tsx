@@ -17,6 +17,7 @@ function App() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [compareMode, setCompareMode] = useState(false);
+  const [compareCsvDailyData, setCompareCsvDailyData] = useState<AggregatedData[]>([]);
 
   const [type, setType] = useState<"month" | "week" | "day" | "hour">("month");
   const [csvData, setCsvData] = useState<AggregatedData[]>([]);
@@ -102,6 +103,43 @@ function App() {
     };
   }, [type, period.startDate, period.endDate]);
 
+  useEffect(() => {
+    if (type !== "hour") {
+      setIsLoading(false);
+      return;
+    }
+    let isCurrent = true;
+    const fetchData = async () => {
+      if (comparePeriod.startDate && comparePeriod.endDate) {
+        setIsLoading(true);
+        const results: AggregatedData[] = [];
+        const current = new Date(comparePeriod.startDate);
+        const end = new Date(comparePeriod.endDate);
+
+        while (current <= end) {
+          // 1時間ごとに取得
+          const rawData = await getRawData({
+            objectClass: "Person",
+            placement: "fukui-station-east-entrance",
+            aggregateRange: "daily", // 1時間毎のデータはdailyに含まれています
+            date: new Date(current),
+          });
+          results.push(...rawData);
+          current.setDate(current.getDate() + 1);
+        }
+
+        if (isCurrent) {
+          setCompareCsvDailyData(results);
+          setIsLoading(false);
+        }
+      }
+    };
+    fetchData();
+    return () => {
+      isCurrent = false;
+    };
+  }, [type, comparePeriod.startDate, comparePeriod.endDate]);
+
   // 本期間の集計データを期間・テーマ・データ変更時に再計算
   useEffect(() => {
     let filtered = csvData;
@@ -162,11 +200,10 @@ function App() {
       return;
     }
     if (type === "hour" && comparePeriod.startDate && comparePeriod.endDate) {
-      setCompareFilteredDailyData(aggregateHourly(csvDailyData));
+      setCompareFilteredDailyData(aggregateHourly(compareCsvDailyData));
       return;
     }
     setCompareFilteredData(csvData);
-    setCompareFilteredDailyData(csvDailyData);
   }, [
     type,
     comparePeriod.startMonth,
@@ -176,7 +213,7 @@ function App() {
     comparePeriod.startDate,
     comparePeriod.endDate,
     csvData,
-    csvDailyData,
+    compareCsvDailyData,
   ]);
 
   return (
