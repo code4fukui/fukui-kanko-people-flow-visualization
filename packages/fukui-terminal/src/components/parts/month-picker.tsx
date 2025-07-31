@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, DEFAULT_MIN_DATE } from "@/lib/utils";
 import * as React from "react";
 
 const months = [
@@ -24,8 +24,19 @@ export interface MonthPickerProps {
   minDate?: Date;
 }
 
-export function MonthPicker({ onChange, className, selected, minDate }: MonthPickerProps) {
+export function MonthPicker({
+  onChange,
+  className,
+  selected,
+  minDate = DEFAULT_MIN_DATE,
+}: MonthPickerProps) {
   const [year, setYear] = React.useState(new Date().getFullYear());
+  const currentDate = new Date();
+  const maxDate = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    currentDate.getDate() - 1,
+  );
 
   const selectedMonth =
     selected && selected.getFullYear() === year ? selected.getMonth() : undefined;
@@ -49,11 +60,12 @@ export function MonthPicker({ onChange, className, selected, minDate }: MonthPic
       </div>
       <div className="grid grid-cols-4 gap-2">
         {months.map((m, i) => {
-          // minDateが指定されている場合、その年のminDateより前の月はdisabled
+          // 選択できる範囲を制限
           const isDisabled =
-            minDate &&
-            (year < minDate.getFullYear() ||
-              (year === minDate.getFullYear() && i < minDate.getMonth()));
+            year < minDate.getFullYear() ||
+            year > maxDate.getFullYear() ||
+            (year === minDate.getFullYear() && i < minDate.getMonth()) ||
+            (year === maxDate.getFullYear() && i > maxDate.getMonth());
           return (
             <Button
               key={m}
