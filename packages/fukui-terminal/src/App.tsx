@@ -197,6 +197,14 @@ function App() {
                 startWeekRange: undefined,
                 endWeekRange: undefined,
               });
+              setComparePeriod({
+                startDate: undefined,
+                endDate: undefined,
+                startMonth: undefined,
+                endMonth: undefined,
+                startWeekRange: undefined,
+                endWeekRange: undefined,
+              });
             }}
           />
           <Checkbox checked={compareMode} onCheckedChange={(v) => setCompareMode(!!v)} />
