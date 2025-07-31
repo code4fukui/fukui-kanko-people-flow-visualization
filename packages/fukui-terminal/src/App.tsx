@@ -16,6 +16,7 @@ function App() {
   const homeUrl = isDev ? "http://localhost:3004" : "../";
 
   const [isLoading, setIsLoading] = useState(false);
+  const [compareIsLoading, setCompareIsLoading] = useState(false);
   const [compareMode, setCompareMode] = useState(false);
   const [compareCsvDailyData, setCompareCsvDailyData] = useState<AggregatedData[]>([]);
 
@@ -105,13 +106,13 @@ function App() {
 
   useEffect(() => {
     if (type !== "hour") {
-      setIsLoading(false);
+      setCompareIsLoading(false);
       return;
     }
     let isCurrent = true;
     const fetchData = async () => {
       if (comparePeriod.startDate && comparePeriod.endDate) {
-        setIsLoading(true);
+        setCompareIsLoading(true);
         const results: AggregatedData[] = [];
         const current = new Date(comparePeriod.startDate);
         const end = new Date(comparePeriod.endDate);
@@ -130,7 +131,7 @@ function App() {
 
         if (isCurrent) {
           setCompareCsvDailyData(results);
-          setIsLoading(false);
+          setCompareIsLoading(false);
         }
       }
     };
@@ -264,7 +265,7 @@ function App() {
                 type={type}
                 period={comparePeriod}
                 setPeriod={setComparePeriod}
-                isLoading={isLoading}
+                isLoading={compareIsLoading}
                 filteredData={compareFilteredData}
                 filteredDailyData={compareFilteredDailyData}
               />
