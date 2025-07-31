@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import { AggregatedData, getRawData, Period } from "@fukui-kanko/shared";
+import {
+  AggregatedData,
+  getRawData,
+  Period,
+  useDailyDataEffect,
+  useFilteredData,
+} from "@fukui-kanko/shared";
 import { PeriodGraphPanel, TypeSelect } from "@fukui-kanko/shared/components/parts";
 import { Checkbox, Label } from "@fukui-kanko/shared/components/ui";
-import {
-  aggregateDaily,
-  aggregateHourly,
-  aggregateMonthly,
-  aggregateWeekly,
-} from "@fukui-kanko/shared/utils";
 
 function App() {
   // 開発環境かどうかを判定
@@ -67,155 +67,24 @@ function App() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    if (type !== "hour") {
-      setIsLoading(false);
-      return;
-    }
-    let isCurrent = true;
-    const fetchData = async () => {
-      if (period.startDate && period.endDate) {
-        setIsLoading(true);
-        const results: AggregatedData[] = [];
-        const current = new Date(period.startDate);
-        const end = new Date(period.endDate);
-
-        while (current <= end) {
-          // 1時間ごとに取得
-          const rawData = await getRawData({
-            objectClass: "Person",
-            placement: "fukui-station-east-entrance",
-            aggregateRange: "daily", // 1時間毎のデータはdailyに含まれています
-            date: new Date(current),
-          });
-          results.push(...rawData);
-          current.setDate(current.getDate() + 1);
-        }
-
-        if (isCurrent) {
-          setCsvDailyData(results);
-          setIsLoading(false);
-        }
-      }
-    };
-    fetchData();
-    return () => {
-      isCurrent = false;
-    };
-  }, [type, period.startDate, period.endDate]);
-
-  useEffect(() => {
-    if (type !== "hour") {
-      setCompareIsLoading(false);
-      return;
-    }
-    let isCurrent = true;
-    const fetchData = async () => {
-      if (comparePeriod.startDate && comparePeriod.endDate) {
-        setCompareIsLoading(true);
-        const results: AggregatedData[] = [];
-        const current = new Date(comparePeriod.startDate);
-        const end = new Date(comparePeriod.endDate);
-
-        while (current <= end) {
-          // 1時間ごとに取得
-          const rawData = await getRawData({
-            objectClass: "Person",
-            placement: "fukui-station-east-entrance",
-            aggregateRange: "daily", // 1時間毎のデータはdailyに含まれています
-            date: new Date(current),
-          });
-          results.push(...rawData);
-          current.setDate(current.getDate() + 1);
-        }
-
-        if (isCurrent) {
-          setCompareCsvDailyData(results);
-          setCompareIsLoading(false);
-        }
-      }
-    };
-    fetchData();
-    return () => {
-      isCurrent = false;
-    };
-  }, [type, comparePeriod.startDate, comparePeriod.endDate]);
-
   // 本期間の集計データを期間・テーマ・データ変更時に再計算
-  useEffect(() => {
-    let filtered = csvData;
-    const filteredDaily = csvDailyData;
-
-    if (type === "month" && period.startMonth && period.endMonth) {
-      // 月末を取得
-      const end = new Date(period.endMonth.getFullYear(), period.endMonth.getMonth() + 1, 0);
-      filtered = aggregateMonthly(filtered, period.startMonth, end);
-    }
-
-    if (type === "week" && period.startWeekRange && period.endWeekRange) {
-      filtered = aggregateWeekly(filtered, period.startWeekRange, period.endWeekRange);
-    }
-
-    if (type === "day" && period.startDate && period.endDate) {
-      filtered = aggregateDaily(filtered, period.startDate, period.endDate);
-    }
-
-    if (type === "hour" && period.startDate && period.endDate) {
-      setFilteredDailyData(aggregateHourly(filteredDaily));
-    }
-
-    setFilteredData(filtered);
-  }, [
-    type,
-    period.startMonth,
-    period.endMonth,
-    period.startWeekRange,
-    period.endWeekRange,
-    period.startDate,
-    period.endDate,
-    csvData,
-    csvDailyData,
-  ]);
+  useFilteredData(type, period, csvData, csvDailyData, setFilteredData, setFilteredDailyData);
 
   // 比較期間の集計データを期間・テーマ・データ変更時に再計算
-  useEffect(() => {
-    if (type === "month" && comparePeriod.startMonth && comparePeriod.endMonth) {
-      const end = new Date(
-        comparePeriod.endMonth.getFullYear(),
-        comparePeriod.endMonth.getMonth() + 1,
-        0,
-      );
-      setCompareFilteredData(aggregateMonthly(csvData, comparePeriod.startMonth, end));
-      return;
-    }
-    if (type === "week" && comparePeriod.startWeekRange && comparePeriod.endWeekRange) {
-      setCompareFilteredData(
-        aggregateWeekly(csvData, comparePeriod.startWeekRange, comparePeriod.endWeekRange),
-      );
-      return;
-    }
-    if (type === "day" && comparePeriod.startDate && comparePeriod.endDate) {
-      setCompareFilteredData(
-        aggregateDaily(csvData, comparePeriod.startDate, comparePeriod.endDate),
-      );
-      return;
-    }
-    if (type === "hour" && comparePeriod.startDate && comparePeriod.endDate) {
-      setCompareFilteredDailyData(aggregateHourly(compareCsvDailyData));
-      return;
-    }
-    setCompareFilteredData(csvData);
-  }, [
+  useFilteredData(
     type,
-    comparePeriod.startMonth,
-    comparePeriod.endMonth,
-    comparePeriod.startWeekRange,
-    comparePeriod.endWeekRange,
-    comparePeriod.startDate,
-    comparePeriod.endDate,
+    comparePeriod,
     csvData,
     compareCsvDailyData,
-  ]);
+    setCompareFilteredData,
+    setCompareFilteredDailyData,
+  );
+
+  // 本期間の時間別データを取得・更新
+  useDailyDataEffect(type, period, setCsvDailyData, setIsLoading);
+
+  // 比較期間の時間別データを取得・更新
+  useDailyDataEffect(type, comparePeriod, setCompareCsvDailyData, setCompareIsLoading);
 
   return (
     <div className="min-h-screen w-screen bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center font-sans">
