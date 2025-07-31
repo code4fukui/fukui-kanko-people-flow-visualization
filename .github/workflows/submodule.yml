@@ -25,6 +25,7 @@ jobs:
       - name: Update submodules
         run: |
           git submodule update --remote --init
+          mkdir -p public
           cp -R data/people-flow-data/full/* public
           git diff
           git add .
