@@ -108,9 +108,9 @@ function App() {
         const total = weekRows.reduce((sum, row) => sum + Number(row["total count"]), 0);
         weeklyAggregated.push({
           ...weekRows[0],
-          ["aggregate from"]: `${formatDate(new Date(weekRows[0]["aggregate from"]))}〜`,
-          ["aggregate to"]: `${formatDate(new Date(weekRows[weekRows.length - 1]["aggregate from"]))}`,
-          ["total count"]: total,
+          aggregateFrom: `${formatDate(new Date(weekRows[0]["aggregate from"]))}〜`,
+          aggregateTo: `${formatDate(new Date(weekRows[weekRows.length - 1]["aggregate from"]))}`,
+          totalCount: total,
         });
       }
       setFilteredData(weeklyAggregated);
