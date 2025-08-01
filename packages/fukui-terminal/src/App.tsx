@@ -90,15 +90,17 @@ function App() {
 
       const weeklyAggregated: AggregatedData[] = [];
       let i = 0;
+      let isFirstWeek = true;
       while (i < filtered.length) {
         let weekRows: AggregatedData[] = [];
-        if (i === 0) {
+        if (isFirstWeek) {
           // 最初の週はstartWeekRange.from〜startWeekRange.toまで
           weekRows = filtered.filter((row) => {
             const d = new Date(row["aggregate from"]);
             return d >= startWeekRange.from && d <= startWeekRange.to;
           });
           i += weekRows.length;
+          isFirstWeek = false;
         } else {
           // 以降は7日ごと
           weekRows = filtered.slice(i, i + 7);
