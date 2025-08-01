@@ -1,3 +1,5 @@
+export const TOTAL_COUNT_KEY = "total count";
+
 export const OBJECT_CLASS = {
   Person: "人物",
 } as const;
@@ -8,6 +10,6 @@ export type AggregatedDataBase = {
   "object class": ObjectClass;
   "aggregate from": string;
   "aggregate to": string;
-  "total count": number;
+  [TOTAL_COUNT_KEY]: number;
 };
 export type AggregatedData = AggregatedDataBase & Record<string, string | number>;

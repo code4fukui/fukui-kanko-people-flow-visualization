@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AggregatedData } from "@/interfaces/aggregated-data.interface";
+import { AggregatedData, TOTAL_COUNT_KEY } from "@/interfaces/aggregated-data.interface";
 import { getRawData } from "@/lib/data/csv";
 import { useEffect, useState } from "react";
 import { formatDate } from "./lib/utils";
@@ -67,13 +67,13 @@ function App() {
             ...row,
             aggregateFrom: `${monthKey}`,
             aggregateTo: `${monthKey}`,
-            totalCount: Number(row["total count"]),
+            totalCount: Number(row[TOTAL_COUNT_KEY]),
           });
         } else {
           const prev = monthlyMap.get(monthKey)!;
           monthlyMap.set(monthKey, {
             ...prev,
-            totalCount: Number(prev.totalCount) + Number(row["total count"]),
+            totalCount: Number(prev.totalCount) + Number(row[TOTAL_COUNT_KEY]),
           });
         }
       });
@@ -106,7 +106,7 @@ function App() {
           weekRows = filtered.slice(i, i + 7);
           i += 7;
         }
-        const total = weekRows.reduce((sum, row) => sum + Number(row["total count"]), 0);
+        const total = weekRows.reduce((sum, row) => sum + Number(row[TOTAL_COUNT_KEY]), 0);
         weeklyAggregated.push({
           ...weekRows[0],
           aggregateFrom: `${formatDate(new Date(weekRows[0]["aggregate from"]), "-")}〜`,
