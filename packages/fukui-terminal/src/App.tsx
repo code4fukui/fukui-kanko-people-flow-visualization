@@ -91,7 +91,7 @@ function App() {
       const weeklyAggregated: AggregatedData[] = [];
       let i = 0;
       while (i < filtered.length) {
-        let weekRows;
+        let weekRows: AggregatedData[] = [];
         if (i === 0) {
           // 最初の週はstartWeekRange.from〜startWeekRange.toまで
           weekRows = filtered.filter((row) => {
