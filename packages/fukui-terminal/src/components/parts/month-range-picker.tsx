@@ -2,8 +2,9 @@ import { MonthPicker } from "@/components/parts/month-picker";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { ChevronDownIcon } from "lucide-react";
+import { CalendarIcon } from "@primer/octicons-react";
 
 type MonthRangePickerProps = {
   startMonth: Date | undefined;
@@ -11,22 +12,26 @@ type MonthRangePickerProps = {
   onChange: (start: Date | undefined, end: Date | undefined) => void;
 };
 
+/**
+ * startがendより前の月かどうかを判定するユーティリティ関数
+ */
+function isMonthBefore(start: Date, end: Date) {
+  return (
+    end.getFullYear() < start.getFullYear() ||
+    (end.getFullYear() === start.getFullYear() && end.getMonth() < start.getMonth())
+  );
+}
+
 export function MonthRangePicker({ startMonth, endMonth, onChange }: MonthRangePickerProps) {
   const [openStartMonth, setOpenStartMonth] = useState(false);
   const [openEndMonth, setOpenEndMonth] = useState(false);
 
   // 終了月が開始月より前になったらリセット
   useEffect(() => {
-    if (
-      startMonth &&
-      endMonth &&
-      (endMonth.getFullYear() < startMonth.getFullYear() ||
-        (endMonth.getFullYear() === startMonth.getFullYear() &&
-          endMonth.getMonth() < startMonth.getMonth()))
-    ) {
+    if (startMonth && endMonth && isMonthBefore(startMonth, endMonth)) {
       onChange(startMonth, undefined);
     }
-  }, [startMonth]);
+  }, [startMonth, endMonth, onChange]);
 
   return (
     <div className="flex flex-row gap-6 mb-6">
@@ -40,7 +45,7 @@ export function MonthRangePicker({ startMonth, endMonth, onChange }: MonthRangeP
                   ? `${startMonth.getFullYear()}/${String(startMonth.getMonth() + 1).padStart(2, "0")}`
                   : "Select month"}
               </span>
-              <ChevronDownIcon />
+              <CalendarIcon size={24} />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto overflow-hidden p-0" align="start">
@@ -61,7 +66,10 @@ export function MonthRangePicker({ startMonth, endMonth, onChange }: MonthRangeP
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className={`w-48 justify-between font-normal ${!startMonth ? "opacity-50 pointer-events-none" : ""}`}
+              className={cn(
+                "w-48 justify-between font-normal",
+                !startMonth && "opacity-50 pointer-events-none",
+              )}
               disabled={!startMonth}
             >
               <span>
@@ -69,7 +77,7 @@ export function MonthRangePicker({ startMonth, endMonth, onChange }: MonthRangeP
                   ? `${endMonth.getFullYear()}/${String(endMonth.getMonth() + 1).padStart(2, "0")}`
                   : "Select month"}
               </span>
-              <ChevronDownIcon />
+              <CalendarIcon size={24} />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto overflow-hidden p-0" align="start">

@@ -10,26 +10,28 @@ import React from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 const chartConfig = {
-  "total count": { label: "人物検出回数" },
+  totalCount: { label: "人物検出回数" },
 };
 
 type GraphProps = {
   data: AggregatedData[];
   xKey?: string;
   yKey?: string;
-  theme: "month" | "week" | "day" | "hour";
+  type: "month" | "week" | "day" | "hour";
+  width?: number;
+  height?: number;
 };
 
 const Graph: React.FC<GraphProps> = ({
   data,
-  xKey = "aggregate from",
-  yKey = "total count",
-  theme,
+  xKey = "aggregateFrom",
+  yKey = "totalCount",
+  type,
 }) => {
-  if (theme === "month" || theme === "week") {
+  if (type === "month" || type === "week") {
     return (
       <ChartContainer config={chartConfig}>
-        <LineChart width={500} height={300} data={data}>
+        <LineChart data={data}>
           <Line dataKey={yKey} />
           <CartesianGrid />
           <XAxis dataKey={xKey} />
@@ -43,6 +45,12 @@ const Graph: React.FC<GraphProps> = ({
       </ChartContainer>
     );
   }
+
+  return (
+    <div>
+      <p>このタイプ（{type}）のグラフは開発中です。</p>
+    </div>
+  );
 };
 
 export { Graph };
