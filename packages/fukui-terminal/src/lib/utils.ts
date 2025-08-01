@@ -6,6 +6,13 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * 日付を指定した区切り文字で "YYYY-MM-DD" または "YYYY/MM/DD" 形式で返す
+ */
+export function formatDate(date: Date, delimiter: "-" | "/" = "-") {
+  return `${date.getFullYear()}${delimiter}${String(date.getMonth() + 1).padStart(2, "0")}${delimiter}${String(date.getDate()).padStart(2, "0")}`;
+}
+
+/**
  * アプリケーション内で利用可能なデータの最小日付
  */
 export const MIN_DATE = new Date("2024-10-17");

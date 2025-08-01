@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { MAX_DATE, MIN_DATE } from "@/lib/utils";
+import { formatDate, MAX_DATE, MIN_DATE } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { CalendarIcon } from "@primer/octicons-react";
 
@@ -26,13 +26,6 @@ type RangeSelectorProps =
 
 function isOutOfRange(date: Date) {
   return date < MIN_DATE || date > MAX_DATE;
-}
-
-/**
- * 日付を "YYYY/MM/DD" 形式で返す
- */
-function formatDate(date: Date) {
-  return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
 }
 
 function getWeekRange(date: Date) {
@@ -111,10 +104,10 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
               <span>
                 {type === "week"
                   ? start
-                    ? `${formatDate(start.from)}〜`
+                    ? `${formatDate(start.from, "/")}〜`
                     : "Select week"
                   : start
-                    ? formatDate(start)
+                    ? formatDate(start, "/")
                     : "Select date"}
               </span>
               <CalendarIcon size={24} />
@@ -158,10 +151,10 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
               <span>
                 {type === "week"
                   ? end
-                    ? `${formatDate(end.from)}〜`
+                    ? `${formatDate(end.from, "/")}〜`
                     : "Select week"
                   : end
-                    ? formatDate(end)
+                    ? formatDate(end, "/")
                     : "Select date"}
               </span>
               <CalendarIcon size={24} />

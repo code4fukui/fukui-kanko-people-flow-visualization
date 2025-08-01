@@ -11,6 +11,7 @@ import {
 import { AggregatedData } from "@/interfaces/aggregated-data.interface";
 import { getRawData } from "@/lib/data/csv";
 import { useEffect, useState } from "react";
+import { formatDate } from "./lib/utils";
 
 function App() {
   // 開発環境かどうかを判定
@@ -103,13 +104,11 @@ function App() {
           weekRows = filtered.slice(i, i + 7);
           i += 7;
         }
-        const formatDate = (date: Date) =>
-          `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
         const total = weekRows.reduce((sum, row) => sum + Number(row["total count"]), 0);
         weeklyAggregated.push({
           ...weekRows[0],
-          aggregateFrom: `${formatDate(new Date(weekRows[0]["aggregate from"]))}〜`,
-          aggregateTo: `${formatDate(new Date(weekRows[weekRows.length - 1]["aggregate from"]))}`,
+          aggregateFrom: `${formatDate(new Date(weekRows[0]["aggregate from"]), "-")}〜`,
+          aggregateTo: `${formatDate(new Date(weekRows[weekRows.length - 1]["aggregate from"]), "-")}`,
           totalCount: total,
         });
       }
