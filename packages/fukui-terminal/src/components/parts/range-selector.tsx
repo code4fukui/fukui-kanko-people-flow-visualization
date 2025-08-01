@@ -45,7 +45,7 @@ function getWeekRange(date: Date) {
   }
 
   if (startDay.getTime() === MIN_DATE.getTime()) {
-    endDay = new Date(2024, 9, 19);
+    endDay = new Date("2024-10-19");
   } else {
     endDay = new Date(startDay);
     endDay.setDate(startDay.getDate() + 6);
