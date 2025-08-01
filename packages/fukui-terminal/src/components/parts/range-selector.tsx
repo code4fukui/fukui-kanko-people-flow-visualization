@@ -45,6 +45,7 @@ function getWeekRange(date: Date) {
   }
 
   if (startDay.getTime() === MIN_DATE.getTime()) {
+    // データのある最初の週は7日周期にできないため、特別に終了日を設定
     endDay = new Date("2024-10-19");
   } else {
     endDay = new Date(startDay);
