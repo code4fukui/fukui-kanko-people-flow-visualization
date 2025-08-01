@@ -94,11 +94,12 @@ function App() {
       while (i < filtered.length) {
         let weekRows: AggregatedData[] = [];
         if (isFirstWeek) {
-          // 最初の週はstartWeekRange.from〜startWeekRange.toまで
+          // 最初の週だけ他の週と範囲が異なる場合があるためfilterで抽出(例：2024/10/17からの週)
           weekRows = filtered.filter((row) => {
             const d = new Date(row["aggregate from"]);
             return d >= startWeekRange.from && d <= startWeekRange.to;
           });
+          // 件数分インデックスを進める
           i += weekRows.length;
           isFirstWeek = false;
         } else {
