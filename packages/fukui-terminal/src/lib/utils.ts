@@ -23,3 +23,8 @@ MIN_DATE.setHours(0, 0, 0, 0);
 export const MAX_DATE = new Date();
 MAX_DATE.setHours(0, 0, 0, 0);
 MAX_DATE.setDate(MAX_DATE.getDate() - 1);
+
+/**
+ * データのある最初の週の終了日
+ */
+export const FIRST_WEEK_END_DATE = new Date("2024-10-19");

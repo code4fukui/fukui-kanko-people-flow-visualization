@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { formatDate, MAX_DATE, MIN_DATE } from "@/lib/utils";
+import { FIRST_WEEK_END_DATE, formatDate, MAX_DATE, MIN_DATE } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { CalendarIcon } from "@primer/octicons-react";
 
@@ -39,7 +39,7 @@ function getWeekRange(date: Date) {
 
   if (startDay.getTime() === MIN_DATE.getTime()) {
     // データのある最初の週は7日周期にできないため、特別に終了日を設定
-    endDay = new Date("2024-10-19");
+    endDay = new Date(FIRST_WEEK_END_DATE);
   } else {
     endDay = new Date(startDay);
     endDay.setDate(startDay.getDate() + 6);
