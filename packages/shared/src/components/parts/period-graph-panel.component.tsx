@@ -11,6 +11,7 @@ type PeriodGraphPanelProps = {
   type: keyof typeof GRAPH_VIEW_TYPES;
   period: Period;
   setPeriod: React.Dispatch<React.SetStateAction<Period>>;
+  isCompareMode: boolean;
   isLoading: boolean;
   filteredData: AggregatedData[];
   filteredDailyData: AggregatedData[];
@@ -20,6 +21,7 @@ export function PeriodGraphPanel({
   type,
   period,
   setPeriod,
+  isCompareMode,
   isLoading,
   filteredData,
   filteredDailyData,
@@ -57,16 +59,26 @@ export function PeriodGraphPanel({
         />
       )}
 
-      <div className="w-2/3">
-        {isLoading && type === "hour" ? (
-          <LoadingSpinner />
-        ) : (period.startMonth && period.endMonth) ||
-          (period.startWeekRange && period.endWeekRange) ||
-          (period.startDate && period.endDate) ? (
-          <Graph type={type} data={type === "hour" ? filteredDailyData : filteredData} />
-        ) : (
-          <p>範囲を選択してください。</p>
-        )}
+      <div className="w-full flex flex-col items-center justify-end min-h-[400px]">
+        <div
+          className={`${
+            (period.startMonth && period.endMonth) ||
+            (period.startWeekRange && period.endWeekRange) ||
+            (period.startDate && period.endDate)
+              ? "min-h-[500px] pt-4 pb-0 mt-2"
+              : "min-h-[200px]"
+          } ${isCompareMode ? "w-full" : "w-2/3"}`}
+        >
+          {isLoading && type === "hour" ? (
+            <LoadingSpinner />
+          ) : (period.startMonth && period.endMonth) ||
+            (period.startWeekRange && period.endWeekRange) ||
+            (period.startDate && period.endDate) ? (
+            <Graph type={type} data={type === "hour" ? filteredDailyData : filteredData} />
+          ) : (
+            <p>範囲を選択してください。</p>
+          )}
+        </div>
       </div>
     </div>
   );
