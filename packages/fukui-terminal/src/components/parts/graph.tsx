@@ -27,18 +27,23 @@ const chartConfig = {
   "total count": { label: "人物検出回数" },
 };
 
-const lineColors = [
-  "#E05B53",
-  "#E063AA",
-  "#E59562",
-  "#E5C930",
-  "#61C558",
-  "#50AC6E",
-  "#57CBD4",
-  "#456DE1",
-  "#3248A9",
-  "#7E55E1",
-];
+const weekdayColors: { [key: number]: string } = {
+  0: "#F44336", // 日
+  1: "#000000", // 月
+  2: "#FF9800", // 火
+  3: "#00BCD4", // 水
+  4: "#4CAF50", // 木
+  5: "#FFEB3B", // 金
+  6: "#2196F3", // 土
+};
+
+/**
+ * 日付文字列から曜日番号を取得する
+ */
+function getWeekday(dateStr: string): number {
+  const date = new Date(dateStr);
+  return date.getDay();
+}
 
 function renderTick(props: XAxisTickProps, data: AggregatedData[], xKey: string) {
   const d = data.find((row) => row[xKey] === props.payload.value);
@@ -109,15 +114,19 @@ const Graph: React.FC<GraphProps> = ({
     return (
       <ChartContainer config={chartConfig}>
         <LineChart margin={{ top: 10, right: 40 }}>
-          {Object.entries(grouped).map(([date, rows], idx) => (
-            <Line
-              key={date}
-              data={rows}
-              dataKey={`${date}_${yKey}`}
-              name={date}
-              stroke={lineColors[idx % lineColors.length]}
-            />
-          ))}
+          {Object.entries(grouped).map(([date, rows]) => {
+            const weekday = getWeekday(date);
+            const strokeColor = weekdayColors[weekday] ?? "#888";
+            return (
+              <Line
+                key={date}
+                data={rows}
+                dataKey={`${date}_${yKey}`}
+                name={date}
+                stroke={strokeColor}
+              />
+            );
+          })}
           <CartesianGrid />
           <XAxis dataKey={xKey} tickMargin={8} allowDuplicatedCategory={false} />
           <YAxis />
