@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Next.jsのサイトをビルド
+  # Vite+Reactのサイトをビルド
   build:
     runs-on: ubuntu-latest
     env:
@@ -39,25 +39,31 @@ jobs:
           cache: pnpm
       - name: Setup Pages
         uses: actions/configure-pages@v5
-        with:
-          # Automatically inject basePath in your Next.js configuration file and disable
-          # server side image optimization (https://nextjs.org/docs/api-reference/next/image#unoptimized).
-          #
-          # You may remove this line if you want to manage the configuration yourself.
-          static_site_generator: next
-          generator_config_file: next.config.ts
       - name: Install dependencies
         run: pnpm install
-      - name: Build with Next.js
+      - name: Build all apps and create deploy structure
         run: |
           date
+          # 全アプリをビルド
           pnpm build
+
+          # デプロイ用ディレクトリ作成
+          mkdir -p deploy
+
+          # 各アプリのdistをコピー
+          cp -r packages/whole/dist deploy/whole
+          cp -r packages/fukui-terminal/dist deploy/fukui-terminal
+          cp -r packages/tojinbo/dist deploy/tojinbo
+          cp -r packages/rainbow-line/dist deploy/rainbow-line
+
+          # ランディングページをルートにコピー
+          cp -r packages/landing-page/dist/* deploy/
         env:
           PAGES: true
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: ./deploy
 
   # GitHub Pagesへデプロイ
   deploy:
