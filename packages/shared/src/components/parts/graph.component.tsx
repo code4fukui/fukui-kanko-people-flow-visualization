@@ -132,6 +132,7 @@ const Graph: React.FC<GraphProps> = ({
                   dataKey={`${date}_${yKey}`}
                   name={`${date}(${rows[0]?.dayOfWeek}${isHoliday ? "・祝" : ""})`}
                   stroke={strokeColor}
+                  strokeWidth={3}
                 />
               );
             })}
@@ -154,7 +155,7 @@ const Graph: React.FC<GraphProps> = ({
       <div>
         <ChartContainer config={chartConfig}>
           <LineChart data={data} margin={{ top: 10, right: 40 }}>
-            <Line dataKey={yKey} />
+            <Line dataKey={yKey} strokeWidth={3} />
             <CartesianGrid />
             <XAxis dataKey={xKey} tick={type === "day" ? tickRenderer : undefined} tickMargin={8} />
             <YAxis />
