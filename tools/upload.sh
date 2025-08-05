@@ -135,9 +135,9 @@ mkdir -p "./dist/$STAGE_NAME"
 for dir in "${dirs[@]}"; do
   package="$(echo "$dir" | sed 's|.*/\([^/]*\)$|\1|' )"
   if [ "$dir" == "./packages/landing-page" ]; then
-    cp -r "$dir/dist/" "./dist/$STAGE_NAME"
+    cp -r "$dir"/dist/* ./dist/"$STAGE_NAME"/
   else
-    cp -r "$dir/dist/" "./dist/$STAGE_NAME/$package"
+    cp -r "$dir"/dist ./dist/"$STAGE_NAME"/"$package"
   fi
 done
 echo -e "${CYAN}INFO:${RESET}\tビルド結果の統合完了。"
@@ -146,6 +146,8 @@ echo -e "${CYAN}INFO:${RESET}\tビルド結果の統合完了。"
 echo -e "${CYAN}INFO:${RESET}\taws cliによってビルド結果を s3://$BUCKET/$STAGE_NAME にアップロードします。"
 if [ "$DRY" != "true" ]; then
   aws s3 sync "./dist/$STAGE_NAME/" "s3://$BUCKET/$STAGE_NAME/" --delete --cache-control "max-age=0" --region "ap-northeast-3"
+else
+  echo -e "${GRAY}dryrun${RESET}"
 fi
 echo -e "${CYAN}INFO:${RESET}\tアップロード完了。"
 
@@ -153,6 +155,8 @@ echo -e "${CYAN}INFO:${RESET}\tアップロード完了。"
 echo -e "${CYAN}INFO:${RESET}\tAWS CloudFront のキャッシュ削除を予約します。"
 if [ "$DRY" != "true" ]; then
   aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION" --paths "/*" > /dev/null
+else
+  echo -e "${GRAY}dryrun${RESET}"
 fi
 echo -e "${CYAN}INFO:${RESET}\tキャッシュ削除の予約完了。"
 
