@@ -130,10 +130,10 @@ fi
 
 # ビルド結果をまとめる
 echo -e "${CYAN}INFO:${RESET}\tビルド結果をデプロイ用に統合します。"
-rm -r ./dist
+rm -rf ./dist
 mkdir -p "./dist/$STAGE_NAME"
 for dir in "${dirs[@]}"; do
-  package="$(echo "$dir" | sed 's|.*/\([^/]*\)$|\1|' )"
+  package="${dir##*/}"
   if [ "$dir" == "./packages/landing-page" ]; then
     cp -r "$dir"/dist/* ./dist/"$STAGE_NAME"/
   else
