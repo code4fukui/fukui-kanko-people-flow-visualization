@@ -6,6 +6,8 @@ on:
   # mainブランチへのpush
   push:
     branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
 # GitHub Pagesへのデプロイを許可
 permissions:
@@ -18,6 +20,10 @@ permissions:
 concurrency:
   group: "pages"
   cancel-in-progress: false
+
+env:
+  IS_ORIGINAL_REPO: ${{ github.repository == 'code4fukui/fukui-kanko-people-flow-visualization' }}
+  IS_MAIN_BRANCH: ${{ github.ref == 'refs/heads/main' }}
 
 jobs:
   # Vite+Reactのサイトをビルド
@@ -37,36 +43,49 @@ jobs:
         with:
           node-version: "20"
           cache: pnpm
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
       - name: Install dependencies
         run: pnpm install
+
+      # 元リポジトリ以外はs3にアップロードする
+      - name: Build and Upload dist
+        if: env.IS_ORIGINAL_REPO != 'true' || env.IS_MAIN_BRANCH != 'true'
+        run: stage="$STAGE" pnpm upload
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          BUCKET: ${{ secrets.BUCKET }}
+          DISTRIBUTION: ${{ secrets.DISTRIBUTION }}
+          STAGE: "${{ github.repository_owner }}-${{ github.event.number }}"
+
+      # Fork元リポジトリのmainブランチではPagesにデプロイする
+      - name: Setup Pages
+        if: env.IS_ORIGINAL_REPO == 'true' && env.IS_MAIN_BRANCH == 'true'
+        uses: actions/configure-pages@v5
       - name: Build all apps and create deploy structure
+        if: env.IS_ORIGINAL_REPO == 'true' && env.IS_MAIN_BRANCH == 'true'
         run: |
           date
-          # 全アプリをビルド
           pnpm build
 
-          # デプロイ用ディレクトリ作成
           mkdir -p deploy
 
-          # 各アプリのdistをコピー
           cp -r packages/whole/dist deploy/whole
           cp -r packages/fukui-terminal/dist deploy/fukui-terminal
           cp -r packages/tojinbo/dist deploy/tojinbo
           cp -r packages/rainbow-line/dist deploy/rainbow-line
 
-          # ランディングページをルートにコピー
           cp -r packages/landing-page/dist/* deploy/
         env:
           PAGES: true
       - name: Upload artifact
+        if: env.IS_ORIGINAL_REPO == 'true' && env.IS_MAIN_BRANCH == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./deploy
 
   # GitHub Pagesへデプロイ
-  deploy:
+  deploy-pages:
+    if: github.repository == 'code4fukui/fukui-kanko-people-flow-visualization' && github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
