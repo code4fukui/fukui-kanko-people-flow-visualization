@@ -166,7 +166,7 @@ echo -e "${CYAN}INFO:${RESET}\tアップロード完了。"
 # aws cli でcloudfrontのキャッシュを削除する
 echo -e "${CYAN}INFO:${RESET}\tAWS CloudFront のキャッシュ削除を予約します。"
 if [ "$DRY" != "true" ]; then
-  aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION" --paths "/*" 2>&1 /dev/null
+  aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION" --paths "/*" > /dev/null 2>&1
 else
   echo -e "${GRAY}dryrun${RESET}"
 fi
