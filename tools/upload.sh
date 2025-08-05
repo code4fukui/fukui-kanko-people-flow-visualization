@@ -77,7 +77,7 @@ if [ "${GITHUB_ACTIONS}" != "true" ]; then
       exit 1
     fi
 
-    regions=$(aws ec2 describe-regions --profile ssdx-yamaji | jq ".Regions[].RegionName")
+    regions=$(aws ec2 describe-regions | jq ".Regions[].RegionName")
     echo -e "${GREEN}SETUP:${RESET}\tこのプロジェクトで利用するAWSリージョンを選択してください。"
     select region in $regions; do
       echo -e "${CYAN}INFO:${RESET}\t$region をこのプロジェクトで利用するAWSリージョンに指定します。"
