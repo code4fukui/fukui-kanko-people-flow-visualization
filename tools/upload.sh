@@ -135,7 +135,7 @@ mkdir -p "./dist/$STAGE_NAME"
 for dir in "${dirs[@]}"; do
   package="$(echo "$dir" | sed 's|.*/\([^/]*\)$|\1|' )"
   if [ "$dir" == "./packages/landing-page" ]; then
-    cp -r "$dir/dist/" "./dist/$STAGE_NAME/"
+    cp -r "$dir/dist/" "./dist/$STAGE_NAME"
   else
     cp -r "$dir/dist/" "./dist/$STAGE_NAME/$package"
   fi
