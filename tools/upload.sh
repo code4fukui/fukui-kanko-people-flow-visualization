@@ -61,7 +61,7 @@ if [ "${GITHUB_ACTIONS}" != "true" ]; then
       exit 1
     fi
 
-    distributions=$(aws cloudfront list-distributions | jq ".DistributionList.Items[].Id")
+    distributions=$(aws cloudfront list-distributions | jq -r ".DistributionList.Items[].Id")
     if [ "$(echo "$distributions" | wc -l)" -gt 1 ]; then
       echo -e "${GREEN}SETUP:${RESET}\tCloudFrontディストリビューションが複数見つかりました。\n\tこのプロジェクトで利用するディストリビューションを選択してください。"
       select distribution in $distributions; do
@@ -77,7 +77,7 @@ if [ "${GITHUB_ACTIONS}" != "true" ]; then
       exit 1
     fi
 
-    regions=$(aws ec2 describe-regions | jq ".Regions[].RegionName")
+    regions=$(aws ec2 describe-regions | jq -r ".Regions[].RegionName")
     echo -e "${GREEN}SETUP:${RESET}\tこのプロジェクトで利用するAWSリージョンを選択してください。"
     select region in $regions; do
       echo -e "${CYAN}INFO:${RESET}\t$region をこのプロジェクトで利用するAWSリージョンに指定します。"
