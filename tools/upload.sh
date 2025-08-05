@@ -38,6 +38,9 @@ if [ "${GITHUB_ACTIONS}" != "true" ]; then
       exit 1
     fi
     AWS_PROFILE=$profile
+  else
+    # 設定済みの.envを読み込み
+    set -a; source .env.profile; set +a
   fi
 
   # .env.awsがなければセットアップする
@@ -74,20 +77,29 @@ if [ "${GITHUB_ACTIONS}" != "true" ]; then
       exit 1
     fi
 
-    echo -e "BUCKET=$bucket\nDISTRIBUTION=$distribution" >> ./.env.aws
+    regions=$(aws ec2 describe-regions --profile ssdx-yamaji | jq ".Regions[].RegionName")
+    echo -e "${GREEN}SETUP:${RESET}\tこのプロジェクトで利用するAWSリージョンを選択してください。"
+    select region in $regions; do
+      echo -e "${CYAN}INFO:${RESET}\t$region をこのプロジェクトで利用するAWSリージョンに指定します。"
+      break
+    done
+
+    echo -e "BUCKET=$bucket\nDISTRIBUTION=$distribution\nREGION=$region" >> ./.env.aws
     BUCKET=$bucket
     DISTRIBUTION=$distribution
+    REGION=$region
+  else
+    # 設定済みの.envを読み込み
+    set -a; source .env.aws; set +a
   fi
-
-  # profileを読み込み
-  set -a; source .env.profile; source .env.aws; set +a
 fi
 
 if
   [[ ( "${GITHUB_ACTIONS}" = "true" ) && ( ( -z "${AWS_ACCESS_KEY_ID}" ) || ( -z "${AWS_SECRET_ACCESS_KEY}" ) ) ]] ||
   [[ ( "${GITHUB_ACTIONS}" != "true" ) && ( -z "${AWS_PROFILE}" ) ]] ||
   [ -z "${BUCKET}" ] ||
-  [ -z "${DISTRIBUTION}" ]
+  [ -z "${DISTRIBUTION}" ] ||
+  [ -z "${REGION}" ]
 then
   echo -e "${RED}ERROR:${RESET}\t必要な情報が登録されていません。"
   if [ "${GITHUB_ACTIONS}" != "true" ]; then
@@ -145,7 +157,7 @@ echo -e "${CYAN}INFO:${RESET}\tビルド結果の統合完了。"
 # aws cli でアップロードする
 echo -e "${CYAN}INFO:${RESET}\taws cliによってビルド結果を s3://$BUCKET/$STAGE_NAME にアップロードします。"
 if [ "$DRY" != "true" ]; then
-  aws s3 sync "./dist/$STAGE_NAME/" "s3://$BUCKET/$STAGE_NAME/" --delete --cache-control "max-age=0" --region "ap-northeast-3"
+  aws s3 sync "./dist/$STAGE_NAME/" "s3://$BUCKET/$STAGE_NAME/" --delete --cache-control "max-age=0" --region "$REGION"
 else
   echo -e "${GRAY}dryrun${RESET}"
 fi
@@ -154,7 +166,7 @@ echo -e "${CYAN}INFO:${RESET}\tアップロード完了。"
 # aws cli でcloudfrontのキャッシュを削除する
 echo -e "${CYAN}INFO:${RESET}\tAWS CloudFront のキャッシュ削除を予約します。"
 if [ "$DRY" != "true" ]; then
-  aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION" --paths "/*" > /dev/null
+  aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION" --paths "/*" 2>&1 /dev/null
 else
   echo -e "${GRAY}dryrun${RESET}"
 fi

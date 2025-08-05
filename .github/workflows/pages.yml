@@ -55,6 +55,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           BUCKET: ${{ secrets.BUCKET }}
           DISTRIBUTION: ${{ secrets.DISTRIBUTION }}
+          REGION: ${{ secrets.REGION }}
           STAGE: "${{ github.repository_owner }}-fkpfv-${{ github.event.number }}"
 
       # Fork元リポジトリのmainブランチではPagesにデプロイする
