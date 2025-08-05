@@ -7,6 +7,7 @@ import {
   StatsSummary,
 } from "@fukui-kanko/shared/components/parts";
 import { cn } from "@fukui-kanko/shared/utils";
+import { saveAs } from "file-saver";
 
 type PeriodGraphPanelProps = {
   type: keyof typeof GRAPH_VIEW_TYPES;
@@ -18,6 +19,14 @@ type PeriodGraphPanelProps = {
   filteredDailyData: AggregatedData[];
   className?: string;
 };
+
+function convertToCSV(data: AggregatedData[]): string {
+  if (data.length === 0) return "";
+  const headers = Object.keys(data[0]);
+  const rows = data.map((row) => headers.map((h) => `"${row[h] ?? ""}"`).join(","));
+  return [headers.join(","), ...rows].join("\n");
+}
+
 export function PeriodGraphPanel({
   type,
   period,
@@ -28,6 +37,17 @@ export function PeriodGraphPanel({
   filteredDailyData,
   className,
 }: PeriodGraphPanelProps) {
+  const handleDownloadCSV = () => {
+    const csv = convertToCSV(filteredData);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    saveAs(blob, "filteredData.csv");
+  };
+  const handleDownloadDailyCSV = () => {
+    const csv = convertToCSV(filteredDailyData);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    saveAs(blob, "filteredDailyData.csv");
+  };
+
   return (
     <div className={cn("w-full min-w-0 flex flex-col items-center", className)}>
       {type === "month" && (
@@ -59,6 +79,21 @@ export function PeriodGraphPanel({
           setEnd={(date) => setPeriod((prev) => ({ ...prev, endDate: date }))}
         />
       )}
+
+      <button
+        className="mb-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        onClick={handleDownloadCSV}
+        disabled={filteredData.length === 0}
+      >
+        CSVダウンロード
+      </button>
+      <button
+        className="mb-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-blue-600"
+        onClick={handleDownloadDailyCSV}
+        disabled={filteredDailyData.length === 0}
+      >
+        CSVダウンロード
+      </button>
 
       <div className="w-full flex flex-col items-center justify-end min-h-[40vh]">
         <div
