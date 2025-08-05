@@ -20,6 +20,7 @@
     "build": "concurrently --names \"landing,whole,fukui-terminal,tojinbo,rainbow-line\" --prefix-colors \"blue,green,yellow,magenta,cyan\" \"pnpm build:landing\" \"pnpm build:whole\" \"pnpm build:fukui-terminal\" \"pnpm build:tojinbo\" \"pnpm build:rainbow-line\"",
     "lint": "pnpm -r lint",
     "preview": "pnpm --filter whole preview",
+    "upload": "./tools/upload.sh -n \"$stage\"",
     "prepare": "husky"
   },
   "devDependencies": {
