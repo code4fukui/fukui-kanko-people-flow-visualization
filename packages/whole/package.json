@@ -10,7 +10,6 @@
     "lint": "eslint .",
     "preview": "vite preview"
   },
-
   "dependencies": {
     "@holiday-jp/holiday_jp": "^2.4.0",
     "@primer/octicons-react": "^19.14.0",
