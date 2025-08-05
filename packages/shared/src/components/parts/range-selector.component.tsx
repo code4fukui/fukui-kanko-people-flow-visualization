@@ -104,7 +104,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
         <Label className="px-1 text-base">開始</Label>
         <Popover open={openStart} onOpenChange={setOpenStart}>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="w-48 justify-between font-normal">
+            <Button variant="outline" className="lg:w-48 justify-between font-normal">
               <span>
                 {type === "week"
                   ? start
@@ -150,7 +150,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="w-48 justify-between font-normal"
+              className="lg:w-48 justify-between font-normal"
               disabled={!start}
             >
               <span>

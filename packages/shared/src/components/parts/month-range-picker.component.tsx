@@ -43,7 +43,7 @@ export function MonthRangePicker({ startMonth, endMonth, onChange }: MonthRangeP
         <Label className="px-1 text-base">開始</Label>
         <Popover open={openStartMonth} onOpenChange={setOpenStartMonth}>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="w-48 justify-between font-normal">
+            <Button variant="outline" className="lg:w-48 justify-between font-normal">
               <span>
                 {startMonth
                   ? `${startMonth.getFullYear()}/${String(startMonth.getMonth() + 1).padStart(2, "0")}`
@@ -71,7 +71,7 @@ export function MonthRangePicker({ startMonth, endMonth, onChange }: MonthRangeP
             <Button
               variant="outline"
               className={cn(
-                "w-48 justify-between font-normal",
+                "lg:w-48 justify-between font-normal",
                 !startMonth && "opacity-50 pointer-events-none",
               )}
               disabled={!startMonth}

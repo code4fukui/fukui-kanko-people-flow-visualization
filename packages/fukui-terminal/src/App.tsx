@@ -119,7 +119,7 @@ function App() {
               </Label>
             </div>
           </div>
-          <div className="flex flex-row w-full gap-8 justify-center">
+          <div className="flex flex-col sm:flex-row w-full gap-8 justify-center">
             <PeriodGraphPanel
               type={type}
               period={period}

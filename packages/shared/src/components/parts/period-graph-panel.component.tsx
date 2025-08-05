@@ -59,14 +59,14 @@ export function PeriodGraphPanel({
         />
       )}
 
-      <div className="w-full flex flex-col items-center justify-end min-h-[400px]">
+      <div className="w-full flex flex-col items-center justify-end min-h-[40vh]">
         <div
           className={`${
             (period.startMonth && period.endMonth) ||
             (period.startWeekRange && period.endWeekRange) ||
             (period.startDate && period.endDate)
-              ? "min-h-[500px] pt-4 pb-0 mt-2"
-              : "min-h-[200px]"
+              ? "min-h-[60vh] pt-4 pb-0 mt-2"
+              : "min-h-[20vh]"
           } ${isCompareMode ? "w-full" : "w-2/3"}`}
         >
           {isLoading && type === "hour" ? (

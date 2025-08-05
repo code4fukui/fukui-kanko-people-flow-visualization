@@ -77,6 +77,7 @@ export function ExternalNavigaton() {
               alt="code4fukui logo"
               width={42}
               height={32}
+              className="max-w-none"
             />
           </PopoverTrigger>
           <PopoverContent className="flex w-56 items-center">
