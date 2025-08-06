@@ -124,7 +124,7 @@ function App() {
       const dailyMap = new Map<string, AggregatedData>();
       filtered.forEach((row) => {
         const date = new Date(row["aggregate from"]);
-        const dayKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+        const dayKey = `${formatDate(date, "-")}`;
         if (!dailyMap.has(dayKey)) {
           const dayOfWeek = ["日", "月", "火", "水", "木", "金", "土"][date.getDay()];
           const holiday = holidayJP.isHoliday(date);
