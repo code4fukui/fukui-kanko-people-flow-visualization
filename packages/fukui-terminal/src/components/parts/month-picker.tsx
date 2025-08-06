@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { cn, DEFAULT_MIN_DATE } from "@/lib/utils";
+import { cn, MAX_DATE, MIN_DATE } from "@/lib/utils";
 import * as React from "react";
 
 const months = [
@@ -28,15 +28,9 @@ export function MonthPicker({
   onChange,
   className,
   selected,
-  minDate = DEFAULT_MIN_DATE,
+  minDate = MIN_DATE,
 }: MonthPickerProps) {
   const [year, setYear] = React.useState(new Date().getFullYear());
-  const currentDate = new Date();
-  const maxDate = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth(),
-    currentDate.getDate() - 1,
-  );
 
   const selectedMonth =
     selected && selected.getFullYear() === year ? selected.getMonth() : undefined;
@@ -63,9 +57,9 @@ export function MonthPicker({
           // 選択できる範囲を制限
           const isDisabled =
             year < minDate.getFullYear() ||
-            year > maxDate.getFullYear() ||
+            year > MAX_DATE.getFullYear() ||
             (year === minDate.getFullYear() && i < minDate.getMonth()) ||
-            (year === maxDate.getFullYear() && i > maxDate.getMonth());
+            (year === MAX_DATE.getFullYear() && i > MAX_DATE.getMonth());
           return (
             <Button
               key={m}

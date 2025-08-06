@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { FIRST_WEEK_END_DATE, formatDate, MAX_DATE, MIN_DATE } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { CalendarIcon } from "@primer/octicons-react";
 
@@ -23,28 +24,30 @@ type RangeSelectorProps =
       setEnd: (date: Date | undefined) => void;
     };
 
-/**
- * 日付を "YYYY/MM/DD" 形式で返す
- */
-function formatDate(date: Date) {
-  return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
-}
-
-/**
- * 週の開始日から「YYYY/MM/DD〜」の形式で返す
- */
-function formatWeekLabel(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}/${month}/${day}〜`;
+function isOutOfRange(date: Date) {
+  return date < MIN_DATE || date > MAX_DATE;
 }
 
 function getWeekRange(date: Date) {
-  const startDay = new Date(date);
+  let startDay = new Date(date);
+  let endDay: Date;
+
   startDay.setDate(date.getDate() - startDay.getDay());
-  const endDay = new Date(startDay);
-  endDay.setDate(startDay.getDate() + 6);
+  if (startDay < MIN_DATE) {
+    startDay = new Date(MIN_DATE);
+  }
+
+  if (startDay.getTime() === MIN_DATE.getTime()) {
+    // データのある最初の週は7日周期にできないため、特別に終了日を設定
+    endDay = new Date(FIRST_WEEK_END_DATE);
+  } else {
+    endDay = new Date(startDay);
+    endDay.setDate(startDay.getDate() + 6);
+    // 最新データ日を超えないようにする
+    if (endDay > MAX_DATE) {
+      endDay = new Date(MAX_DATE);
+    }
+  }
   return { from: startDay, to: endDay };
 }
 
@@ -53,6 +56,12 @@ function getWeekRange(date: Date) {
  */
 function isBeforeStart(start: Date | undefined) {
   return start ? (date: Date) => date < start : undefined;
+}
+/**
+ * 週範囲選択時、開始週より前を選択不可にする
+ */
+function isBeforeStartWeek(date: Date, start: WeekRange | undefined) {
+  return start?.from ? date < start.from : false;
 }
 
 export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelectorProps) => {
@@ -101,10 +110,10 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
               <span>
                 {type === "week"
                   ? start
-                    ? formatWeekLabel(start.from)
+                    ? `${formatDate(start.from, "/")}〜`
                     : "Select week"
                   : start
-                    ? formatDate(start)
+                    ? formatDate(start, "/")
                     : "Select date"}
               </span>
               <CalendarIcon size={24} />
@@ -116,6 +125,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                 mode="range"
                 selected={start}
                 captionLayout="dropdown"
+                disabled={isOutOfRange}
                 onSelect={(date) => {
                   handleWeekRangeSelect(date, start, setStart, () => setOpenStart(false));
                 }}
@@ -147,10 +157,10 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
               <span>
                 {type === "week"
                   ? end
-                    ? formatWeekLabel(end.from)
+                    ? `${formatDate(end.from, "/")}〜`
                     : "Select week"
                   : end
-                    ? formatDate(end)
+                    ? formatDate(end, "/")
                     : "Select date"}
               </span>
               <CalendarIcon size={24} />
@@ -162,7 +172,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                 mode="range"
                 selected={end}
                 captionLayout="dropdown"
-                disabled={isBeforeStart(start?.from)}
+                disabled={(date) => isOutOfRange(date) || isBeforeStartWeek(date, start)}
                 onSelect={(date) => {
                   handleWeekRangeSelect(date, end, setEnd, () => setOpenEnd(false));
                 }}

@@ -8,9 +8,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AggregatedData } from "@/interfaces/aggregated-data.interface";
+import { AggregatedData, TOTAL_COUNT_KEY } from "@/interfaces/aggregated-data.interface";
 import { getRawData } from "@/lib/data/csv";
 import { useEffect, useState } from "react";
+import { formatDate } from "./lib/utils";
 
 function App() {
   // 開発環境かどうかを判定
@@ -66,13 +67,13 @@ function App() {
             ...row,
             aggregateFrom: `${monthKey}`,
             aggregateTo: `${monthKey}`,
-            totalCount: Number(row["total count"]),
+            totalCount: Number(row[TOTAL_COUNT_KEY]),
           });
         } else {
           const prev = monthlyMap.get(monthKey)!;
           monthlyMap.set(monthKey, {
             ...prev,
-            totalCount: Number(prev.totalCount) + Number(row["total count"]),
+            totalCount: Number(prev.totalCount) + Number(row[TOTAL_COUNT_KEY]),
           });
         }
       });
@@ -80,9 +81,46 @@ function App() {
       return;
     }
 
+    if (type === "week" && startWeekRange && endWeekRange) {
+      // 週の範囲でフィルタ
+      filtered = filtered.filter((row) => {
+        const date = new Date(row["aggregate from"]);
+        return date >= startWeekRange.from && date <= endWeekRange.to;
+      });
+
+      const weeklyAggregated: AggregatedData[] = [];
+      let i = 0;
+      let isFirstWeek = true;
+      while (i < filtered.length) {
+        let weekRows: AggregatedData[] = [];
+        if (isFirstWeek) {
+          // 最初の週だけ他の週と範囲が異なる場合があるためfilterで抽出(例：2024/10/17からの週)
+          weekRows = filtered.filter((row) => {
+            const d = new Date(row["aggregate from"]);
+            return d >= startWeekRange.from && d <= startWeekRange.to;
+          });
+          // 件数分インデックスを進める
+          i += weekRows.length;
+          isFirstWeek = false;
+        } else {
+          // 以降は7日ごと
+          weekRows = filtered.slice(i, i + 7);
+          i += 7;
+        }
+        const total = weekRows.reduce((sum, row) => sum + Number(row[TOTAL_COUNT_KEY]), 0);
+        weeklyAggregated.push({
+          ...weekRows[0],
+          aggregateFrom: `${formatDate(new Date(weekRows[0]["aggregate from"]), "-")}〜`,
+          aggregateTo: `${formatDate(new Date(weekRows[weekRows.length - 1]["aggregate from"]), "-")}`,
+          totalCount: total,
+        });
+      }
+      setFilteredData(weeklyAggregated);
+      return;
+    }
     // TODO:他の期間の処理を実装する
     setFilteredData(filtered);
-  }, [type, startMonth, endMonth]);
+  }, [type, startMonth, endMonth, startWeekRange, endWeekRange]);
 
   return (
     <>
@@ -146,7 +184,7 @@ function App() {
             )}
           </div>
           <div className="my-8">
-            {startMonth && endMonth ? (
+            {(startMonth && endMonth) || (startWeekRange && endWeekRange) ? (
               <Graph type={type} data={filteredData} />
             ) : (
               <p>範囲を選択してください。</p>
