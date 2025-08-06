@@ -127,11 +127,11 @@ function App() {
         const dayKey = `${formatDate(date, "-")}`;
         if (!dailyMap.has(dayKey)) {
           const dayOfWeek = ["日", "月", "火", "水", "木", "金", "土"][date.getDay()];
-          const holiday = holidayJP.isHoliday(date);
           let holidayName: string = "";
-          if (holiday) {
-            // 祝日一覧から該当日を検索
-            holidayName = holidayJP.between(date, date)[0].name;
+          // 指定日が祝日なら祝日名を取得
+          const holiday = holidayJP.between(date, date);
+          if (holiday.length > 0) {
+            holidayName = holiday[0].name;
           }
           dailyMap.set(dayKey, {
             ...row,
