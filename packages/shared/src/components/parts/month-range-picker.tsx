@@ -1,10 +1,10 @@
-import { MonthPicker } from "@/components/parts/month-picker";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useEffect, useState } from "react";
 import { CalendarIcon } from "@primer/octicons-react";
 import { cn } from "../../utils/utils";
+import { MonthPicker } from "./month-picker";
 
 type MonthRangePickerProps = {
   startMonth: Date | undefined;
