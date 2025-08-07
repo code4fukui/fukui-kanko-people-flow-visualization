@@ -7,12 +7,13 @@ export const OBJECT_CLASS = {
 } as const;
 export type ObjectClass = keyof typeof OBJECT_CLASS;
 
+export const TOTAL_COUNT_KEY = "total count";
 export type AggregatedDataBase = {
   placement: Placement;
   "object class": ObjectClass;
   "aggregate from": string;
   "aggregate to": string;
-  "total count": number;
+  [TOTAL_COUNT_KEY]: number;
 };
 export const KEYOF_AGGREGATED_DATA_BASE: (keyof AggregatedDataBase)[] = [
   "placement",

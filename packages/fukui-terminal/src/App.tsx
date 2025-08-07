@@ -8,9 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AggregatedData, TOTAL_COUNT_KEY } from "@/interfaces/aggregated-data.interface";
 import { getRawData } from "@/lib/data/csv";
 import { useEffect, useState } from "react";
+import { AggregatedData, TOTAL_COUNT_KEY } from "@fukui-kanko/shared";
 import { formatDate } from "./lib/utils";
 
 function App() {
