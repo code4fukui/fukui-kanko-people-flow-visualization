@@ -1,8 +1,8 @@
 import { Graph } from "@/components/parts/graph";
 import { RangeSelector } from "@/components/parts/range-selector";
-import { AggregatedData, TOTAL_COUNT_KEY } from "@/interfaces/aggregated-data.interface";
 import { getRawData } from "@/lib/data/csv";
 import { useEffect, useState } from "react";
+import { AggregatedData, TOTAL_COUNT_KEY } from "@fukui-kanko/shared";
 import { MonthRangePicker, TypeSelect } from "@fukui-kanko/shared/components";
 import { formatDate } from "./lib/utils";
 

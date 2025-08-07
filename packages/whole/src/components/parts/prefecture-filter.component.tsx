@@ -7,8 +7,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { REGIONS_PREFECTURES } from "@/interfaces/aggregated-data.interface";
 import { GraphSeries } from "@/interfaces/graph-series.interface";
+import { REGIONS_PREFECTURES } from "@fukui-kanko/shared";
 
 interface Props {
   objectClassAttribute: string;

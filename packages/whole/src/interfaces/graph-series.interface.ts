@@ -1,6 +1,11 @@
 import { PartiallyRequired } from "@/lib/utils";
-import { OBJECT_CLASS, ObjectClass, ObjectClassAttribute } from "./aggregated-data.interface";
-import { Placement, PLACEMENTS } from "./placement.interface";
+import {
+  OBJECT_CLASS,
+  ObjectClass,
+  ObjectClassAttribute,
+  Placement,
+  PLACEMENTS,
+} from "@fukui-kanko/shared";
 
 // keyを変更すると後方互換性が失われるので注意
 export const GRAPH_TYPES = {
