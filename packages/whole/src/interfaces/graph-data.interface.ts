@@ -1,5 +1,4 @@
 import { ChartConfig } from "@/components/ui/chart";
-import { KEYOF_AGGREGATED_DATA_BASE } from "@/interfaces/aggregated-data.interface";
 import { getData } from "@/lib/data/csv";
 import { getDateStringRange, WEEK_DAYS } from "@/lib/date";
 import { isKeyMatchingAttribute } from "@/lib/utils";
@@ -9,8 +8,9 @@ import {
   attributeValueText,
   CAR_CATEGORIES,
   GENDERS,
+  KEYOF_AGGREGATED_DATA_BASE,
   PREFECTURES,
-} from "./aggregated-data.interface";
+} from "@fukui-kanko/shared";
 import { defaultSeriesName, GraphSeries, isSeriesValid } from "./graph-series.interface";
 
 type ChartData = Record<string, string | number>[];

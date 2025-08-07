@@ -1,12 +1,12 @@
+import { GraphSeries } from "@/interfaces/graph-series.interface";
+import { isKeyMatchingAttribute } from "@/lib/utils";
 import {
   AggregatedData,
   KEYOF_AGGREGATED_DATA_BASE,
   ObjectClass,
-  PREFECTURES
-} from "@/interfaces/aggregated-data.interface";
-import { GraphSeries } from "@/interfaces/graph-series.interface";
-import { Placement } from "@/interfaces/placement.interface";
-import { isKeyMatchingAttribute } from "@/lib/utils";
+  Placement,
+  PREFECTURES,
+} from "@fukui-kanko/shared";
 import Papa from "papaparse";
 import { isDateIncludedInRange } from "../date";
 
@@ -57,12 +57,12 @@ function removeColumnFromRawData(
 function reorderDataColumns(data: AggregatedData[]): AggregatedData[] {
   return data.map(row => {
     const reorderedRow: Record<string, string | number> = {};
-    
+
     // まず基本項目をコピー
     KEYOF_AGGREGATED_DATA_BASE.forEach(key => {
       reorderedRow[key] = row[key];
     });
-    
+
     // 都道府県データをPREFECTURESの順序で追加
     Object.keys(PREFECTURES).forEach(prefecture => {
       Object.entries(row).forEach(([key, value]) => {
@@ -71,7 +71,7 @@ function reorderDataColumns(data: AggregatedData[]): AggregatedData[] {
         }
       });
     });
-    
+
     return reorderedRow as AggregatedData;
   });
 }

@@ -24,23 +24,24 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  JAPANESE_ATTRIBUTE_NAME,
-  OBJECT_CLASS,
-  OBJECT_CLASS_ATTRIBUTES,
-  ObjectClass,
-  ObjectClassAttribute,
-  PREFECTURES,
-} from "@/interfaces/aggregated-data.interface";
-import {
   defaultSeriesName,
   GRAPH_TYPES,
   GraphSeries,
   GraphType,
   SERIES_PROPERTY_EFFECT_TO,
 } from "@/interfaces/graph-series.interface";
-import { Placement, PLACEMENTS } from "@/interfaces/placement.interface";
 import { cn } from "@/lib/utils";
 import { MouseEventHandler } from "react";
+import {
+  JAPANESE_ATTRIBUTE_NAME,
+  OBJECT_CLASS,
+  OBJECT_CLASS_ATTRIBUTES,
+  ObjectClass,
+  ObjectClassAttribute,
+  Placement,
+  PLACEMENTS,
+  PREFECTURES,
+} from "@fukui-kanko/shared";
 import { TrashIcon } from "@primer/octicons-react";
 
 interface Props {

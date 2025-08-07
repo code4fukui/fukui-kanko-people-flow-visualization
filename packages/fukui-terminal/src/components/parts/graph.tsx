@@ -5,8 +5,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { AggregatedData } from "@/interfaces/aggregated-data.interface";
 import React from "react";
+import { AggregatedData } from "@fukui-kanko/shared";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 const chartConfig = {
