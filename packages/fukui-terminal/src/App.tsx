@@ -1,9 +1,9 @@
-import { Graph } from "@/components/parts/graph";
 import { getRawData } from "@/lib/data/csv";
 import { useEffect, useState } from "react";
 import {
   AggregatedData,
   formatDate,
+  Graph,
   MonthRangePicker,
   RangeSelector,
   TOTAL_COUNT_KEY,
