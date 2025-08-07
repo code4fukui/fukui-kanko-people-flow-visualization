@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fukui-kanko/shared": "workspace:^",
     "@holiday-jp/holiday_jp": "^2.4.0",
     "@primer/octicons-react": "^19.14.0",
     "@radix-ui/react-accordion": "^1.2.11",
