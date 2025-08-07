@@ -60,8 +60,8 @@ function App() {
         if (!monthlyMap.has(monthKey)) {
           monthlyMap.set(monthKey, {
             ...row,
-            aggregateFrom: `${monthKey}`,
-            aggregateTo: `${monthKey}`,
+            aggregateFrom: monthKey,
+            aggregateTo: monthKey,
             totalCount: Number(row[TOTAL_COUNT_KEY]),
           });
         } else {
@@ -106,7 +106,7 @@ function App() {
         weeklyAggregated.push({
           ...weekRows[0],
           aggregateFrom: `${formatDate(new Date(weekRows[0]["aggregate from"]), "-")}〜`,
-          aggregateTo: `${formatDate(new Date(weekRows[weekRows.length - 1]["aggregate from"]), "-")}`,
+          aggregateTo: formatDate(new Date(weekRows[weekRows.length - 1]["aggregate from"]), "-"),
           totalCount: total,
         });
       }
@@ -135,8 +135,8 @@ function App() {
           }
           dailyMap.set(dayKey, {
             ...row,
-            aggregateFrom: `${dayKey}`,
-            aggregateTo: `${dayKey}`,
+            aggregateFrom: dayKey,
+            aggregateTo: dayKey,
             totalCount: Number(row[TOTAL_COUNT_KEY]),
             dayOfWeek,
             holidayName,
