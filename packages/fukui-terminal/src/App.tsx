@@ -1,16 +1,10 @@
 import { Graph } from "@/components/parts/graph";
 import { MonthRangePicker } from "@/components/parts/month-range-picker";
 import { RangeSelector } from "@/components/parts/range-selector";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { AggregatedData, TOTAL_COUNT_KEY } from "@/interfaces/aggregated-data.interface";
 import { getRawData } from "@/lib/data/csv";
 import { useEffect, useState } from "react";
+import { TypeSelect } from "@fukui-kanko/shared/components";
 import { formatDate } from "./lib/utils";
 
 function App() {
@@ -128,10 +122,9 @@ function App() {
         <div className="text-center w-1/2">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">福井駅周辺データ可視化</h1>
           <div className="flex flex-col items-center gap-6 my-8">
-            <Select
-              value={type}
-              onValueChange={(v) => {
-                const newType = v as "month" | "week" | "day" | "hour";
+            <TypeSelect
+              type={type}
+              onChange={(newType) => {
                 setType(newType);
                 // タイプ変更時に値をリセット
                 setStartMonth(undefined);
@@ -141,17 +134,7 @@ function App() {
                 setStartWeekRange(undefined);
                 setEndWeekRange(undefined);
               }}
-            >
-              <SelectTrigger className="w-[180px] bg-white text-black">
-                <SelectValue placeholder="type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="month">月別</SelectItem>
-                <SelectItem value="week">週別</SelectItem>
-                <SelectItem value="day">日別</SelectItem>
-                <SelectItem value="hour">時間別</SelectItem>
-              </SelectContent>
-            </Select>
+            />
             {type === "month" && (
               <MonthRangePicker
                 startMonth={startMonth}
