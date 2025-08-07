@@ -1,9 +1,14 @@
 import { Graph } from "@/components/parts/graph";
 import { getRawData } from "@/lib/data/csv";
 import { useEffect, useState } from "react";
-import { AggregatedData, TOTAL_COUNT_KEY } from "@fukui-kanko/shared";
-import { MonthRangePicker, RangeSelector, TypeSelect } from "@fukui-kanko/shared/components";
-import { formatDate } from "./lib/utils";
+import {
+  AggregatedData,
+  formatDate,
+  MonthRangePicker,
+  RangeSelector,
+  TOTAL_COUNT_KEY,
+  TypeSelect,
+} from "@fukui-kanko/shared";
 
 function App() {
   // 開発環境かどうかを判定
