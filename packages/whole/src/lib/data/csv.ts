@@ -2,13 +2,13 @@ import { GraphSeries } from "@/interfaces/graph-series.interface";
 import { isKeyMatchingAttribute } from "@/lib/utils";
 import {
   AggregatedData,
+  isDateIncludedInRange,
   KEYOF_AGGREGATED_DATA_BASE,
   ObjectClass,
   Placement,
   PREFECTURES,
 } from "@fukui-kanko/shared";
 import Papa from "papaparse";
-import { isDateIncludedInRange } from "../date";
 
 const getUrlPrefix = () => `${location.origin}${location.pathname}`;
 
