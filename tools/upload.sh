@@ -152,6 +152,9 @@ for dir in "${dirs[@]}"; do
     cp -r "$dir"/dist ./dist/"$STAGE_NAME"/"$package"
   fi
 done
+# .gitなどが含まれないようにfindでコピー
+mkdir -p ./dist/data
+find ./data -mindepth 1 -maxdepth 1 ! -name '.*' -exec cp -r {} ./dist/data/ \;
 echo -e "${CYAN}INFO:${RESET}\tビルド結果の統合完了。"
 
 # aws cli でアップロードする
