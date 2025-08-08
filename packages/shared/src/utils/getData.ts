@@ -1,4 +1,3 @@
-/// <reference types="vite/client" />
 import Papa from "papaparse";
 import { AggregatedData, AggregatedRange, DateNumbers, ObjectClass, Placement } from "../types";
 
@@ -21,7 +20,7 @@ type getRawDataProps<T extends AggregatedRange> = T extends "full"
 
 export async function getRawData<T extends AggregatedRange>(params: getRawDataProps<T>) {
   const { placement, objectClass, aggregateRange, kind = "people-flow-data" } = params;
-  let url = `${__CSV_ORIGIN__}/data/${kind}/${aggregateRange}/${placement}/${objectClass}`;
+  let url = `${__CSV_ORIGIN__}${kind}/${aggregateRange}/${placement}/${objectClass}`;
 
   if (aggregateRange === "full") {
     url += ".csv";
@@ -54,6 +53,10 @@ export async function getRawData<T extends AggregatedRange>(params: getRawDataPr
     url += `/${year}/${month}/${day}/${year}-${month}-${day}-${hour}.csv`;
   }
 
-  const rawData = Papa.parse<AggregatedData>(url, { header: true }).data;
+  const csvResponse = await fetch(url);
+  const csvRawText = await csvResponse.text();
+  const csvFormattedText = csvRawText.replaceAll(/\n{2,}/g, "\n");
+
+  const rawData = Papa.parse<AggregatedData>(csvFormattedText, { header: true }).data;
   return rawData;
 }
