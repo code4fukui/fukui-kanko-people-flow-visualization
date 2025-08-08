@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { AggregatedData } from "@fukui-kanko/shared";
 import {
   ChartContainer,
@@ -100,6 +100,16 @@ const Graph: React.FC<GraphProps> = ({
     (props: XAxisTickProps) => renderTick(props, data, xKey),
     [data, xKey],
   );
+
+  // 15日より多いデータ数の場合、日曜基準の目盛りを表示
+  const sundayTicks = useMemo(() => {
+    if (type !== "day") return undefined;
+    const uniqueDays = new Set(data.map((row) => String(row[xKey]))).size;
+    if (uniqueDays <= 15) return undefined;
+    const ticks = data.filter((row) => row.dayOfWeek === "日").map((row) => String(row[xKey]));
+    return ticks;
+  }, [data, type, xKey]);
+
   if (type === "hour") {
     // 日付ごとにグループ化し、xKeyを時間のみに変換
     const grouped: { [date: string]: AggregatedData[] } = {};
@@ -152,7 +162,12 @@ const Graph: React.FC<GraphProps> = ({
         <LineChart data={data} margin={{ top: 10, bottom: 10, right: 40 }}>
           <Line dataKey={yKey} strokeWidth={3} stroke="#2563eb" />
           <CartesianGrid />
-          <XAxis dataKey={xKey} tick={type === "day" ? tickRenderer : undefined} tickMargin={8} />
+          <XAxis
+            dataKey={xKey}
+            tick={type === "day" ? tickRenderer : undefined}
+            tickMargin={8}
+            ticks={sundayTicks}
+          />
           <YAxis />
           <ChartTooltip
             cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
