@@ -154,7 +154,7 @@ const Graph: React.FC<GraphProps> = ({
     return (
       <div>
         <ChartContainer config={chartConfig}>
-          <LineChart data={data} margin={{ top: 10, right: 40 }}>
+          <LineChart data={data} margin={{ top: 10, bottom: 10, right: 40 }}>
             <Line dataKey={yKey} strokeWidth={3} stroke="#2563eb" />
             <CartesianGrid />
             <XAxis dataKey={xKey} tick={type === "day" ? tickRenderer : undefined} tickMargin={8} />
@@ -163,7 +163,6 @@ const Graph: React.FC<GraphProps> = ({
               cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
               content={<ChartTooltipContent className="bg-white" />}
             />
-            <ChartLegend content={<ChartLegendContent />} />
           </LineChart>
         </ChartContainer>
         <StatsSummary type={type} data={data} />
