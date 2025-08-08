@@ -4,6 +4,7 @@ import {
   LoadingSpinner,
   MonthRangePicker,
   RangeSelector,
+  StatsSummary,
 } from "@fukui-kanko/shared/components/parts";
 import { cn } from "@fukui-kanko/shared/utils";
 
@@ -67,16 +68,28 @@ export function PeriodGraphPanel({
             (period.startDate && period.endDate)
               ? "min-h-[60vh] pt-4 pb-0 mt-2"
               : "min-h-[20vh]"
-          } ${isCompareMode ? "w-full" : "w-2/3"}`}
+          } w-full`}
         >
           {isLoading && type === "hour" ? (
             <LoadingSpinner />
           ) : (period.startMonth && period.endMonth) ||
             (period.startWeekRange && period.endWeekRange) ||
             (period.startDate && period.endDate) ? (
-            <Graph type={type} data={type === "hour" ? filteredDailyData : filteredData} />
+            <>
+              <div className=" rounded-lg w-full h-[60vh]">
+                <Graph type={type} data={type === "hour" ? filteredDailyData : filteredData} />
+              </div>
+              <div className={`${isCompareMode ? "w-full" : "w-2/3"} mx-auto px-4 mt-4`}>
+                <StatsSummary
+                  type={type}
+                  data={type === "hour" ? filteredDailyData : filteredData}
+                />
+              </div>
+            </>
           ) : (
-            <p>範囲を選択してください。</p>
+            <div className="flex items-center justify-center h-full text-gray-500">
+              <p className="text-lg">表示したい期間を設定してください。</p>
+            </div>
           )}
         </div>
       </div>

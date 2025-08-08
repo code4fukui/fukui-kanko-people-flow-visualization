@@ -1,6 +1,5 @@
 import React, { useCallback } from "react";
 import { AggregatedData } from "@fukui-kanko/shared";
-import { StatsSummary } from "@fukui-kanko/shared/components/parts";
 import {
   ChartContainer,
   ChartLegend,
@@ -119,7 +118,7 @@ const Graph: React.FC<GraphProps> = ({
 
     return (
       <div>
-        <ChartContainer config={chartConfig}>
+        <ChartContainer config={chartConfig} className="h-full w-full">
           <LineChart margin={{ top: 10, right: 40 }}>
             {Object.entries(grouped).map(([date, rows]) => {
               const isHoliday = !!rows[0]?.holidayName;
@@ -146,14 +145,13 @@ const Graph: React.FC<GraphProps> = ({
             <ChartLegend content={<ChartLegendContent />} />
           </LineChart>
         </ChartContainer>
-        <StatsSummary type={type} data={data} />
       </div>
     );
   }
   if (type === "month" || type === "week" || type === "day") {
     return (
       <div>
-        <ChartContainer config={chartConfig}>
+        <ChartContainer config={chartConfig} className="h-full w-full">
           <LineChart data={data} margin={{ top: 10, bottom: 10, right: 40 }}>
             <Line dataKey={yKey} strokeWidth={3} stroke="#2563eb" />
             <CartesianGrid />
@@ -165,7 +163,6 @@ const Graph: React.FC<GraphProps> = ({
             />
           </LineChart>
         </ChartContainer>
-        <StatsSummary type={type} data={data} />
       </div>
     );
   }
