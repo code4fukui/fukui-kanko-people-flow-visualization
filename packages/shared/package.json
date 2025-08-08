@@ -22,6 +22,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fukui-kanko/shared": "workspace:^",
     "@primer/octicons-react": "^19.14.0",
     "@radix-ui/react-label": "^2.1.1",
     "@radix-ui/react-popover": "^1.1.5",

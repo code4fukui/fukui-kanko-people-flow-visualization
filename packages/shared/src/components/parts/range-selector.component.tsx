@@ -57,7 +57,9 @@ function getWeekRange(date: Date) {
  * データが無い日、または開始日より前の日付を選択できないようにする
  */
 function isDisabledDate(date: Date, start?: Date) {
-  return date < MIN_DATE || date > MAX_DATE || (start ? date < start : false);
+  const minDate = getMinDate();
+  const maxDate = getMaxDate();
+  return date < minDate || date > maxDate || (start ? date < start : false);
 }
 
 export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelectorProps) => {
