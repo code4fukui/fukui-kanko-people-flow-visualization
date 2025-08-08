@@ -177,9 +177,6 @@ importers:
 
   packages/shared:
     dependencies:
-      "@fukui-kanko/shared":
-        specifier: workspace:^
-        version: "link:"
       "@primer/octicons-react":
         specifier: ^19.14.0
         version: 19.15.3(react@18.3.1)
