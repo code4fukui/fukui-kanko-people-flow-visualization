@@ -5,6 +5,25 @@ dirs=("./packages/fukui-terminal" "./packages/tojinbo" "./packages/rainbow-line"
 cd "$(git rev-parse --show-toplevel)" || exit 1
 source ./tools/utils.sh
 
+# spinner を必ず止めて見た目を戻す
+cleanup_spinner() {
+  if [[ -n "${spinner_pid:-}" ]] && kill -0 "$spinner_pid" 2>/dev/null; then
+    kill "$spinner_pid" >/dev/null 2>&1
+    wait "$spinner_pid" 2>/dev/null
+    printf "%b\r%b" "$ERASE_LINE" "$SHOW_CURSOR"
+  fi
+}
+
+on_exit() {
+  cleanup_spinner
+  _report_duration
+}
+
+trap on_exit EXIT
+trap 'cleanup_spinner; exit 130' INT
+
+DATA_STAGE="data-fkpfv"
+
 ####################
 #       main
 ####################
@@ -92,6 +111,13 @@ if [ "${GITHUB_ACTIONS}" != "true" ]; then
     # 設定済みの.envを読み込み
     set -a; source .env.aws; set +a
   fi
+
+  if [ ! -e ".env" ]; then
+    echo -e "${GREEN}SETUP:${RESET}\tこのプロジェクトで利用する内部オリジンを指定してください。"
+    read -r internal_origin
+    echo -e "INTERNAL_ORIGIN=${internal_origin}\n" > .env
+  fi
+  set -a; source .env; set +a
 fi
 
 if
@@ -123,48 +149,67 @@ if [ -z "$STAGE_NAME" ]; then
 fi
 echo -e "${CYAN}INFO:${RESET}\t"
 
-# ビルド
-echo -e "${CYAN}INFO:${RESET}\tビルド開始"
-pnpm build
-echo -e "${CYAN}INFO:${RESET}\tビルド完了"
+if [ "${STAGE_NAME}" != "${DATA_STAGE}" ]; then
+  # ビルド
+  echo -e "${CYAN}INFO:${RESET}\tビルド開始"
+  export INTERNAL_ROOT="https://${DATA_STAGE}.${INTERNAL_ORIGIN}"
+  pnpm build
+  echo -e "${CYAN}INFO:${RESET}\tビルド完了"
 
-# ビルド結果を確認
-missing_dirs=()
-for dir in "${dirs[@]}"; do
-  if [ ! -d "$dir" ]; then
-    missing_dirs+=("$dir")
+  # ビルド結果を確認
+  missing_dirs=()
+  for dir in "${dirs[@]}"; do
+    if [ ! -d "$dir" ]; then
+      missing_dirs+=("$dir")
+    fi
+  done
+  if [ ${#missing_dirs[@]} -ne 0 ]; then
+    echo -e "${RED}ERROR:${RESET}\tビルド結果が不足しています。 ${missing_dirs[*]}"
+    exit 1
   fi
-done
-if [ ${#missing_dirs[@]} -ne 0 ]; then
-  echo -e "${RED}ERROR:${RESET}\tビルド結果が不足しています。 ${missing_dirs[*]}"
-  exit 1
+else
+  echo -e "${CYAN}INFO:${RESET}\tデータをs3にアップロードします。"
 fi
 
 # ビルド結果をまとめる
-echo -e "${CYAN}INFO:${RESET}\tビルド結果をデプロイ用に統合します。"
+echo -e "${CYAN}INFO:${RESET}\tアップロードするファイルをまとめます"
+spinner "\tアップロード準備中..." &
+spinner_pid=$!
 rm -rf ./dist
 mkdir -p "./dist/$STAGE_NAME"
-for dir in "${dirs[@]}"; do
-  package="${dir##*/}"
-  if [ "$dir" == "./packages/landing-page" ]; then
-    cp -r "$dir"/dist/* ./dist/"$STAGE_NAME"/
-  else
-    cp -r "$dir"/dist ./dist/"$STAGE_NAME"/"$package"
-  fi
-done
-# .gitなどが含まれないようにfindでコピー
-mkdir -p ./dist/data
-find ./data -mindepth 1 -maxdepth 1 ! -name '.*' -exec cp -r {} ./dist/data/ \;
-echo -e "${CYAN}INFO:${RESET}\tビルド結果の統合完了。"
+if [ "$STAGE_NAME" != "$DATA_STAGE" ]; then
+  for dir in "${dirs[@]}"; do
+    package="${dir##*/}"
+    if [ "$dir" == "./packages/landing-page" ]; then
+      cp -r "$dir"/dist/* ./dist/"$STAGE_NAME"/
+    else
+      cp -r "$dir"/dist ./dist/"$STAGE_NAME"/"$package"
+    fi
+  done
+else
+  # .gitなどが含まれないようにfindでコピー
+  mkdir -p ./dist/data
+  find ./data -mindepth 1 -maxdepth 1 ! -name '.*' -exec cp -r {} ./dist/"$STAGE_NAME"/data/ \;
+fi
+kill $spinner_pid > /dev/null 2>&1
+wait $spinner_pid 2> /dev/null
+printf "%b%b\n" "$ERASE_LINE" "${CYAN}INFO:${RESET}\tアップロード準備完了。"
+printf "%b\r" "${SHOW_CURSOR}"
 
 # aws cli でアップロードする
 echo -e "${CYAN}INFO:${RESET}\taws cliによってビルド結果を s3://$BUCKET/$STAGE_NAME にアップロードします。"
 if [ "$DRY" != "true" ]; then
-  aws s3 sync "./dist/$STAGE_NAME/" "s3://$BUCKET/$STAGE_NAME/" --delete --cache-control "max-age=0" --region "$REGION"
+  spinner "\tアップロード中..." &
+  spinner_pid=$!
+  # S3にアップロード
+  aws s3 sync "./dist/$STAGE_NAME/" "s3://$BUCKET/$STAGE_NAME/" --delete --cache-control "max-age=0" --region "$REGION" > /dev/null 2>&1
+  kill $spinner_pid > /dev/null 2>&1
+  wait $spinner_pid 2> /dev/null
+  printf "%b%b\n" "$ERASE_LINE"  "${CYAN}INFO:${RESET}\tアップロード完了。"
+  printf "%b\r" "${SHOW_CURSOR}"
 else
   echo -e "${GRAY}dryrun${RESET}"
 fi
-echo -e "${CYAN}INFO:${RESET}\tアップロード完了。"
 
 # aws cli でcloudfrontのキャッシュを削除する
 echo -e "${CYAN}INFO:${RESET}\tAWS CloudFront のキャッシュ削除を予約します。"
