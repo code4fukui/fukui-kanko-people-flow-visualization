@@ -2,7 +2,7 @@ import { ExternalNavigaton } from "@fukui-kanko/shared/components/parts";
 
 export function Header() {
   return (
-    <header className="relative border-indigo-200 flex h-12 w-full items-center justify-between gap-x-2 border-b-2 pb-2">
+    <header className="relative border-b-gray-500 flex h-12 w-full items-center justify-between gap-x-2 border-b-2 pb-2">
       <div className="flex flex-col lg:flex-row w-full items-center justify-center lg:justify-start gap-x-2">
         <h1 className="lg:absolute lg:left-1/2 lg:top-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:text-4xl text-2xl font-bold whitespace-nowrap pb-3">
           福井駅東口案内所 人流データ
