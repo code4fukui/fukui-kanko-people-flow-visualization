@@ -112,7 +112,7 @@ function App() {
               <Checkbox
                 checked={compareMode}
                 onCheckedChange={(v) => setCompareMode(!!v)}
-                className="bg-white"
+                className="bg-white border-black hover:bg-gray-100"
               />
               <Label htmlFor="terms" className="text-base">
                 2期間比較

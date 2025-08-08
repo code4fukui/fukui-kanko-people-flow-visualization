@@ -18,7 +18,7 @@ export const TypeSelect = ({ type, onChange, className }: TypeSelectProps) => (
   <div className={cn("flex flex-row items-center gap-2", className)}>
     <p>表示単位</p>
     <Select value={type} onValueChange={(v) => onChange(v as keyof typeof GRAPH_VIEW_TYPES)}>
-      <SelectTrigger className="w-[120px] bg-white text-black">
+      <SelectTrigger className="w-[120px] bg-white text-black border-black hover:bg-gray-100 ">
         <SelectValue placeholder="Type" />
       </SelectTrigger>
       <SelectContent>
