@@ -44,7 +44,7 @@ importers:
     dependencies:
       "@fukui-kanko/shared":
         specifier: workspace:^
-        version: link:../shared-old
+        version: link:../shared
       "@primer/octicons-react":
         specifier: ^19.14.0
         version: 19.15.3(react@18.3.1)
@@ -123,7 +123,7 @@ importers:
     dependencies:
       "@fukui-kanko/shared":
         specifier: workspace:^
-        version: link:../shared-old
+        version: link:../shared
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -151,7 +151,7 @@ importers:
     dependencies:
       "@fukui-kanko/shared":
         specifier: workspace:^
-        version: link:../shared-old
+        version: link:../shared
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -242,51 +242,11 @@ importers:
         specifier: ^7.1.0
         version: 7.1.1(@types/node@22.16.3)(jiti@2.4.2)(lightningcss@1.30.1)(yaml@2.8.0)
 
-  packages/shared-old:
-    dependencies:
-      "@radix-ui/react-slot":
-        specifier: ^1.2.3
-        version: 1.2.3(@types/react@18.3.23)(react@18.3.1)
-      "@tailwindcss/vite":
-        specifier: ^4.1.11
-        version: 4.1.11(vite@7.1.1(@types/node@22.16.3)(jiti@2.4.2)(lightningcss@1.30.1)(yaml@2.8.0))
-      class-variance-authority:
-        specifier: ^0.7.1
-        version: 0.7.1
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
-      lucide-react:
-        specifier: ^0.474.0
-        version: 0.474.0(react@18.3.1)
-      react:
-        specifier: ^18.3.1
-        version: 18.3.1
-      react-dom:
-        specifier: ^18.3.1
-        version: 18.3.1(react@18.3.1)
-      tailwind-merge:
-        specifier: ^3.0.1
-        version: 3.3.1
-      tailwindcss:
-        specifier: ^4.1.11
-        version: 4.1.11
-    devDependencies:
-      "@types/react":
-        specifier: ^18.3.18
-        version: 18.3.23
-      "@types/react-dom":
-        specifier: ^18.3.5
-        version: 18.3.7(@types/react@18.3.23)
-      typescript:
-        specifier: ~5.6.2
-        version: 5.6.3
-
   packages/tojinbo:
     dependencies:
       "@fukui-kanko/shared":
         specifier: workspace:^
-        version: link:../shared-old
+        version: link:../shared
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -314,7 +274,7 @@ importers:
     dependencies:
       "@fukui-kanko/shared":
         specifier: workspace:^
-        version: link:../shared-old
+        version: link:../shared
       "@holiday-jp/holiday_jp":
         specifier: ^2.4.0
         version: 2.5.1
