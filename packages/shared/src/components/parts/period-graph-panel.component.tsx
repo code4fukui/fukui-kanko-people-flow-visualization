@@ -29,7 +29,7 @@ export function PeriodGraphPanel({
   className,
 }: PeriodGraphPanelProps) {
   return (
-    <div className={cn("w-full flex flex-col items-center", className)}>
+    <div className={cn("w-full min-w-0 flex flex-col items-center", className)}>
       {type === "month" && (
         <MonthRangePicker
           startMonth={period.startMonth}
@@ -76,7 +76,7 @@ export function PeriodGraphPanel({
             (period.startWeekRange && period.endWeekRange) ||
             (period.startDate && period.endDate) ? (
             <>
-              <div className=" rounded-lg w-full h-[60vh]">
+              <div className="rounded-lg w-full h-[60vh] overflow-hidden">
                 <Graph type={type} data={type === "hour" ? filteredDailyData : filteredData} />
               </div>
               <div className={`${isCompareMode ? "w-full" : "w-2/3"} mx-auto px-4 mt-4`}>
