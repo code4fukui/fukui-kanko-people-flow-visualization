@@ -22,6 +22,7 @@
     "lint": "pnpm -r lint",
     "preview": "pnpm --filter whole preview",
     "upload": "./tools/upload.sh -n \"$stage\"",
+    "upload:data": "./tools/upload.sh -n \"data-fkpfv\" -d",
     "prepare": "husky"
   },
   "devDependencies": {
