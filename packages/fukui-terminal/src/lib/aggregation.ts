@@ -112,12 +112,24 @@ export function aggregateHourly(data: AggregatedData[]): AggregatedData[] {
   data.forEach((row) => {
     const date = new Date(row["aggregate from"]);
     const hourKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:00`;
+
+    const dayOfWeek = ["日", "月", "火", "水", "木", "金", "土"][date.getDay()];
+    const isHoliday = holidayJP.isHoliday(date);
+    let holidayName = "";
+    if (isHoliday) {
+      const holidays = holidayJP.between(date, date);
+      if (holidays.length > 0) {
+        holidayName = holidays[0].name;
+      }
+    }
     if (!hourlyMap.has(hourKey)) {
       hourlyMap.set(hourKey, {
         ...row,
         ["aggregate from"]: hourKey,
         ["aggregate to"]: hourKey,
         ["total count"]: Number(row["total count"]),
+        dayOfWeek,
+        holidayName,
       });
     } else {
       const prev = hourlyMap.get(hourKey)!;
