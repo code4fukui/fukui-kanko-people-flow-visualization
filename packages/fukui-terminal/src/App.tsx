@@ -1,16 +1,16 @@
 import { Graph } from "@/components/parts/graph";
 import { MonthRangePicker } from "@/components/parts/month-range-picker";
 import { RangeSelector } from "@/components/parts/range-selector";
+import { getRawData } from "@/lib/data/csv";
+import { useEffect, useState } from "react";
+import { AggregatedData, TOTAL_COUNT_KEY } from "@fukui-kanko/shared";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { getRawData } from "@/lib/data/csv";
-import { useEffect, useState } from "react";
-import { AggregatedData, TOTAL_COUNT_KEY } from "@fukui-kanko/shared";
+} from "@fukui-kanko/shared/components/ui";
 import { formatDate } from "./lib/utils";
 
 function App() {

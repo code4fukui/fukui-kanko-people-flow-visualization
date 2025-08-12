@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
 import { cn, MAX_DATE, MIN_DATE } from "@/lib/utils";
 import * as React from "react";
+import { Button } from "@fukui-kanko/shared/components/ui";
 
 const months = [
   "1月",
