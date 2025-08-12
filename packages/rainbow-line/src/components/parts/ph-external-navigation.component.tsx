@@ -1,4 +1,5 @@
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@fukui-kanko/shared";
+import { Popover, PopoverContent, PopoverTrigger } from "@fukui-kanko/shared/components/ui";
 import {
   DatabaseIcon,
   FileCodeIcon,
@@ -7,10 +8,10 @@ import {
   ThreeBarsIcon,
 } from "@primer/octicons-react";
 
-export function ExternalNavigaton() {
+export function ExternalNavigatonPlaceHolder({ className }: { className?: string }) {
   return (
     <>
-      <nav className="md:hidden">
+      <nav className={cn("md:hidden", className)}>
         <Popover>
           <PopoverTrigger>
             <ThreeBarsIcon size="medium" />

@@ -1,4 +1,4 @@
-import { HeaderPlaceHolder } from "./components/ph-header";
+import { HeaderPlaceHolder } from "./components/parts/ph-header";
 
 function App() {
   return (
