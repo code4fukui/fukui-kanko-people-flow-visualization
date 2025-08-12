@@ -13,7 +13,7 @@ type GraphProps = {
   data: AggregatedData[];
   xKey?: string;
   yKey?: string;
-  theme: "month" | "week" | "day" | "hour";
+  type: "month" | "week" | "day" | "hour";
 };
 
 type XAxisTickProps = {
@@ -29,7 +29,13 @@ const chartConfig = {
 
 function renderTick(props: XAxisTickProps, data: AggregatedData[], xKey: string) {
   const d = data.find((row) => row[xKey] === props.payload.value);
-  return <CustomizedXAxisTick {...props} dayOfWeek={d?.dayOfWeek} holidayName={d?.holidayName} />;
+  return (
+    <CustomizedXAxisTick
+      {...props}
+      dayOfWeek={d?.dayOfWeek !== undefined ? String(d.dayOfWeek) : undefined}
+      holidayName={d?.holidayName !== undefined ? String(d.holidayName) : undefined}
+    />
+  );
 }
 
 const CustomizedXAxisTick = ({
