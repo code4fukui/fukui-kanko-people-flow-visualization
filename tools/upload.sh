@@ -192,8 +192,7 @@ else
   mkdir -p ./dist/data
   find ./data -mindepth 1 -maxdepth 1 ! -name '.*' -exec cp -r {} ./dist/"$STAGE_NAME"/data/ \;
 fi
-kill $spinner_pid > /dev/null 2>&1
-wait $spinner_pid 2> /dev/null
+cleanup_spinner
 printf "%b%b\n" "$ERASE_LINE" "${CYAN}INFO:${RESET}\tアップロード準備完了。"
 printf "%b\r" "${SHOW_CURSOR}"
 
@@ -204,8 +203,7 @@ if [ "$DRY" != "true" ]; then
   spinner_pid=$!
   # S3にアップロード
   aws s3 sync "./dist/$STAGE_NAME/" "s3://$BUCKET/$STAGE_NAME/" --delete --cache-control "max-age=0" --region "$REGION" > /dev/null 2>&1
-  kill $spinner_pid > /dev/null 2>&1
-  wait $spinner_pid 2> /dev/null
+  cleanup_spinner
   printf "%b%b\n" "$ERASE_LINE"  "${CYAN}INFO:${RESET}\tアップロード完了。"
   printf "%b\r" "${SHOW_CURSOR}"
 else
