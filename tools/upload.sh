@@ -125,7 +125,8 @@ if
   [[ ( "${GITHUB_ACTIONS}" != "true" ) && ( -z "${AWS_PROFILE}" ) ]] ||
   [ -z "${BUCKET}" ] ||
   [ -z "${DISTRIBUTION}" ] ||
-  [ -z "${REGION}" ]
+  [ -z "${REGION}" ] ||
+  [ -z "${INTERNAL_ORIGIN}" ]
 then
   echo -e "${RED}ERROR:${RESET}\t必要な情報が登録されていません。"
   if [ "${GITHUB_ACTIONS}" != "true" ]; then
