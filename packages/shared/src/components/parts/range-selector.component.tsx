@@ -54,12 +54,12 @@ function getWeekRange(date: Date) {
 }
 
 /**
- * データが無い日、または開始日より前の日付を選択できないようにする
+ * 日付が選択可能な期間内かどうかを判定する
  */
-function isDisabledDate(date: Date, start?: Date) {
+function isValidDate(date: Date, start?: Date) {
   const minDate = getMinDate();
   const maxDate = getMaxDate();
-  return date < minDate || date > maxDate || (start ? date < start : false);
+  return date >= minDate && date <= maxDate && (start ? date >= start : true);
 }
 
 export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelectorProps) => {
@@ -123,7 +123,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                 mode="range"
                 selected={start}
                 captionLayout="dropdown"
-                disabled={isDisabledDate}
+                disabled={(date) => !isValidDate(date)}
                 onSelect={(date) => {
                   handleWeekRangeSelect(date, start, setStart, () => setOpenStart(false));
                 }}
@@ -133,7 +133,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                 mode="single"
                 selected={start}
                 captionLayout="dropdown"
-                disabled={isDisabledDate}
+                disabled={(date) => !isValidDate(date)}
                 onSelect={(date) => {
                   setStart(date);
                   setOpenStart(false);
@@ -171,7 +171,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                 mode="range"
                 selected={end}
                 captionLayout="dropdown"
-                disabled={(date) => isDisabledDate(date, start?.from)}
+                disabled={(date) => !isValidDate(date, start?.from)}
                 onSelect={(date) => {
                   handleWeekRangeSelect(date, end, setEnd, () => setOpenEnd(false));
                 }}
@@ -181,7 +181,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                 mode="single"
                 selected={end}
                 captionLayout="dropdown"
-                disabled={(date) => isDisabledDate(date, start)}
+                disabled={(date) => !isValidDate(date, start)}
                 onSelect={(date) => {
                   setEnd(date);
                   setOpenEnd(false);
