@@ -29,7 +29,7 @@ export async function getRawData<T extends AggregatedRange>(params: getRawDataPr
       params.date instanceof Date
         ? {
             year: params.date.getFullYear().toString(),
-            month: params.date.getMonth().toString().padStart(2, "0"),
+            month: (params.date.getMonth() + 1).toString().padStart(2, "0"),
           }
         : params.date;
     url += `/${year}/${year}-${month}.csv`;
@@ -38,7 +38,7 @@ export async function getRawData<T extends AggregatedRange>(params: getRawDataPr
       params.date instanceof Date
         ? {
             year: params.date.getFullYear().toString(),
-            month: params.date.getMonth().toString().padStart(2, "0"),
+            month: (params.date.getMonth() + 1).toString().padStart(2, "0"),
             day: params.date.getDate().toString().padStart(2, "0"),
           }
         : params.date;
@@ -48,7 +48,7 @@ export async function getRawData<T extends AggregatedRange>(params: getRawDataPr
       params.date instanceof Date
         ? {
             year: params.date.getFullYear().toString(),
-            month: params.date.getMonth().toString().padStart(2, "0"),
+            month: (params.date.getMonth() + 1).toString().padStart(2, "0"),
             day: params.date.getDate().toString().padStart(2, "0"),
             hour: params.date.getHours().toString().padStart(2, "0"),
           }
