@@ -1,4 +1,3 @@
-import { FIRST_WEEK_END_DATE, formatDate, MAX_DATE, MIN_DATE } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import {
   Button,
@@ -9,6 +8,7 @@ import {
   PopoverTrigger,
 } from "@fukui-kanko/shared/components/ui";
 import { CalendarIcon } from "@primer/octicons-react";
+import { FIRST_WEEK_END_DATE, formatDate, getMaxDate, getMinDate } from "../../utils/utils";
 
 type WeekRange = { from: Date; to: Date } | undefined;
 
@@ -29,27 +29,31 @@ type RangeSelectorProps =
     };
 
 function isOutOfRange(date: Date) {
-  return date < MIN_DATE || date > MAX_DATE;
+  const minDate = getMinDate();
+  const maxDate = getMaxDate();
+  return date < minDate || date > maxDate;
 }
 
 function getWeekRange(date: Date) {
+  const minDate = getMinDate();
+  const maxDate = getMaxDate();
   let startDay = new Date(date);
   let endDay: Date;
 
   startDay.setDate(date.getDate() - startDay.getDay());
-  if (startDay < MIN_DATE) {
-    startDay = new Date(MIN_DATE);
+  if (startDay < minDate) {
+    startDay = new Date(minDate);
   }
 
-  if (startDay.getTime() === MIN_DATE.getTime()) {
+  if (startDay.getTime() === minDate.getTime()) {
     // データのある最初の週は7日周期にできないため、特別に終了日を設定
     endDay = new Date(FIRST_WEEK_END_DATE);
   } else {
     endDay = new Date(startDay);
     endDay.setDate(startDay.getDate() + 6);
     // 最新データ日を超えないようにする
-    if (endDay > MAX_DATE) {
-      endDay = new Date(MAX_DATE);
+    if (endDay > maxDate) {
+      endDay = new Date(maxDate);
     }
   }
   return { from: startDay, to: endDay };

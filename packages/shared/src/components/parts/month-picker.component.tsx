@@ -1,6 +1,6 @@
-import { cn, MAX_DATE, MIN_DATE } from "@/lib/utils";
 import * as React from "react";
 import { Button } from "@fukui-kanko/shared/components/ui";
+import { cn, getMaxDate, getMinDate } from "../../utils/utils";
 
 const months = [
   "1月",
@@ -28,7 +28,7 @@ export function MonthPicker({
   onChange,
   className,
   selected,
-  minDate = MIN_DATE,
+  minDate = getMinDate(),
 }: MonthPickerProps) {
   const [year, setYear] = React.useState(new Date().getFullYear());
 
@@ -40,6 +40,8 @@ export function MonthPicker({
       onChange(new Date(year, monthIndex, 1));
     }
   };
+
+  const MAX_DATE = getMaxDate();
 
   return (
     <div className={cn("p-4 w-fit", className)}>
