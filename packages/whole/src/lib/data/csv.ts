@@ -2,27 +2,13 @@ import { GraphSeries } from "@/interfaces/graph-series.interface";
 import { isKeyMatchingAttribute } from "@/lib/utils";
 import {
   AggregatedData,
+  getRawData,
+  isDateIncludedInRange,
   KEYOF_AGGREGATED_DATA_BASE,
   ObjectClass,
   Placement,
   PREFECTURES,
 } from "@fukui-kanko/shared";
-import Papa from "papaparse";
-import { isDateIncludedInRange } from "../date";
-
-const getUrlPrefix = () => `${location.origin}${location.pathname}`;
-
-async function getRawData(
-  placement: Placement,
-  objectClass: ObjectClass,
-): Promise<AggregatedData[]> {
-  const csvResponse = await fetch(getUrlPrefix() + `${placement}/${objectClass}.csv`);
-  const csvRawText = await csvResponse.text();
-  const csvFormattedText = csvRawText.replaceAll(/\n{2,}/g, "\n");
-
-  const rawData = Papa.parse<AggregatedData>(csvFormattedText, { header: true }).data;
-  return rawData;
-}
 
 function removeColumnFromRawData(
   rawData: AggregatedData[],
@@ -82,7 +68,7 @@ export async function getData(
   date: { from: Date; to: Date },
   exclude?: GraphSeries["exclude"],
 ): Promise<AggregatedData[]> {
-  const rawData = await getRawData(placement, objectClass);
+  const rawData = await getRawData({placement, objectClass, aggregateRange: "full"});
 
   let filteredData = [...rawData].filter((rawDataRow) =>
     isDateIncludedInRange(new Date(rawDataRow["aggregate from"]), date),
