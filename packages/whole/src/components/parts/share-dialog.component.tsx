@@ -8,8 +8,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { GraphSeries } from "@/interfaces/graph-series.interface";
-import { getDateTimeString } from "@/lib/date";
 import { useState } from "react";
+import { getDateTimeString } from "@fukui-kanko/shared";
 import { ShareIcon } from "@primer/octicons-react";
 
 interface Props {

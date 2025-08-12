@@ -1,6 +1,5 @@
 import { ChartConfig } from "@/components/ui/chart";
 import { getData } from "@/lib/data/csv";
-import { getDateStringRange, WEEK_DAYS } from "@/lib/date";
 import { isKeyMatchingAttribute } from "@/lib/utils";
 import {
   AGE_RANGES,
@@ -8,8 +7,10 @@ import {
   attributeValueText,
   CAR_CATEGORIES,
   GENDERS,
+  getDateStringRange,
   KEYOF_AGGREGATED_DATA_BASE,
   PREFECTURES,
+  WEEK_DAYS,
 } from "@fukui-kanko/shared";
 import { defaultSeriesName, GraphSeries, isSeriesValid } from "./graph-series.interface";
 

@@ -1,9 +1,8 @@
 import { Graph } from "@/components/parts/graph";
 import { MonthRangePicker } from "@/components/parts/month-range-picker";
 import { RangeSelector } from "@/components/parts/range-selector";
-import { getRawData } from "@/lib/data/csv";
 import { useEffect, useState } from "react";
-import { AggregatedData, TOTAL_COUNT_KEY } from "@fukui-kanko/shared";
+import { AggregatedData, getRawData, TOTAL_COUNT_KEY } from "@fukui-kanko/shared";
 import {
   Select,
   SelectContent,
@@ -34,7 +33,11 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const rawData = await getRawData("Person");
+        const rawData = await getRawData({
+          objectClass: "Person",
+          placement: "fukui-station-east-entrance",
+          aggregateRange: "full",
+        });
         setCsvData(rawData);
       } catch (error) {
         // eslint-disable-next-line no-console
