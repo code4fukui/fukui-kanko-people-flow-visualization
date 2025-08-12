@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { MonthPicker } from "@fukui-kanko/shared/components/parts";
 import {
   Button,
   Label,
@@ -8,7 +9,6 @@ import {
 } from "@fukui-kanko/shared/components/ui";
 import { CalendarIcon } from "@primer/octicons-react";
 import { cn } from "../../utils/utils";
-import { MonthPicker } from "./month-picker.component";
 
 type MonthRangePickerProps = {
   startMonth: Date | undefined;

@@ -9,6 +9,7 @@
     ".": "./src/index.ts",
     "./components": "./src/components/index.ts",
     "./components/ui": "./src/components/ui/index.ts",
+    "./components/parts": "./src/components/parts/index.ts",
     "./utils": "./src/utils/index.ts",
     "./hooks": "./src/hooks/index.ts",
     "./types": "./src/types/index.ts",

@@ -4,7 +4,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@fukui-kanko/shared/components/ui";
 
 type TypeSelectProps = {
   type: "month" | "week" | "day" | "hour";
