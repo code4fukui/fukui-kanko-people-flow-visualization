@@ -1,8 +1,12 @@
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useEffect, useState } from "react";
+import {
+  Button,
+  Calendar,
+  Label,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@fukui-kanko/shared/components/ui";
 import { CalendarIcon } from "@primer/octicons-react";
 import { FIRST_WEEK_END_DATE, formatDate, MAX_DATE, MIN_DATE } from "../../utils/utils";
 

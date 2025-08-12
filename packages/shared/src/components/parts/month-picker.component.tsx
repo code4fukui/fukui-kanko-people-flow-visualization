@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
 import * as React from "react";
+import { Button } from "@fukui-kanko/shared/components/ui";
 import { cn, MAX_DATE, MIN_DATE } from "../../utils/utils";
 
 const months = [

@@ -119,5 +119,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-@source "../../shared/src/**/*.{ts,tsx}";

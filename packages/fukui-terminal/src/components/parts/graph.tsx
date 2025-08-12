@@ -1,12 +1,12 @@
+import React from "react";
+import { AggregatedData } from "@fukui-kanko/shared";
 import {
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart";
-import React from "react";
-import { AggregatedData } from "@fukui-kanko/shared";
+} from "@fukui-kanko/shared/components/ui";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 const chartConfig = {

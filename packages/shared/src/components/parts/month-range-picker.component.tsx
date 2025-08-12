@@ -1,7 +1,11 @@
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useEffect, useState } from "react";
+import {
+  Button,
+  Label,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@fukui-kanko/shared/components/ui";
 import { CalendarIcon } from "@primer/octicons-react";
 import { cn } from "../../utils/utils";
 import { MonthPicker } from "./month-picker.component";
