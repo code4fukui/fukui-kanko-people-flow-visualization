@@ -27,16 +27,19 @@ export async function getRawData<T extends AggregatedRange>(params: getRawDataPr
   } else if (aggregateRange === "monthly") {
     const { year, month } =
       params.date instanceof Date
-        ? { year: params.date.getFullYear(), month: params.date.getMonth() }
+        ? {
+            year: params.date.getFullYear().toString(),
+            month: params.date.getMonth().toString().padStart(2, "0"),
+          }
         : params.date;
     url += `/${year}/${year}-${month}.csv`;
   } else if (aggregateRange === "daily") {
     const { year, month, day } =
       params.date instanceof Date
         ? {
-            year: params.date.getFullYear(),
-            month: params.date.getMonth(),
-            day: params.date.getDate(),
+            year: params.date.getFullYear().toString(),
+            month: params.date.getMonth().toString().padStart(2, "0"),
+            day: params.date.getDate().toString().padStart(2, "0"),
           }
         : params.date;
     url += `/${year}/${month}/${year}-${month}-${day}.csv`;
@@ -44,10 +47,10 @@ export async function getRawData<T extends AggregatedRange>(params: getRawDataPr
     const { year, month, day, hour } =
       params.date instanceof Date
         ? {
-            year: params.date.getFullYear(),
-            month: params.date.getMonth(),
-            day: params.date.getDate(),
-            hour: params.date.getHours(),
+            year: params.date.getFullYear().toString(),
+            month: params.date.getMonth().toString().padStart(2, "0"),
+            day: params.date.getDate().toString().padStart(2, "0"),
+            hour: params.date.getHours().toString().padStart(2, "0"),
           }
         : params.date;
     url += `/${year}/${month}/${day}/${year}-${month}-${day}-${hour}.csv`;
