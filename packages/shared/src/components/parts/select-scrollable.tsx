@@ -19,7 +19,6 @@ export function SelectScrollable<T = string | number>({
           <li
             className={cn(
               "cursor-pointer hover:bg-gray-200",
-              selected === item.value ? "bg-gray-300" : "",
               item.value === selected ? "bg-cyan-100" : "",
             )}
           >
