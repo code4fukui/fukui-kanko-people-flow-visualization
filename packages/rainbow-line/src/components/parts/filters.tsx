@@ -56,12 +56,17 @@ const filterAttributes: Array<{
 export function FiltersSample({
   className,
   onFilterChange = () => {},
+  defaultValues,
 }: {
   className?: string;
   onFilterChange?: (
     attribute: (typeof filterAttributes)[number]["id"],
     value: (typeof filterAttributes)[number]["items"][number]["value"],
   ) => void;
+  defaultValues?: Record<
+    (typeof filterAttributes)[number]["id"],
+    (typeof filterAttributes)[number]["items"][number]["value"]
+  >;
 }) {
   return (
     <ul className={cn(className, "flex w-full justify-center items-start gap-4")}>
@@ -71,7 +76,7 @@ export function FiltersSample({
           <SelectScrollable
             items={attribute.items}
             onChange={(v) => onFilterChange(attribute.id, v)}
-            defaultValue="all"
+            defaultValue={defaultValues?.[attribute.id] || "all"}
             className="w-fit h-40 border-2 border-border rounded-lg flex flex-col gap-y-2"
           ></SelectScrollable>
         </li>
