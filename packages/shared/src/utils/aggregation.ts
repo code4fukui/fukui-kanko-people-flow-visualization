@@ -21,8 +21,8 @@ export function aggregateMonthly(data: AggregatedData[], start: Date, end: Date)
     if (!monthlyMap.has(monthKey)) {
       monthlyMap.set(monthKey, {
         ...row,
-        aggregateFrom: `${monthKey}`,
-        aggregateTo: `${monthKey}`,
+        aggregateFrom: monthKey,
+        aggregateTo: monthKey,
         totalCount: Number(row[TOTAL_COUNT_KEY]),
       });
     } else {
@@ -138,12 +138,6 @@ export function aggregateHourly(data: AggregatedData[]): AggregatedData[] {
         totalCount: Number(row[TOTAL_COUNT_KEY]),
         dayOfWeek,
         holidayName,
-      });
-    } else {
-      const prev = hourlyMap.get(hourKey)!;
-      hourlyMap.set(hourKey, {
-        ...prev,
-        ["total count"]: Number(prev["total count"]) + Number(row["total count"]),
       });
     }
   });
