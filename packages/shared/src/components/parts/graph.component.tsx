@@ -110,6 +110,7 @@ const Graph: React.FC<GraphProps> = ({
         ...row,
         [xKey]: hour, // "HH:00" のみ
         [`${date}_${yKey}`]: row[yKey],
+        type,
       });
     });
 

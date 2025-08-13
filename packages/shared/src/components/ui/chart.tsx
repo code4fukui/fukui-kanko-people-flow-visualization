@@ -95,7 +95,7 @@ type ChartTooltipRow = {
   holidayName?: string;
   dayOfWeek?: string;
   id?: string;
-  theme?: "month" | "week" | "day" | "hour";
+  type?: "month" | "week" | "day" | "hour";
 };
 
 const ChartTooltipContent = React.forwardRef<
@@ -202,7 +202,7 @@ const ChartTooltipContent = React.forwardRef<
         {!nestLabel && tooltipLabel ? (
           <div className="flex">
             {tooltipLabel}
-            {row.dayOfWeek && row.dayOfWeek !== "" && row.theme !== "hour" ? (
+            {row.dayOfWeek && row.dayOfWeek !== "" && row.type !== "hour" ? (
               <span
                 className={cn(
                   "ml-2",
