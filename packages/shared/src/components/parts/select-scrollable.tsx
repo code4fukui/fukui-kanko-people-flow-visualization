@@ -14,28 +14,24 @@ export function SelectScrollable<T = string | number>({
   const [selected, setSelected] = useState<T | undefined>(undefined);
   return (
     <ScrollArea className={cn(className)}>
-      <ul>
+      <div className="flex flex-col">
         {Array.from(items).map((item) => (
-          <li
+          <Button
+            key={String(item.value)}
+            onClick={() => {
+              setSelected(item.value);
+              onChange(item.value);
+            }}
+            variant="ghost"
             className={cn(
-              "cursor-pointer hover:bg-gray-200",
+              "block rounded-none h-fit py-1 px-4 w-full text-left cursor-pointer hover:bg-gray-200",
               item.value === selected ? "bg-cyan-100" : "",
             )}
-            key={`${item.value}`}
           >
-            <Button
-              onClick={() => {
-                setSelected(item.value);
-                onChange(item.value);
-              }}
-              variant="ghost"
-              className="block rounded-none h-fit py-1 px-4 w-full text-left"
-            >
-              {item.text}
-            </Button>
-          </li>
+            {item.text}
+          </Button>
         ))}
-      </ul>
+      </div>
     </ScrollArea>
   );
 }
