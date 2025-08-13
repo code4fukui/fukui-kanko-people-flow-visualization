@@ -1,11 +1,8 @@
-import {
-  JAPANESE_ATTRIBUTE_NAME,
-  ObjectClassAttribute,
-} from "@/interfaces/aggregated-data.interface";
 import { ChartGroup, getChartConfig } from "@/interfaces/graph-data.interface";
 import { defaultSeriesName, GraphSeries } from "@/interfaces/graph-series.interface";
 import { CARTESIAN_RENDER_THRESHOLD, cn, SCROLL_BOTTOM_THRESHOLD } from "@/lib/utils";
 import { Children, ReactNode, useEffect, useRef, useState } from "react";
+import { JAPANESE_ATTRIBUTE_NAME, ObjectClassAttribute } from "@fukui-kanko/shared";
 import { ChevronDownIcon } from "@primer/octicons-react";
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, XAxis, YAxis } from "recharts";
 import {

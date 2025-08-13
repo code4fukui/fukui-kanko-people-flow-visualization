@@ -3,7 +3,9 @@
 @tailwind utilities;
 
 .app-card {
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition:
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
 }
 
 .app-card:hover {

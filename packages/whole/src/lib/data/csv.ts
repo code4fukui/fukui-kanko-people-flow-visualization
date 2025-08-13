@@ -1,28 +1,14 @@
+import { GraphSeries } from "@/interfaces/graph-series.interface";
+import { isKeyMatchingAttribute } from "@/lib/utils";
 import {
   AggregatedData,
+  getRawData,
+  isDateIncludedInRange,
   KEYOF_AGGREGATED_DATA_BASE,
   ObjectClass,
-  PREFECTURES
-} from "@/interfaces/aggregated-data.interface";
-import { GraphSeries } from "@/interfaces/graph-series.interface";
-import { Placement } from "@/interfaces/placement.interface";
-import { isKeyMatchingAttribute } from "@/lib/utils";
-import Papa from "papaparse";
-import { isDateIncludedInRange } from "../date";
-
-const getUrlPrefix = () => `${location.origin}${location.pathname}`;
-
-async function getRawData(
-  placement: Placement,
-  objectClass: ObjectClass,
-): Promise<AggregatedData[]> {
-  const csvResponse = await fetch(getUrlPrefix() + `${placement}/${objectClass}.csv`);
-  const csvRawText = await csvResponse.text();
-  const csvFormattedText = csvRawText.replaceAll(/\n{2,}/g, "\n");
-
-  const rawData = Papa.parse<AggregatedData>(csvFormattedText, { header: true }).data;
-  return rawData;
-}
+  Placement,
+  PREFECTURES,
+} from "@fukui-kanko/shared";
 
 function removeColumnFromRawData(
   rawData: AggregatedData[],
@@ -57,12 +43,12 @@ function removeColumnFromRawData(
 function reorderDataColumns(data: AggregatedData[]): AggregatedData[] {
   return data.map(row => {
     const reorderedRow: Record<string, string | number> = {};
-    
+
     // まず基本項目をコピー
     KEYOF_AGGREGATED_DATA_BASE.forEach(key => {
       reorderedRow[key] = row[key];
     });
-    
+
     // 都道府県データをPREFECTURESの順序で追加
     Object.keys(PREFECTURES).forEach(prefecture => {
       Object.entries(row).forEach(([key, value]) => {
@@ -71,7 +57,7 @@ function reorderDataColumns(data: AggregatedData[]): AggregatedData[] {
         }
       });
     });
-    
+
     return reorderedRow as AggregatedData;
   });
 }
@@ -82,7 +68,7 @@ export async function getData(
   date: { from: Date; to: Date },
   exclude?: GraphSeries["exclude"],
 ): Promise<AggregatedData[]> {
-  const rawData = await getRawData(placement, objectClass);
+  const rawData = await getRawData({placement, objectClass, aggregateRange: "full"});
 
   let filteredData = [...rawData].filter((rawDataRow) =>
     isDateIncludedInRange(new Date(rawDataRow["aggregate from"]), date),

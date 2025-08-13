@@ -6,12 +6,13 @@
   "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c",
   "scripts": {
     "submodule": "git submodule update --init --force --depth=1 --recursive && cp -R data/people-flow-data/full/* packages/whole/public",
-    "dev:landing": "pnpm --filter landing-page dev",
-    "dev:whole": "pnpm --filter whole dev",
-    "dev:fukui-terminal": "pnpm --filter fukui-terminal dev",
-    "dev:tojinbo": "pnpm --filter tojinbo dev",
-    "dev:rainbow-line": "pnpm --filter rainbow-line dev",
-    "dev": "concurrently --names \"landing,whole,fukui-terminal,tojinbo,rainbow-line\" --prefix-colors \"blue,green,yellow,magenta,cyan\" \"pnpm dev:landing\" \"pnpm dev:whole\" \"pnpm dev:fukui-terminal\" \"pnpm dev:tojinbo\" \"pnpm dev:rainbow-line\"",
+    "serve:data": "pnpm dlx http-server data -p 4000 --cors",
+    "dev:landing": "LOCAL='true' concurrently --names \"landing,data\" --prefix-colors \"blue,brightGreen\" \"pnpm --filter landing-page dev\" \"pnpm serve:data\"",
+    "dev:whole": "LOCAL='true' concurrently --names \"whole,data\" --prefix-colors \"green,brightGreen\" \"pnpm --filter whole dev\" \"pnpm serve:data\"",
+    "dev:fukui-terminal": "LOCAL='true' concurrently --names \"fukui-terminal,data\" --prefix-colors \"yellow,brightGreen\" \"pnpm --filter fukui-terminal dev\" \"pnpm serve:data\"",
+    "dev:tojinbo": "LOCAL='true' concurrently --names \"tojinbo,data\" --prefix-colors \"magenta,brightGreen\" \"pnpm --filter tojinbo dev\" \"pnpm serve:data\"",
+    "dev:rainbow-line": "LOCAL='true' concurrently --names \"rainbow-line,data\" --prefix-colors \"cyan,brightGreen\" \"pnpm --filter rainbow-line dev\" \"pnpm serve:data\"",
+    "dev": "LOCAL='true' concurrently --names \"landing,whole,fukui-terminal,tojinbo,rainbow-line,data\" --prefix-colors \"blue,green,yellow,magenta,cyan,white.bgGray\" \"pnpm --filter landing-page dev\" \"pnpm --filter whole dev\" \"pnpm --filter fukui-terminal dev\" \"pnpm --filter tojinbo dev\" \"pnpm --filter rainbow-line dev\" \"pnpm serve:data\"",
     "build:landing": "pnpm --filter landing-page build",
     "build:whole": "pnpm --filter whole build",
     "build:fukui-terminal": "pnpm --filter fukui-terminal build",
@@ -20,6 +21,8 @@
     "build": "concurrently --names \"landing,whole,fukui-terminal,tojinbo,rainbow-line\" --prefix-colors \"blue,green,yellow,magenta,cyan\" \"pnpm build:landing\" \"pnpm build:whole\" \"pnpm build:fukui-terminal\" \"pnpm build:tojinbo\" \"pnpm build:rainbow-line\"",
     "lint": "pnpm -r lint",
     "preview": "pnpm --filter whole preview",
+    "upload": "./tools/upload.sh -n \"$stage\"",
+    "upload:data": "./tools/upload.sh -n \"data-fkpfv\" -d",
     "prepare": "husky"
   },
   "devDependencies": {
