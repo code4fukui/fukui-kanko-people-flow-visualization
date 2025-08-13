@@ -1,5 +1,13 @@
 import { Placement } from "./placement.interface";
 
+export type AggregatedRange = "hourly" | "daily" | "monthly" | "full";
+
+export type DateNumbers<T extends AggregatedRange> = T extends "hourly"
+  ? { year: number; month: number; day: number; hour: number }
+  : T extends "daily"
+    ? { year: number; month: number; day: number }
+    : { year: number; month: number };
+
 export const OBJECT_CLASS = {
   Person: "人物",
   Face: "顔",
@@ -7,12 +15,13 @@ export const OBJECT_CLASS = {
 } as const;
 export type ObjectClass = keyof typeof OBJECT_CLASS;
 
+export const TOTAL_COUNT_KEY = "total count";
 export type AggregatedDataBase = {
   placement: Placement;
   "object class": ObjectClass;
   "aggregate from": string;
   "aggregate to": string;
-  "total count": number;
+  [TOTAL_COUNT_KEY]: number;
 };
 export const KEYOF_AGGREGATED_DATA_BASE: (keyof AggregatedDataBase)[] = [
   "placement",

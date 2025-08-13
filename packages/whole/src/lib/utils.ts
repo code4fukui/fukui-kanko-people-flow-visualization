@@ -1,5 +1,5 @@
-import { ObjectClassAttribute } from "@/interfaces/aggregated-data.interface";
-import { clsx, type ClassValue } from "clsx";
+import { ObjectClassAttribute } from "@fukui-kanko/shared";
+import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 /**
@@ -31,7 +31,9 @@ export async function digest(value: string): Promise<string> {
 
 export function linkPath(path: string) {
   return location.host.endsWith("github.io")
-    ? `/${location.pathname.slice(1).split("/").at(0)}/whole/${path.at(0) === "/" ? path.slice(1) : path}`
+    ? `/${location.pathname.slice(1).split("/").at(0)}/whole/${
+        path.at(0) === "/" ? path.slice(1) : path
+      }`
     : path;
 }
 

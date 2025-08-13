@@ -1,6 +1,6 @@
 import { GraphSeries } from "@/interfaces/graph-series.interface";
 import { useEffect, useState } from "react";
-import { getDateTimeString } from "../date";
+import { getDateTimeString } from "@fukui-kanko/shared";
 
 export const STAR_KEY = "stars";
 

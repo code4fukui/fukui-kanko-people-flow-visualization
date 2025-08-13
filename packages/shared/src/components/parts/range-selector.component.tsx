@@ -1,14 +1,18 @@
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { MAX_DATE, MIN_DATE } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { ChevronDownIcon } from "lucide-react";
+import {
+  Button,
+  Calendar,
+  Label,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@fukui-kanko/shared/components/ui";
+import { CalendarIcon } from "@primer/octicons-react";
+import { FIRST_WEEK_END_DATE, formatDate, getMaxDate, getMinDate } from "../../utils/utils";
 
 type WeekRange = { from: Date; to: Date } | undefined;
 
-type Props =
+type RangeSelectorProps =
   | {
       type: "week";
       start: WeekRange;
@@ -24,74 +28,75 @@ type Props =
       setEnd: (date: Date | undefined) => void;
     };
 
-/**
- * データが無い日、または開始日より前の日付を選択できないようにする
- */
-function isDisabledDate(date: Date, start?: Date) {
-  return date < MIN_DATE || date > MAX_DATE || (start ? date < start : false);
-}
-
-/**
- * 週の範囲選択時の処理関数
- */
-function handleWeekRangeSelect(
-  date: { from?: Date; to?: Date } | undefined,
-  current: WeekRange,
-  setRange: (range: WeekRange) => void,
-  close: () => void,
-) {
-  if (date?.from && current?.from && date.from < current.from) {
-    setRange(getWeekRange(date.from));
-  } else if (date?.to) {
-    setRange(getWeekRange(date.to));
-  }
-  close();
-}
-
-/**
- * 日付を "YYYY/MM/DD" 形式で返す
- */
-function formatDate(date: Date) {
-  return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
-}
-
 function getWeekRange(date: Date) {
+  const minDate = getMinDate();
+  const maxDate = getMaxDate();
   let startDay = new Date(date);
   let endDay: Date;
 
   startDay.setDate(date.getDate() - startDay.getDay());
-  if (startDay < MIN_DATE) {
-    startDay = new Date(MIN_DATE);
+  if (startDay < minDate) {
+    startDay = new Date(minDate);
   }
 
-  if (startDay.getTime() === MIN_DATE.getTime()) {
-    endDay = new Date(2024, 9, 19);
+  if (startDay.getTime() === minDate.getTime()) {
+    // データのある最初の週は7日周期にできないため、特別に終了日を設定
+    endDay = new Date(FIRST_WEEK_END_DATE);
   } else {
     endDay = new Date(startDay);
     endDay.setDate(startDay.getDate() + 6);
     // 最新データ日を超えないようにする
-    if (endDay > MAX_DATE) {
-      endDay = new Date(MAX_DATE);
+    if (endDay > maxDate) {
+      endDay = new Date(maxDate);
     }
   }
   return { from: startDay, to: endDay };
 }
 
-export const RangeSelector = (props: Props) => {
+/**
+ * 日付が選択可能な期間内かどうかを判定する
+ */
+function isValidDate(date: Date, start?: Date) {
+  const minDate = getMinDate();
+  const maxDate = getMaxDate();
+  return date >= minDate && date <= maxDate && (start ? date >= start : true);
+}
+
+export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelectorProps) => {
   const [openStart, setOpenStart] = useState(false);
   const [openEnd, setOpenEnd] = useState(false);
 
+  /**
+   * 週の範囲選択時の処理関数
+   */
+  function handleWeekRangeSelect(
+    date: { from?: Date; to?: Date } | undefined,
+    current: WeekRange,
+    setRange: (range: WeekRange) => void,
+    close: () => void,
+  ) {
+    const newWeek = date?.from ? getWeekRange(date.from) : undefined;
+    const currentWeek = current?.from ? getWeekRange(current.from) : undefined;
+
+    if (newWeek && currentWeek && newWeek.from < currentWeek.from) {
+      setRange(newWeek);
+    } else if (date?.to) {
+      setRange(getWeekRange(date.to));
+    }
+    close();
+  }
+
   useEffect(() => {
-    if (props.type === "week") {
-      if (props.start?.from && props.end?.from && props.start.from > props.end.from) {
-        props.setEnd(undefined);
+    if (type === "week") {
+      if (start?.from && end?.from && start.from > end.from) {
+        setEnd(undefined);
       }
     } else {
-      if (props.start && props.end && props.start > props.end) {
-        props.setEnd(undefined);
+      if (start && end && start > end) {
+        setEnd(undefined);
       }
     }
-  }, [props.start]);
+  }, [type, start, end, setEnd]);
 
   return (
     <div className="flex flex-row gap-6 mb-6">
@@ -101,38 +106,36 @@ export const RangeSelector = (props: Props) => {
           <PopoverTrigger asChild>
             <Button variant="outline" className="w-48 justify-between font-normal">
               <span>
-                {props.type === "week"
-                  ? props.start
-                    ? `${formatDate(props.start.from)}〜`
+                {type === "week"
+                  ? start
+                    ? `${formatDate(start.from, "/")}〜`
                     : "Select week"
-                  : props.start
-                    ? formatDate(props.start)
+                  : start
+                    ? formatDate(start, "/")
                     : "Select date"}
               </span>
-              <ChevronDownIcon />
+              <CalendarIcon size={24} />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-            {props.type === "week" ? (
+            {type === "week" ? (
               <Calendar
                 mode="range"
-                selected={props.start}
+                selected={start}
                 captionLayout="dropdown"
-                disabled={isDisabledDate}
+                disabled={(date) => !isValidDate(date)}
                 onSelect={(date) => {
-                  handleWeekRangeSelect(date, props.start, props.setStart, () =>
-                    setOpenStart(false),
-                  );
+                  handleWeekRangeSelect(date, start, setStart, () => setOpenStart(false));
                 }}
               />
             ) : (
               <Calendar
                 mode="single"
-                selected={props.start}
+                selected={start}
                 captionLayout="dropdown"
-                disabled={isDisabledDate}
+                disabled={(date) => !isValidDate(date)}
                 onSelect={(date) => {
-                  props.setStart(date);
+                  setStart(date);
                   setOpenStart(false);
                 }}
               />
@@ -148,39 +151,39 @@ export const RangeSelector = (props: Props) => {
             <Button
               variant="outline"
               className="w-48 justify-between font-normal"
-              disabled={!props.start}
+              disabled={!start}
             >
               <span>
-                {props.type === "week"
-                  ? props.end
-                    ? `${formatDate(props.end.from)}〜`
+                {type === "week"
+                  ? end
+                    ? `${formatDate(end.from, "/")}〜`
                     : "Select week"
-                  : props.end
-                    ? formatDate(props.end)
+                  : end
+                    ? formatDate(end, "/")
                     : "Select date"}
               </span>
-              <ChevronDownIcon />
+              <CalendarIcon size={24} />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-            {props.type === "week" ? (
+            {type === "week" ? (
               <Calendar
                 mode="range"
-                selected={props.end}
+                selected={end}
                 captionLayout="dropdown"
-                disabled={(date) => isDisabledDate(date, props.start?.from)}
+                disabled={(date) => !isValidDate(date, start?.from)}
                 onSelect={(date) => {
-                  handleWeekRangeSelect(date, props.end, props.setEnd, () => setOpenEnd(false));
+                  handleWeekRangeSelect(date, end, setEnd, () => setOpenEnd(false));
                 }}
               />
             ) : (
               <Calendar
                 mode="single"
-                selected={props.end}
+                selected={end}
                 captionLayout="dropdown"
-                disabled={(date) => isDisabledDate(date, props.start)}
+                disabled={(date) => !isValidDate(date, start)}
                 onSelect={(date) => {
-                  props.setEnd(date);
+                  setEnd(date);
                   setOpenEnd(false);
                 }}
               />

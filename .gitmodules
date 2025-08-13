@@ -1,3 +1,4 @@
 [submodule "data/people-flow-data"]
 	path = data/people-flow-data
 	url = git@github.com:code4fukui/fukui-kanko-people-flow-data.git
+  shallow = true

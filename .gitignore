@@ -24,3 +24,8 @@ dist-ssr
 *.sw?
 
 .eslintcache
+
+tmp/q.json
+
+.env*
+!.env*.sample
