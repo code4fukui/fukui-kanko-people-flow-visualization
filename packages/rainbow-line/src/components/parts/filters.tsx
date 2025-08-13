@@ -52,7 +52,7 @@ export function FiltersSample({ className }: { className?: string }) {
           <SelectScrollable
             items={attribute.items}
             onChange={alert}
-            className="w-fit h-40 overflow-auto border-2 border-border rounded-lg flex flex-col gap-y-2"
+            className="w-fit h-40 border-2 border-border rounded-lg flex flex-col gap-y-2"
           ></SelectScrollable>
         </li>
       ))}
