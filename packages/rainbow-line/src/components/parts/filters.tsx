@@ -18,7 +18,7 @@ export function FiltersSample({
   >;
 }) {
   return (
-    <ul className={cn(className, "flex w-full justify-center items-start gap-4")}>
+    <ul className={cn("flex w-full justify-center items-start gap-4", className)}>
       {FILTER_ATTRIBUTES.map((attribute) => (
         <li className="flex flex-col items-center" key={attribute.name}>
           <span className="font-bold text-center">{attribute.name}</span>
