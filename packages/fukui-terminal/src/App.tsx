@@ -1,14 +1,12 @@
-import { getRawData } from "@/lib/data/csv";
 import { useEffect, useState } from "react";
+import { AggregatedData, formatDate, getRawData, TOTAL_COUNT_KEY } from "@fukui-kanko/shared";
 import {
-  AggregatedData,
-  formatDate,
   Graph,
   MonthRangePicker,
   RangeSelector,
-  TOTAL_COUNT_KEY,
   TypeSelect,
-} from "@fukui-kanko/shared";
+} from "@fukui-kanko/shared/components/parts";
+import * as holidayJP from "@holiday-jp/holiday_jp";
 
 function App() {
   // 開発環境かどうかを判定
@@ -31,7 +29,11 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const rawData = await getRawData("Person");
+        const rawData = await getRawData({
+          objectClass: "Person",
+          placement: "fukui-station-east-entrance",
+          aggregateRange: "full",
+        });
         setCsvData(rawData);
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -62,8 +64,8 @@ function App() {
         if (!monthlyMap.has(monthKey)) {
           monthlyMap.set(monthKey, {
             ...row,
-            aggregateFrom: `${monthKey}`,
-            aggregateTo: `${monthKey}`,
+            aggregateFrom: monthKey,
+            aggregateTo: monthKey,
             totalCount: Number(row[TOTAL_COUNT_KEY]),
           });
         } else {
@@ -108,16 +110,52 @@ function App() {
         weeklyAggregated.push({
           ...weekRows[0],
           aggregateFrom: `${formatDate(new Date(weekRows[0]["aggregate from"]), "-")}〜`,
-          aggregateTo: `${formatDate(new Date(weekRows[weekRows.length - 1]["aggregate from"]), "-")}`,
+          aggregateTo: formatDate(new Date(weekRows[weekRows.length - 1]["aggregate from"]), "-"),
           totalCount: total,
         });
       }
       setFilteredData(weeklyAggregated);
       return;
     }
+    if (type === "day" && startDate && endDate) {
+      // 日付の範囲でフィルタ
+      filtered = filtered.filter((row) => {
+        const date = new Date(row["aggregate from"]);
+        return date >= startDate && date <= endDate;
+      });
+
+      // 祝日を事前に取得しMap化
+      const holidays = holidayJP.between(startDate, endDate);
+      const holidayMap = new Map<string, string>();
+      holidays.forEach((h) => {
+        holidayMap.set(formatDate(h.date, "-"), h.name);
+      });
+
+      // 日ごとに集計
+      const dailyMap = new Map<string, AggregatedData>();
+      filtered.forEach((row) => {
+        const date = new Date(row["aggregate from"]);
+        const dayKey = formatDate(date, "-");
+        if (!dailyMap.has(dayKey)) {
+          const dayOfWeek = ["日", "月", "火", "水", "木", "金", "土"][date.getDay()];
+          const holidayName = holidayMap.get(dayKey) ?? "";
+          dailyMap.set(dayKey, {
+            ...row,
+            aggregateFrom: dayKey,
+            aggregateTo: dayKey,
+            totalCount: Number(row[TOTAL_COUNT_KEY]),
+            dayOfWeek,
+            holidayName,
+          });
+        }
+      });
+      setFilteredData(Array.from(dailyMap.values()));
+      return;
+    }
+
     // TODO:他の期間の処理を実装する
     setFilteredData(filtered);
-  }, [type, startMonth, endMonth, startWeekRange, endWeekRange]);
+  }, [type, startMonth, endMonth, startWeekRange, endWeekRange, startDate, endDate, csvData]);
 
   return (
     <>
@@ -170,7 +208,9 @@ function App() {
             )}
           </div>
           <div className="my-8">
-            {(startMonth && endMonth) || (startWeekRange && endWeekRange) ? (
+            {(startMonth && endMonth) ||
+            (startWeekRange && endWeekRange) ||
+            (startDate && endDate) ? (
               <Graph type={type} data={filteredData} />
             ) : (
               <p>範囲を選択してください。</p>

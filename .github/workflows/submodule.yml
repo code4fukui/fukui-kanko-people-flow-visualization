@@ -8,11 +8,28 @@ on:
     # UTCで実行されているのでJST AM1時30分過ぎに実行される
     - cron: "30 16 * * *"
 
+env:
+  IS_ORIGINAL_REPO: ${{ github.repository == 'code4fukui/fukui-kanko-people-flow-visualization' }}
+
 jobs:
+  if-original-repo:
+    runs-on: ubuntu-latest
+    outputs:
+      continue: ${{ steps.check.outputs.continue }}
+    steps:
+      - id: check
+        run: |
+          if [ "${{ env.IS_ORIGINAL_REPO }}" = "true" ]; then
+            echo "continue=true" >> $GITHUB_OUTPUT
+          else
+            echo "continue=false" >> $GITHUB_OUTPUT
   # サブモジュールの更新
   update:
     name: Update Submodules
     runs-on: ubuntu-latest
+    needs:
+      - if-original-repo
+    if: needs.if-original-repo.outputs.continue == 'true'
     env:
       TZ: "Asia/Tokyo"
     permissions:
@@ -25,6 +42,7 @@ jobs:
       - name: Update submodules
         run: |
           git submodule update --remote --init
+          mkdir -p public
           cp -R data/people-flow-data/full/* public
           git diff
           git add .

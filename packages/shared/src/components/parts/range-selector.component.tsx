@@ -1,10 +1,14 @@
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useEffect, useState } from "react";
+import {
+  Button,
+  Calendar,
+  Label,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@fukui-kanko/shared/components/ui";
 import { CalendarIcon } from "@primer/octicons-react";
-import { FIRST_WEEK_END_DATE, formatDate, MAX_DATE, MIN_DATE } from "../../utils/utils";
+import { FIRST_WEEK_END_DATE, formatDate, getMaxDate, getMinDate } from "../../utils/utils";
 
 type WeekRange = { from: Date; to: Date } | undefined;
 
@@ -24,44 +28,38 @@ type RangeSelectorProps =
       setEnd: (date: Date | undefined) => void;
     };
 
-function isOutOfRange(date: Date) {
-  return date < MIN_DATE || date > MAX_DATE;
-}
-
 function getWeekRange(date: Date) {
+  const minDate = getMinDate();
+  const maxDate = getMaxDate();
   let startDay = new Date(date);
   let endDay: Date;
 
   startDay.setDate(date.getDate() - startDay.getDay());
-  if (startDay < MIN_DATE) {
-    startDay = new Date(MIN_DATE);
+  if (startDay < minDate) {
+    startDay = new Date(minDate);
   }
 
-  if (startDay.getTime() === MIN_DATE.getTime()) {
+  if (startDay.getTime() === minDate.getTime()) {
     // データのある最初の週は7日周期にできないため、特別に終了日を設定
     endDay = new Date(FIRST_WEEK_END_DATE);
   } else {
     endDay = new Date(startDay);
     endDay.setDate(startDay.getDate() + 6);
     // 最新データ日を超えないようにする
-    if (endDay > MAX_DATE) {
-      endDay = new Date(MAX_DATE);
+    if (endDay > maxDate) {
+      endDay = new Date(maxDate);
     }
   }
   return { from: startDay, to: endDay };
 }
 
 /**
- * 終了日が開始日より前の日付を選択できないようにする
+ * 日付が選択可能な期間内かどうかを判定する
  */
-function isBeforeStart(start: Date | undefined) {
-  return start ? (date: Date) => date < start : undefined;
-}
-/**
- * 週範囲選択時、開始週より前を選択不可にする
- */
-function isBeforeStartWeek(date: Date, start: WeekRange | undefined) {
-  return start?.from ? date < start.from : false;
+function isValidDate(date: Date, start?: Date) {
+  const minDate = getMinDate();
+  const maxDate = getMaxDate();
+  return date >= minDate && date <= maxDate && (start ? date >= start : true);
 }
 
 export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelectorProps) => {
@@ -125,7 +123,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                 mode="range"
                 selected={start}
                 captionLayout="dropdown"
-                disabled={isOutOfRange}
+                disabled={(date) => !isValidDate(date)}
                 onSelect={(date) => {
                   handleWeekRangeSelect(date, start, setStart, () => setOpenStart(false));
                 }}
@@ -135,6 +133,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                 mode="single"
                 selected={start}
                 captionLayout="dropdown"
+                disabled={(date) => !isValidDate(date)}
                 onSelect={(date) => {
                   setStart(date);
                   setOpenStart(false);
@@ -172,7 +171,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                 mode="range"
                 selected={end}
                 captionLayout="dropdown"
-                disabled={(date) => isOutOfRange(date) || isBeforeStartWeek(date, start)}
+                disabled={(date) => !isValidDate(date, start?.from)}
                 onSelect={(date) => {
                   handleWeekRangeSelect(date, end, setEnd, () => setOpenEnd(false));
                 }}
@@ -182,7 +181,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                 mode="single"
                 selected={end}
                 captionLayout="dropdown"
-                disabled={isBeforeStart(start)}
+                disabled={(date) => !isValidDate(date, start)}
                 onSelect={(date) => {
                   setEnd(date);
                   setOpenEnd(false);

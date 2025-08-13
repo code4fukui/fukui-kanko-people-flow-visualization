@@ -1,5 +1,13 @@
 import { Placement } from "./placement.interface";
 
+export type AggregatedRange = "hourly" | "daily" | "monthly" | "full";
+
+export type DateNumbers<T extends AggregatedRange> = T extends "hourly"
+  ? { year: number; month: number; day: number; hour: number }
+  : T extends "daily"
+    ? { year: number; month: number; day: number }
+    : { year: number; month: number };
+
 export const OBJECT_CLASS = {
   Person: "人物",
   Face: "顔",

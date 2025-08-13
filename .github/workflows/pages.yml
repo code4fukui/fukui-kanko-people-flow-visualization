@@ -56,6 +56,7 @@ jobs:
           BUCKET: ${{ secrets.BUCKET }}
           DISTRIBUTION: ${{ secrets.DISTRIBUTION }}
           REGION: ${{ secrets.REGION }}
+          INTERNAL_ORIGIN: ${{ secrets.INTERNAL_ORIGIN }}
           STAGE: "${{ github.repository_owner }}-fkpfv-${{ github.event.number }}"
 
       # Fork元リポジトリのmainブランチではPagesにデプロイする

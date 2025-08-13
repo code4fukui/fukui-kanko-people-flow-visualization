@@ -13,16 +13,22 @@ export function formatDate(date: Date, delimiter: "-" | "/" = "-") {
 }
 
 /**
- * アプリケーション内で利用可能なデータの最小日付
+ * アプリケーション内で利用可能なデータの最小日付を返す
  */
-export const MIN_DATE = new Date("2024-10-17");
-MIN_DATE.setHours(0, 0, 0, 0);
+export function getMinDate(): Date {
+  const date = new Date("2024-10-17");
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
 /**
- * アプリケーション内で利用可能なデータの最大日付（今日の前日）
+ * アプリケーション内で利用可能なデータの最大日付（今日の前日）を返す
  */
-export const MAX_DATE = new Date();
-MAX_DATE.setHours(0, 0, 0, 0);
-MAX_DATE.setDate(MAX_DATE.getDate() - 1);
+export function getMaxDate(): Date {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() - 1);
+  return date;
+}
 
 /**
  * データのある最初の週の終了日

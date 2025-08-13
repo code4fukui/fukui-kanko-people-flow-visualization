@@ -14,4 +14,13 @@ export default defineConfig({
   server: {
     port: 3003,
   },
+  define: {
+    __CSV_ORIGIN__: JSON.stringify(
+      process.env.PAGES
+        ? `${process.env.PAGES_ROOT}/data/` // GitHub Pages (本番)
+        : process.env.LOCAL === "true"
+          ? "http://localhost:4000/" // ローカル開発
+          : `${process.env.INTERNAL_ROOT}/data/`, // 社内確認環境
+    ),
+  },
 });
