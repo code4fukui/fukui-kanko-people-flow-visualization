@@ -1,34 +1,39 @@
 import { useState } from "react";
 import { cn } from "../../utils";
-import { ScrollArea } from "../ui";
+import { Button, ScrollArea } from "../ui";
 
-export function SelectScrollable({
+export function SelectScrollable<T = string | number>({
   items,
   onChange,
   className,
 }: {
-  items: ArrayLike<{ text: string; value: string | number }>;
+  items: ArrayLike<{ text: string; value: T }>;
   className?: string;
-  onChange: (value: string | number) => void;
+  onChange: (value: T) => void;
 }) {
-  const [selected, setSelected] = useState<string | number | undefined>(undefined);
+  const [selected, setSelected] = useState<T | undefined>(undefined);
   return (
-    <ScrollArea className={(cn(className), "overflow-auto")}>
+    <ScrollArea className={(cn(className), "overflow-scroll")}>
       <ul>
         {Array.from(items).map((item, index) => (
           <li
-            key={`${index}-${item.value}`}
             className={cn(
-              "cursor-pointer px-2 hover:bg-gray-200",
+              "cursor-pointer hover:bg-gray-200",
               selected === item.value ? "bg-gray-300" : "",
               item.value === selected ? "bg-cyan-100" : "",
             )}
-            onClick={() => {
-              setSelected(item.value);
-              onChange(item.value);
-            }}
           >
-            {item.text}
+            <Button
+              onClick={() => {
+                setSelected(item.value);
+                onChange(item.value);
+              }}
+              variant="ghost"
+              className="block rounded-none h-fit py-1 px-4 w-full text-left"
+              key={`${index}-${item.value}`}
+            >
+              {item.text}
+            </Button>
           </li>
         ))}
       </ul>
