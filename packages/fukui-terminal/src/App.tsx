@@ -1,18 +1,14 @@
-import { Graph } from "@/components/parts/graph";
 import { LoadingSpinner } from "@/components/parts/loading-spinner";
-import { MonthRangePicker } from "@/components/parts/month-range-picker";
-import { RangeSelector } from "@/components/parts/range-selector";
-import { AggregatedData } from "@/interfaces/aggregated-data.interface";
-import {
-  aggregateDaily,
-  aggregateHourly,
-  aggregateMonthly,
-  aggregateWeekly,
-} from "@/lib/aggregation";
 import { getDailyData } from "@/lib/data/csv";
 import { useEffect, useState } from "react";
-import { getRawData } from "@fukui-kanko/shared";
-import { TypeSelect } from "@fukui-kanko/shared/components/parts";
+import { AggregatedData, getRawData } from "@fukui-kanko/shared";
+import {
+  Graph,
+  MonthRangePicker,
+  RangeSelector,
+  TypeSelect,
+} from "@fukui-kanko/shared/components/parts";
+import { aggregateDaily, aggregateMonthly, aggregateWeekly } from "@fukui-kanko/shared/utils";
 
 function App() {
   // 開発環境かどうかを判定
@@ -77,29 +73,21 @@ function App() {
   }, [type, startDate, endDate]);
 
   useEffect(() => {
-    const filtered = csvData;
+    let filtered = csvData;
     const filteredDaily = csvDailyData;
 
     if (type === "month" && startMonth && endMonth) {
       // 月末を取得
       const end = new Date(endMonth.getFullYear(), endMonth.getMonth() + 1, 0);
-      setFilteredData(aggregateMonthly(csvData, startMonth, end));
-      return;
+      filtered = aggregateMonthly(filtered, startMonth, end);
     }
 
     if (type === "week" && startWeekRange && endWeekRange) {
-      setFilteredData(aggregateWeekly(csvData, startWeekRange, endWeekRange));
-      return;
+      filtered = aggregateWeekly(filtered, startWeekRange, endWeekRange);
     }
 
     if (type === "day" && startDate && endDate) {
-      setFilteredData(aggregateDaily(csvData, startDate, endDate));
-      return;
-    }
-
-    if (type === "hour" && startDate && endDate) {
-      setFilteredDailyData(aggregateHourly(filteredDaily));
-      return;
+      filtered = aggregateDaily(filtered, startDate, endDate);
     }
 
     // TODO:他の期間の処理を実装する
