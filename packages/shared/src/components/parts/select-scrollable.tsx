@@ -13,7 +13,7 @@ export function SelectScrollable<T = string | number>({
 }) {
   const [selected, setSelected] = useState<T | undefined>(undefined);
   return (
-    <ScrollArea className={(cn(className), "overflow-scroll")}>
+    <ScrollArea className={cn(className, "overflow-scroll")}>
       <ul>
         {Array.from(items).map((item, index) => (
           <li
