@@ -1,14 +1,18 @@
-import { LoadingSpinner } from "@/components/parts/loading-spinner";
-import { getDailyData } from "@/lib/data/csv";
 import { useEffect, useState } from "react";
 import { AggregatedData, getRawData } from "@fukui-kanko/shared";
 import {
   Graph,
+  LoadingSpinner,
   MonthRangePicker,
   RangeSelector,
   TypeSelect,
 } from "@fukui-kanko/shared/components/parts";
-import { aggregateDaily, aggregateMonthly, aggregateWeekly } from "@fukui-kanko/shared/utils";
+import {
+  aggregateDaily,
+  aggregateHourly,
+  aggregateMonthly,
+  aggregateWeekly,
+} from "@fukui-kanko/shared/utils";
 
 function App() {
   // 開発環境かどうかを判定
@@ -58,15 +62,29 @@ function App() {
     const fetchData = async () => {
       if (startDate && endDate) {
         setIsLoading(true);
-        const rawData = await getDailyData("Person", startDate, endDate);
+        const results: AggregatedData[] = [];
+        const current = new Date(startDate);
+        const end = new Date(endDate);
+
+        while (current <= end) {
+          // 1時間ごとに取得
+          const rawData = await getRawData({
+            objectClass: "Person",
+            placement: "fukui-station-east-entrance",
+            aggregateRange: "daily",
+            date: new Date(current),
+          });
+          results.push(...rawData);
+          current.setDate(current.getDate() + 1);
+        }
+
         if (isCurrent) {
-          setCsvDailyData(rawData);
+          setCsvDailyData(results);
           setIsLoading(false);
         }
       }
     };
     fetchData();
-
     return () => {
       isCurrent = false;
     };
@@ -90,9 +108,11 @@ function App() {
       filtered = aggregateDaily(filtered, startDate, endDate);
     }
 
-    // TODO:他の期間の処理を実装する
+    if (type === "hour" && startDate && endDate) {
+      setFilteredDailyData(aggregateHourly(filteredDaily));
+    }
+
     setFilteredData(filtered);
-    setFilteredDailyData(filteredDaily);
   }, [
     type,
     startMonth,

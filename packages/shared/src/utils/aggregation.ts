@@ -111,3 +111,41 @@ export function aggregateDaily(data: AggregatedData[], start: Date, end: Date): 
 
   return Array.from(dailyMap.values());
 }
+
+/**
+ * 指定した期間内のデータを時間単位で集計
+ */
+export function aggregateHourly(data: AggregatedData[]): AggregatedData[] {
+  const hourlyMap = new Map<string, AggregatedData>();
+  data.forEach((row) => {
+    const date = new Date(row["aggregate from"]);
+    const hourKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:00`;
+
+    const dayOfWeek = ["日", "月", "火", "水", "木", "金", "土"][date.getDay()];
+    const isHoliday = holidayJP.isHoliday(date);
+    let holidayName = "";
+    if (isHoliday) {
+      const holidays = holidayJP.between(date, date);
+      if (holidays.length > 0) {
+        holidayName = holidays[0].name;
+      }
+    }
+    if (!hourlyMap.has(hourKey)) {
+      hourlyMap.set(hourKey, {
+        ...row,
+        aggregateFrom: hourKey,
+        aggregateTo: hourKey,
+        totalCount: Number(row[TOTAL_COUNT_KEY]),
+        dayOfWeek,
+        holidayName,
+      });
+    } else {
+      const prev = hourlyMap.get(hourKey)!;
+      hourlyMap.set(hourKey, {
+        ...prev,
+        ["total count"]: Number(prev["total count"]) + Number(row["total count"]),
+      });
+    }
+  });
+  return Array.from(hourlyMap.values());
+}
