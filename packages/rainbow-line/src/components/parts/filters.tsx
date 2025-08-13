@@ -46,8 +46,8 @@ const filterAttributes: Array<{ items: { text: string; value: string }[]; name: 
 export function FiltersSample({ className }: { className?: string }) {
   return (
     <ul className={cn(className, "flex w-full justify-center items-start gap-4")}>
-      {filterAttributes.map((attribute, index) => (
-        <li className="flex flex-col items-center" key={`${index}-${attribute.name}`}>
+      {filterAttributes.map((attribute) => (
+        <li className="flex flex-col items-center" key={attribute.name}>
           <span className="font-bold text-center">{attribute.name}</span>
           <SelectScrollable
             items={attribute.items}

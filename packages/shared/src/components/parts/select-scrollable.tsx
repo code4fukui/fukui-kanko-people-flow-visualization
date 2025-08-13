@@ -15,12 +15,13 @@ export function SelectScrollable<T = string | number>({
   return (
     <ScrollArea className={cn(className)}>
       <ul>
-        {Array.from(items).map((item, index) => (
+        {Array.from(items).map((item) => (
           <li
             className={cn(
               "cursor-pointer hover:bg-gray-200",
               item.value === selected ? "bg-cyan-100" : "",
             )}
+            key={`${item.value}`}
           >
             <Button
               onClick={() => {
@@ -29,7 +30,6 @@ export function SelectScrollable<T = string | number>({
               }}
               variant="ghost"
               className="block rounded-none h-fit py-1 px-4 w-full text-left"
-              key={`${index}-${item.value}`}
             >
               {item.text}
             </Button>
