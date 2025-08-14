@@ -71,7 +71,7 @@ function App() {
           const rawData = await getRawData({
             objectClass: "Person",
             placement: "fukui-station-east-entrance",
-            aggregateRange: "daily",
+            aggregateRange: "daily", // 1時間毎のデータはdailyに含まれています
             date: new Date(current),
           });
           results.push(...rawData);

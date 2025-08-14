@@ -9,6 +9,7 @@ import {
   ChartTooltipContent,
 } from "@fukui-kanko/shared/components/ui";
 import { GRAPH_VIEW_TYPES } from "@fukui-kanko/shared/types";
+import { WEEK_DAYS } from "@fukui-kanko/shared/utils";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 type GraphProps = {
@@ -80,7 +81,7 @@ const CustomizedXAxisTick = ({
   );
 };
 
-const weekdayColors: Record<string, string> = {
+const weekdayColors: Record<(typeof WEEK_DAYS)[number], string> = {
   日: "#F44336",
   月: "#000000",
   火: "#FF9800",
@@ -121,16 +122,15 @@ const Graph: React.FC<GraphProps> = ({
         <ChartContainer config={chartConfig}>
           <LineChart margin={{ top: 10, right: 40 }}>
             {Object.entries(grouped).map(([date, rows]) => {
-              const isHoliday = rows[0]?.holidayName !== "";
-              const strokeColor = isHoliday
-                ? "#F44336"
-                : (weekdayColors[rows[0]?.dayOfWeek as string] ?? "#888");
+              const isHoliday = !!rows[0]?.holidayName;
+              const d = rows[0]?.dayOfWeek as (typeof WEEK_DAYS)[number] | undefined;
+              const strokeColor = isHoliday ? "#F44336" : d ? weekdayColors[d] : "#888";
               return (
                 <Line
                   key={date}
                   data={rows}
                   dataKey={`${date}_${yKey}`}
-                  name={`${date}(${rows[0]?.dayOfWeek})`}
+                  name={`${date}(${rows[0]?.dayOfWeek}${isHoliday ? "・祝" : ""})`}
                   stroke={strokeColor}
                 />
               );
