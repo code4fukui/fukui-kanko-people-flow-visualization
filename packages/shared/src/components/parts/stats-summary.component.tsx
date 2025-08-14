@@ -1,6 +1,7 @@
 import React from "react";
 import { AggregatedData, GRAPH_VIEW_TYPES } from "@fukui-kanko/shared";
 import { AverageBar } from "@fukui-kanko/shared/components/parts";
+import { cn } from "@fukui-kanko/shared/utils";
 import { PeopleIcon } from "@primer/octicons-react";
 
 type StatsSummaryProps = {
@@ -70,9 +71,10 @@ export const StatsSummary: React.FC<StatsSummaryProps> = ({ type, data }) => {
   return (
     <div className="flex justify-center">
       <div
-        className={`grid ${
-          type === "hour" ? "md:grid-cols-[1fr_1fr]" : "md:grid-cols-[1fr_1.5fr]"
-        } gap-3 mt-2 mb-4 w-full max-w-md`}
+        className={cn(
+          "grid gap-3 mt-2 mb-4 w-full max-w-md",
+          type === "hour" ? "md:grid-cols-[1fr_1fr]" : "md:grid-cols-[1fr_1.5fr]",
+        )}
       >
         {/* 合計検出回数 */}
         <div className="bg-blue-50 rounded-lg p-2 text-center">
