@@ -64,10 +64,10 @@ function App() {
       .reduce((acc, row, _index, array) => {
         if (acc.some((r) => r["aggregate from"] === row["aggregate from"])) return acc; // すでに同じ時点のデータがある場合はスキップ
         // 集計の開始時点を取得
-        const addregatedFrom = row["aggregate from"];
+        const aggregatedFrom = row["aggregate from"];
 
         // 同じ時点のデータを取得
-        const sameDayData = array.filter((r) => r["aggregate from"] === addregatedFrom);
+        const sameDayData = array.filter((r) => r["aggregate from"] === aggregatedFrom);
 
         // 同じ時点のデータが1つだけの場合は集計せず追加
         if (sameDayData.length === 1)
