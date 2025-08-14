@@ -21,7 +21,7 @@ export const AverageBar: React.FC<AverageBarProps> = ({ color, label, value, max
           }}
         ></div>
       </div>
-      <p className={`text-sm min-w-[70px] text-right ${valueColor}`}>{value.toLocaleString()}人</p>
+      <p className={`text-sm min-w-[70px] text-right ${valueColor}`}>{value.toLocaleString()}回</p>
     </div>
   </div>
 );

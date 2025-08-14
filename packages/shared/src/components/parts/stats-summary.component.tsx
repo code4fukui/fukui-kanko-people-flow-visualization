@@ -74,15 +74,15 @@ export const StatsSummary: React.FC<StatsSummaryProps> = ({ type, data }) => {
           type === "hour" ? "md:grid-cols-[1fr_1fr]" : "md:grid-cols-[1fr_1.5fr]"
         } gap-3 mt-2 mb-4 w-full max-w-md`}
       >
-        {/* 合計人数 */}
+        {/* 合計検出回数 */}
         <div className="bg-blue-50 rounded-lg p-2 text-center">
           <div className="flex items-center justify-center gap-1 mb-1">
             <PeopleIcon size={16} className="w-4 h-4 text-blue-600" />
-            <p className=" text-blue-600">合計人数</p>
+            <p className=" text-blue-600">合計検出回数</p>
           </div>
-          <p className="text-lg font-medium text-blue-800">{statsData.sum.toLocaleString()}人</p>
+          <p className="text-lg font-medium text-blue-800">{statsData.sum.toLocaleString()}回</p>
         </div>
-        {/* 平均人数 */}
+        {/* 平均検出回数 */}
         <div className="bg-green-50 rounded-lg p-2 text-center">
           {type !== "hour" ? (
             <>
@@ -112,10 +112,10 @@ export const StatsSummary: React.FC<StatsSummaryProps> = ({ type, data }) => {
             <>
               <div className="flex items-center justify-center gap-1 mb-1">
                 <PeopleIcon size={16} className="w-4 h-4 text-green-600" />
-                <p className=" text-green-600">1時間平均人数</p>
+                <p className=" text-green-600">1時間平均検出回数</p>
               </div>
               <p className="text-lg font-medium text-green-800">
-                {statsData.avg.toLocaleString()}人
+                {statsData.avg.toLocaleString()}回
               </p>
             </>
           )}
