@@ -108,7 +108,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
               <span>
                 {type === "week"
                   ? start
-                    ? `${formatDate(start.from, "/")}週`
+                    ? `${formatDate(start.from, "/")}〜`
                     : "週を選択"
                   : start
                     ? formatDate(start, "/")
@@ -158,7 +158,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
               <span>
                 {type === "week"
                   ? end
-                    ? `${formatDate(end.from, "/")}週`
+                    ? `${formatDate(end.from, "/")}〜`
                     : "週を選択"
                   : end
                     ? formatDate(end, "/")
