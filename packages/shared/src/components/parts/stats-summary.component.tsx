@@ -12,7 +12,7 @@ type StatsSummaryProps = {
  */
 function getStats(data: AggregatedData[]) {
   if (!data || data.length === 0) return { sum: 0, avg: 0 };
-  const sum = data.reduce((acc, cur) => acc + Number(cur["total count"] ?? 0), 0);
+  const sum = data.reduce((acc, cur) => acc + Number(cur["totalCount"] ?? 0), 0);
   const avg = sum / data.length;
   return { sum, avg };
 }
