@@ -83,10 +83,7 @@ export function aggregateWeekly(
       i += 7;
     }
     if (weekRows.length === 0) continue;
-    const formatDate = (date: Date) =>
-      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     const total = weekRows.reduce((sum, row) => sum + Number(row[TOTAL_COUNT_KEY]), 0);
-
     let weekdayTotal = 0;
     let weekendTotal = 0;
     weekRows.forEach((row) => {
@@ -104,8 +101,8 @@ export function aggregateWeekly(
 
     weeklyAggregated.push({
       ...weekRows[0],
-      aggregateFrom: `${formatDate(new Date(weekRows[0][AGGREGATE_FROM_KEY]))}〜`,
-      aggregateTo: `${formatDate(new Date(weekRows[weekRows.length - 1][AGGREGATE_FROM_KEY]))}`,
+      aggregateFrom: `${formatDate(new Date(weekRows[0][AGGREGATE_FROM_KEY]), "-")}〜`,
+      aggregateTo: `${formatDate(new Date(weekRows[weekRows.length - 1][AGGREGATE_FROM_KEY]), "-")}`,
       totalCount: total,
       weekdayTotal,
       weekendTotal,
