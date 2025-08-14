@@ -86,17 +86,17 @@ function App() {
                 k === "object class"
               ) {
                 // 数値データでないものはそのまま反映
-                sum[k as keyof AggregatedData] = v;
+                sum[k as keyof RainbowLineAggregatedData] = v;
               } else {
                 // 数値データは合計を計算
-                sum[k as keyof AggregatedData] = (
+                sum[k as keyof RainbowLineAggregatedData] = (
                   (k in sum ? parseInt(`${sum[k]}`) : 0) +
                   (typeof v === "number" ? v : !isNaN(parseInt(v)) ? parseInt(v) : 0)
                 ).toString();
               }
             });
             return sum;
-          }, {} as AggregatedData);
+          }, {} as RainbowLineAggregatedData);
           acc.push({
             ...sum,
             placement: filters["parkingLot"] === "all" ? "rainbow-line-all" : row.placement,
