@@ -34,7 +34,7 @@ export const AverageBar: React.FC<AverageBarProps> = ({
           ></div>
         </div>
       )}
-      <p className={cn("text-sm min-w-[70px] text-right", valueColor)}>
+      <p className={cn("text-sm min-w-[80px] text-right", valueColor)}>
         {value.toLocaleString()}回/
         {type === "month" ? "月" : type === "week" ? "週" : type === "day" ? "日" : ""}
       </p>
