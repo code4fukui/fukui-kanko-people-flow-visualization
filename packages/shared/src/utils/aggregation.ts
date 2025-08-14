@@ -101,7 +101,7 @@ export function aggregateWeekly(
 
     weeklyAggregated.push({
       ...weekRows[0],
-      aggregateFrom: `${formatDate(new Date(weekRows[0][AGGREGATE_FROM_KEY]), "-")}〜`,
+      aggregateFrom: `${formatDate(new Date(weekRows[0][AGGREGATE_FROM_KEY]), "-")}週`,
       aggregateTo: `${formatDate(new Date(weekRows[weekRows.length - 1][AGGREGATE_FROM_KEY]), "-")}`,
       totalCount: total,
       weekdayTotal,
