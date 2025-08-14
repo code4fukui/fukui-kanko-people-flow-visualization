@@ -118,7 +118,7 @@ const Graph: React.FC<GraphProps> = ({
       <ChartContainer config={chartConfig}>
         <LineChart margin={{ top: 10, right: 40 }}>
           {Object.entries(grouped).map(([date, rows]) => {
-            const isHoliday = rows[0]?.holidayName !== "";
+            const isHoliday = !!rows[0]?.holidayName;
             const strokeColor = isHoliday
               ? "#F44336"
               : (weekdayColors[rows[0]?.dayOfWeek as string] ?? "#888");
