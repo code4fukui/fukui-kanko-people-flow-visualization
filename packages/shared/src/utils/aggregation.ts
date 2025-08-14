@@ -90,7 +90,7 @@ export function aggregateWeekly(
     let weekdayTotal = 0;
     let weekendTotal = 0;
     weekRows.forEach((row) => {
-      const date = new Date(row["aggregate from"]);
+      const date = new Date(row[AGGREGATE_FROM_KEY]);
       const dayOfWeek = date.getDay();
       const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
       const isHoliday = holidayJP.isHoliday(date);
