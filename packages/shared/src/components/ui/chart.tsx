@@ -213,7 +213,7 @@ const ChartTooltipContent = React.forwardRef<
                 {row.dayOfWeek}
               </span>
             ) : undefined}
-            {row.holidayName && row.holidayName !== "" ? (
+            {row.dayOfWeek && row.dayOfWeek !== "" && row.type !== "hour" ? (
               <span className="text-red-500 ml-2">{row.holidayName}</span>
             ) : undefined}
           </div>
