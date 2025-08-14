@@ -8,13 +8,14 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@fukui-kanko/shared/components/ui";
+import { GRAPH_VIEW_TYPES } from "@fukui-kanko/shared/types";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 type GraphProps = {
   data: AggregatedData[];
   xKey?: string;
   yKey?: string;
-  type: "month" | "week" | "day" | "hour";
+  type: keyof typeof GRAPH_VIEW_TYPES;
 };
 
 type XAxisTickProps = {
@@ -144,7 +145,7 @@ const Graph: React.FC<GraphProps> = ({
             <ChartLegend content={<ChartLegendContent />} />
           </LineChart>
         </ChartContainer>
-        <StatsSummary theme={type} data={data} />
+        <StatsSummary type={type} data={data} />
       </div>
     );
   }
@@ -164,7 +165,7 @@ const Graph: React.FC<GraphProps> = ({
             <ChartLegend content={<ChartLegendContent />} />
           </LineChart>
         </ChartContainer>
-        <StatsSummary theme={type} data={data} />
+        <StatsSummary type={type} data={data} />
       </div>
     );
   }

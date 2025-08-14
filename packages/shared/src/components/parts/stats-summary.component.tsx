@@ -1,8 +1,9 @@
 import React from "react";
 import { AggregatedData } from "@fukui-kanko/shared";
+import { GRAPH_VIEW_TYPES } from "@fukui-kanko/shared/types";
 
 type StatsSummaryProps = {
-  theme: "month" | "week" | "day" | "hour";
+  type: keyof typeof GRAPH_VIEW_TYPES;
   data?: AggregatedData[];
 };
 
@@ -19,10 +20,10 @@ function getStats(data: AggregatedData[]) {
 /**
  * 集計データ配列から平日・土日祝の平均値を計算
  */
-function getWeekdayAverages(data: AggregatedData[], theme: string) {
+function getWeekdayAverages(data: AggregatedData[], type: keyof typeof GRAPH_VIEW_TYPES) {
   if (!data) return { weekdayAvg: 0, weekendAvg: 0 };
 
-  if (theme === "month" || theme === "week") {
+  if (type === "month" || type === "week") {
     // 月・週集計はweekdayTotal, weekendTotalを使う
     const weekdaySum = data.reduce((acc, cur) => acc + Number(cur["weekdayTotal"] ?? 0), 0);
     const weekendSum = data.reduce((acc, cur) => acc + Number(cur["weekendTotal"] ?? 0), 0);
@@ -32,7 +33,7 @@ function getWeekdayAverages(data: AggregatedData[], theme: string) {
       weekendAvg: count > 0 ? weekendSum / count : 0,
     };
   }
-  if (theme === "day") {
+  if (type === "day") {
     const weekdays = data.filter(
       (d) => d.dayOfWeek && !["土", "日"].includes(String(d.dayOfWeek)) && !d.holidayName,
     );
@@ -52,9 +53,9 @@ function getWeekdayAverages(data: AggregatedData[], theme: string) {
   return { weekdayAvg: 0, weekendAvg: 0 };
 }
 
-export const StatsSummary: React.FC<StatsSummaryProps> = ({ theme, data }) => {
+export const StatsSummary: React.FC<StatsSummaryProps> = ({ type, data }) => {
   const { sum, avg } = getStats(data ?? []);
-  const { weekdayAvg, weekendAvg } = getWeekdayAverages(data ?? [], theme);
+  const { weekdayAvg, weekendAvg } = getWeekdayAverages(data ?? [], type);
 
   return (
     <div className="flex justify-center">
@@ -65,7 +66,7 @@ export const StatsSummary: React.FC<StatsSummaryProps> = ({ theme, data }) => {
             {Math.round(avg).toLocaleString()}人
           </p>
         </div>
-        {theme !== "hour" && (
+        {type !== "hour" && (
           <div>
             <div className="flex justify-end">
               <p>平日平均: {Math.round(weekdayAvg).toLocaleString()}人</p>
