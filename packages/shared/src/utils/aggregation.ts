@@ -1,10 +1,10 @@
 import * as holidayJP from "@holiday-jp/holiday_jp";
-import { AggregatedData, TOTAL_COUNT_KEY } from "../types";
+import { AGGREGATE_FROM_KEY, AggregatedData, TOTAL_COUNT_KEY } from "../types";
 import { formatDate } from "./utils";
 
 function filterByRange(data: AggregatedData[], from: Date, to: Date) {
   return data.filter((row) => {
-    const date = new Date(row["aggregate from"]);
+    const date = new Date(row[AGGREGATE_FROM_KEY]);
     return date >= from && date <= to;
   });
 }
@@ -16,7 +16,7 @@ export function aggregateMonthly(data: AggregatedData[], start: Date, end: Date)
   const filtered = filterByRange(data, start, end);
   const monthlyMap = new Map<string, AggregatedData>();
   filtered.forEach((row) => {
-    const date = new Date(row["aggregate from"]);
+    const date = new Date(row[AGGREGATE_FROM_KEY]);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
     if (!monthlyMap.has(monthKey)) {
       monthlyMap.set(monthKey, {
@@ -54,7 +54,7 @@ export function aggregateWeekly(
     if (isFirstWeek) {
       // 最初の週だけ他の週と範囲が異なる場合があるためfilterで抽出(例：2024/10/17からの週)
       weekRows = filtered.filter((row) => {
-        const d = new Date(row["aggregate from"]);
+        const d = new Date(row[AGGREGATE_FROM_KEY]);
         return d >= startWeekRange.from && d <= startWeekRange.to;
       });
       // 件数分インデックスを進める
@@ -68,8 +68,8 @@ export function aggregateWeekly(
     const total = weekRows.reduce((sum, row) => sum + Number(row[TOTAL_COUNT_KEY]), 0);
     weeklyAggregated.push({
       ...weekRows[0],
-      aggregateFrom: `${formatDate(new Date(weekRows[0]["aggregate from"]))}〜`,
-      aggregateTo: `${formatDate(new Date(weekRows[weekRows.length - 1]["aggregate from"]))}`,
+      aggregateFrom: `${formatDate(new Date(weekRows[0][AGGREGATE_FROM_KEY]))}〜`,
+      aggregateTo: `${formatDate(new Date(weekRows[weekRows.length - 1][AGGREGATE_FROM_KEY]))}`,
       totalCount: total,
     });
   }
@@ -92,7 +92,7 @@ export function aggregateDaily(data: AggregatedData[], start: Date, end: Date): 
   // 日ごとに集計
   const dailyMap = new Map<string, AggregatedData>();
   filtered.forEach((row) => {
-    const date = new Date(row["aggregate from"]);
+    const date = new Date(row[AGGREGATE_FROM_KEY]);
     const dayKey = formatDate(date, "-");
     const dayOfWeek = ["日", "月", "火", "水", "木", "金", "土"][date.getDay()];
     const holidayName = holidayMap.get(dayKey) ?? "";
@@ -118,7 +118,7 @@ export function aggregateDaily(data: AggregatedData[], start: Date, end: Date): 
 export function aggregateHourly(data: AggregatedData[]): AggregatedData[] {
   const hourlyMap = new Map<string, AggregatedData>();
   data.forEach((row) => {
-    const date = new Date(row["aggregate from"]);
+    const date = new Date(row[AGGREGATE_FROM_KEY]);
     const hourKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:00`;
 
     const dayOfWeek = ["日", "月", "火", "水", "木", "金", "土"][date.getDay()];
