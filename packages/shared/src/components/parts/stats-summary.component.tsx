@@ -1,5 +1,5 @@
-import { AggregatedData } from "@/interfaces/aggregated-data.interface";
 import React from "react";
+import { AggregatedData } from "@fukui-kanko/shared";
 
 type StatsSummaryProps = {
   theme: "month" | "week" | "day" | "hour";

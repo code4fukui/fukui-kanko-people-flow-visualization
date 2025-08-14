@@ -1,6 +1,6 @@
-import { StatsSummary } from "@/components/parts/stats-summary";
 import React, { useCallback } from "react";
 import { AggregatedData } from "@fukui-kanko/shared";
+import { StatsSummary } from "@fukui-kanko/shared/components/parts";
 import {
   ChartContainer,
   ChartLegend,
