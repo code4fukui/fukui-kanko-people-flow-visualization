@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { MonthPicker } from "@fukui-kanko/shared/components/parts";
 import {
@@ -9,6 +8,7 @@ import {
   PopoverTrigger,
 } from "@fukui-kanko/shared/components/ui";
 import { CalendarIcon } from "@primer/octicons-react";
+import { cn } from "../../lib/utils";
 
 type MonthRangePickerProps = {
   startMonth: Date | undefined;
