@@ -34,10 +34,10 @@ function getWeekdayAverages(data: AggregatedData[], theme: string) {
   }
   if (theme === "day") {
     const weekdays = data.filter(
-      (d) => d.dayOfWeek && !["土", "日"].includes(d.dayOfWeek) && !d.holidayName,
+      (d) => d.dayOfWeek && !["土", "日"].includes(String(d.dayOfWeek)) && !d.holidayName,
     );
     const weekends = data.filter(
-      (d) => (d.dayOfWeek && ["土", "日"].includes(d.dayOfWeek)) || d.holidayName,
+      (d) => (d.dayOfWeek && ["土", "日"].includes(String(d.dayOfWeek))) || d.holidayName,
     );
     const weekdayAvg =
       weekdays.length > 0
