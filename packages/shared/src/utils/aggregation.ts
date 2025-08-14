@@ -153,6 +153,7 @@ export function aggregateDaily(data: AggregatedData[], start: Date, end: Date): 
 export function aggregateHourly(data: AggregatedData[]): AggregatedData[] {
   const hourlyMap = new Map<string, AggregatedData>();
   data.forEach((row) => {
+    if (!row[AGGREGATE_FROM_KEY]) return;
     const date = new Date(row[AGGREGATE_FROM_KEY]);
     const hourKey = `${formatDate(date, "-")} ${String(date.getHours()).padStart(2, "0")}:00`;
     const dayOfWeek = WEEK_DAYS[date.getDay()];
