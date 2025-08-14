@@ -10,7 +10,7 @@ import {
   REGIONS_PREFECTURES,
   useInitialization,
 } from "@fukui-kanko/shared";
-import { TypeSelect } from "@fukui-kanko/shared/components/parts";
+import { Graph, RangeSelector, TypeSelect } from "@fukui-kanko/shared/components/parts";
 import { Checkbox, Label } from "@fukui-kanko/shared/components/ui";
 import { FiltersSample } from "./components/parts/filters";
 import { HeaderPlaceHolder } from "./components/parts/ph-header";
@@ -37,6 +37,14 @@ function App() {
   const [data, setData] = useState<AggregatedData[]>([]);
   const [processedData, setProcessedData] = useState<RainbowLineAggregatedData[]>([]);
 
+  const [graphRange, setGraghRange] = useState<{
+    from: Date | undefined;
+    to: Date | undefined;
+  }>({
+    from: undefined,
+    to: undefined,
+  });
+
   useInitialization(() => {
     Promise.all([
       getRawData({
@@ -57,6 +65,13 @@ function App() {
   useEffect(() => {
     const processedAggregatedFrom = new Set<string>();
     const processed = data
+      .filter((row) => {
+        const aggregatedFrom = new Date(row["aggregate from"]);
+        return (
+          aggregatedFrom >= (graphRange.from || new Date(0)) &&
+          aggregatedFrom < (graphRange.to || new Date())
+        );
+      })
       // 駐車場のフィルタが設定されていれば適用
       .filter((row) => {
         if (filters["parkingLot"] === "all") return true;
@@ -145,7 +160,7 @@ function App() {
         return filteredRow;
       });
     setProcessedData(processed);
-  }, [data, filters]);
+  }, [data, filters, graphRange]);
 
   return (
     <div className="flex flex-col w-full h-full min-h-[100dvh] p-4">
@@ -169,16 +184,23 @@ function App() {
           </Label>
         </div>
       </div>
-      <div className="grid place-content-center w-full h-full min-h-full">
-        <span>{JSON.stringify(filters)}</span>
-        <span>{JSON.stringify(type)}</span>
-        <span>{JSON.stringify(compareMode)}</span>
-        <span>
-          合計:{" "}
-          {JSON.stringify(
-            processedData.reduce((sum, v) => (sum += Number(`${v["total count"]}`)), 0),
-          )}
-        </span>
+      <div className="flex flex-col items-center w-full h-full min-h-full mt-4">
+        <RangeSelector
+          type={"date"}
+          start={graphRange.from}
+          end={graphRange.to}
+          setStart={(d) => setGraghRange({ ...graphRange, from: d })}
+          setEnd={(d) => setGraghRange({ ...graphRange, to: d })}
+        ></RangeSelector>
+
+        <div className="w-full max-h-1/2 h-1/2 overflow-hidden">
+          <Graph
+            data={processedData as AggregatedData[]}
+            type="day"
+            xKey="aggregated from"
+            yKey="total count"
+          />
+        </div>
       </div>
     </div>
   );
