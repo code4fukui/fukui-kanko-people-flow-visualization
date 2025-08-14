@@ -157,8 +157,7 @@ export function aggregateHourly(data: AggregatedData[]): AggregatedData[] {
   const hourlyMap = new Map<string, AggregatedData>();
   data.forEach((row) => {
     const date = new Date(row[AGGREGATE_FROM_KEY]);
-    const hourKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:00`;
-
+    const hourKey = `${formatDate(date, "-")} ${String(date.getHours()).padStart(2, "0")}:00`;
     const dayOfWeek = WEEK_DAYS[date.getDay()];
     const isHoliday = holidayJP.isHoliday(date);
     let holidayName = "";
