@@ -172,7 +172,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
               <Calendar
                 mode="range"
                 selected={end}
-                defaultMonth={end?.to}
+                defaultMonth={end?.from}
                 captionLayout="dropdown"
                 disabled={(date) => !isValidDate(date, start?.from)}
                 onSelect={(date) => {
