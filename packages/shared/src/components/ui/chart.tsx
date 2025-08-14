@@ -95,6 +95,7 @@ type ChartTooltipRow = {
   holidayName?: string;
   dayOfWeek?: string;
   id?: string;
+  type?: "month" | "week" | "day" | "hour";
 };
 
 const ChartTooltipContent = React.forwardRef<
@@ -201,7 +202,7 @@ const ChartTooltipContent = React.forwardRef<
         {!nestLabel && tooltipLabel ? (
           <div className="flex">
             {tooltipLabel}
-            {row.dayOfWeek && row.dayOfWeek !== "" ? (
+            {row.dayOfWeek && row.dayOfWeek !== "" && row.type !== "hour" ? (
               <span
                 className={cn(
                   "ml-2",
@@ -212,7 +213,7 @@ const ChartTooltipContent = React.forwardRef<
                 {row.dayOfWeek}
               </span>
             ) : undefined}
-            {row.holidayName && row.holidayName !== "" ? (
+            {row.dayOfWeek && row.dayOfWeek !== "" && row.type !== "hour" ? (
               <span className="text-red-500 ml-2">{row.holidayName}</span>
             ) : undefined}
           </div>
@@ -220,7 +221,14 @@ const ChartTooltipContent = React.forwardRef<
 
         <div className="grid gap-1.5">
           {Object.values(groupedById)
-            .flatMap((group) => [...group].reverse())
+            .flatMap((group) => [...group])
+            .sort((a, b) => {
+              if (typeof a.value === "number" && typeof b.value === "number") {
+                return b.value - a.value;
+              }
+              return 0;
+            })
+            .slice(0, 31)
             .map((item, index) => {
               const key = `${nameKey || item.name || item.dataKey || "value"}`;
               const itemConfig = getPayloadConfigFromPayload(config, item, key);
@@ -276,7 +284,13 @@ const ChartTooltipContent = React.forwardRef<
                 </div>
               );
             })}
-          {payload.length >= 10 ? (
+          {payload.filter((item) => item.value !== 0).length > 31 ? (
+            <p className="mx-auto mt-1 text-muted-foreground">
+              ⚠️ 31日分の系統を
+              <br />
+              表示しています
+            </p>
+          ) : payload.length >= 10 && payload.some((item) => item.value === 0) ? (
             <p className="mx-auto mt-1 text-muted-foreground">
               ⚠️ 値が0の系統は
               <br />
@@ -310,7 +324,7 @@ const ChartLegendContent = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "flex items-center justify-center gap-4",
+        "flex flex-wrap items-center justify-center gap-4 max-h-32 overflow-y-auto",
         verticalAlign === "top" ? "pb-3" : "pt-3",
         className,
       )}
@@ -336,7 +350,7 @@ const ChartLegendContent = React.forwardRef<
                 }}
               />
             )}
-            {itemConfig?.label}
+            {itemConfig?.label || item.value}
           </div>
         );
       })}

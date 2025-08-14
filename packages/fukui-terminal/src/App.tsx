@@ -2,11 +2,17 @@ import { useEffect, useState } from "react";
 import { AggregatedData, getRawData } from "@fukui-kanko/shared";
 import {
   Graph,
+  LoadingSpinner,
   MonthRangePicker,
   RangeSelector,
   TypeSelect,
 } from "@fukui-kanko/shared/components/parts";
-import { aggregateDaily, aggregateMonthly, aggregateWeekly } from "@fukui-kanko/shared/utils";
+import {
+  aggregateDaily,
+  aggregateHourly,
+  aggregateMonthly,
+  aggregateWeekly,
+} from "@fukui-kanko/shared/utils";
 
 function App() {
   // 開発環境かどうかを判定
@@ -24,7 +30,10 @@ function App() {
   const [endWeekRange, setEndWeekRange] = useState<{ from: Date; to: Date } | undefined>(undefined);
   const [type, setType] = useState<"month" | "week" | "day" | "hour">("month");
   const [csvData, setCsvData] = useState<AggregatedData[]>([]);
+  const [csvDailyData, setCsvDailyData] = useState<AggregatedData[]>([]);
   const [filteredData, setFilteredData] = useState<AggregatedData[]>([]);
+  const [filteredDailyData, setFilteredDailyData] = useState<AggregatedData[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,7 +54,45 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (type !== "hour") {
+      setIsLoading(false);
+      return;
+    }
+    let isCurrent = true;
+    const fetchData = async () => {
+      if (startDate && endDate) {
+        setIsLoading(true);
+        const results: AggregatedData[] = [];
+        const current = new Date(startDate);
+        const end = new Date(endDate);
+
+        while (current <= end) {
+          // 1時間ごとに取得
+          const rawData = await getRawData({
+            objectClass: "Person",
+            placement: "fukui-station-east-entrance",
+            aggregateRange: "daily", // 1時間毎のデータはdailyに含まれています
+            date: new Date(current),
+          });
+          results.push(...rawData);
+          current.setDate(current.getDate() + 1);
+        }
+
+        if (isCurrent) {
+          setCsvDailyData(results);
+          setIsLoading(false);
+        }
+      }
+    };
+    fetchData();
+    return () => {
+      isCurrent = false;
+    };
+  }, [type, startDate, endDate]);
+
+  useEffect(() => {
     let filtered = csvData;
+    const filteredDaily = csvDailyData;
 
     if (type === "month" && startMonth && endMonth) {
       // 月末を取得
@@ -56,13 +103,27 @@ function App() {
     if (type === "week" && startWeekRange && endWeekRange) {
       filtered = aggregateWeekly(filtered, startWeekRange, endWeekRange);
     }
+
     if (type === "day" && startDate && endDate) {
       filtered = aggregateDaily(filtered, startDate, endDate);
     }
 
-    // TODO:他の期間の処理を実装する
+    if (type === "hour" && startDate && endDate) {
+      setFilteredDailyData(aggregateHourly(filteredDaily));
+    }
+
     setFilteredData(filtered);
-  }, [type, startMonth, endMonth, startWeekRange, endWeekRange, startDate, endDate, csvData]);
+  }, [
+    type,
+    startMonth,
+    endMonth,
+    startWeekRange,
+    endWeekRange,
+    startDate,
+    endDate,
+    csvData,
+    csvDailyData,
+  ]);
 
   return (
     <>
@@ -115,10 +176,12 @@ function App() {
             )}
           </div>
           <div className="my-8">
-            {(startMonth && endMonth) ||
-            (startWeekRange && endWeekRange) ||
-            (startDate && endDate) ? (
-              <Graph type={type} data={filteredData} />
+            {isLoading && type === "hour" ? (
+              <LoadingSpinner />
+            ) : (startMonth && endMonth) ||
+              (startWeekRange && endWeekRange) ||
+              (startDate && endDate) ? (
+              <Graph type={type} data={type === "hour" ? filteredDailyData : filteredData} />
             ) : (
               <p>範囲を選択してください。</p>
             )}

@@ -16,6 +16,7 @@ export const OBJECT_CLASS = {
 export type ObjectClass = keyof typeof OBJECT_CLASS;
 
 export const TOTAL_COUNT_KEY = "total count";
+export const AGGREGATE_FROM_KEY = "aggregate from";
 export type AggregatedDataBase = {
   placement: Placement;
   "object class": ObjectClass;

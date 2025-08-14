@@ -7,6 +7,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@fukui-kanko/shared/components/ui";
+import { WEEK_DAYS } from "@fukui-kanko/shared/utils";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 type GraphProps = {
@@ -78,6 +79,16 @@ const CustomizedXAxisTick = ({
   );
 };
 
+const weekdayColors: Record<(typeof WEEK_DAYS)[number], string> = {
+  日: "#F44336",
+  月: "#000000",
+  火: "#FF9800",
+  水: "#00BCD4",
+  木: "#4CAF50",
+  金: "#FFEB3B",
+  土: "#2196F3",
+};
+
 const Graph: React.FC<GraphProps> = ({
   data,
   xKey = "aggregateFrom",
@@ -88,6 +99,51 @@ const Graph: React.FC<GraphProps> = ({
     (props: XAxisTickProps) => renderTick(props, data, xKey),
     [data, xKey],
   );
+  if (type === "hour") {
+    // 日付ごとにグループ化し、xKeyを時間のみに変換
+    const grouped: { [date: string]: AggregatedData[] } = {};
+    data.forEach((row) => {
+      const value = String(row[xKey]);
+      const [date, hour] = value.split(" ");
+      if (!grouped[date]) grouped[date] = [];
+      // 新しいオブジェクトでxKeyを時間のみに
+      grouped[date].push({
+        ...row,
+        [xKey]: hour, // "HH:00" のみ
+        [`${date}_${yKey}`]: row[yKey],
+        type,
+      });
+    });
+
+    return (
+      <ChartContainer config={chartConfig}>
+        <LineChart margin={{ top: 10, right: 40 }}>
+          {Object.entries(grouped).map(([date, rows]) => {
+            const isHoliday = !!rows[0]?.holidayName;
+            const d = rows[0]?.dayOfWeek as (typeof WEEK_DAYS)[number] | undefined;
+            const strokeColor = isHoliday ? "#F44336" : d ? weekdayColors[d] : "#888";
+            return (
+              <Line
+                key={date}
+                data={rows}
+                dataKey={`${date}_${yKey}`}
+                name={`${date}(${rows[0]?.dayOfWeek}${isHoliday ? "・祝" : ""})`}
+                stroke={strokeColor}
+              />
+            );
+          })}
+          <CartesianGrid />
+          <XAxis dataKey={xKey} tickMargin={8} allowDuplicatedCategory={false} />
+          <YAxis />
+          <ChartTooltip
+            cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
+            content={<ChartTooltipContent className="bg-white" />}
+          />
+          <ChartLegend content={<ChartLegendContent />} />
+        </LineChart>
+      </ChartContainer>
+    );
+  }
   if (type === "month" || type === "week" || type === "day") {
     return (
       <ChartContainer config={chartConfig}>
