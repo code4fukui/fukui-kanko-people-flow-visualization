@@ -127,7 +127,7 @@ const Graph: React.FC<GraphProps> = ({
                 key={date}
                 data={rows}
                 dataKey={`${date}_${yKey}`}
-                name={`${date}(${rows[0]?.dayOfWeek})`}
+                name={`${date}(${rows[0]?.dayOfWeek}${isHoliday ? "・祝" : ""})`}
                 stroke={strokeColor}
               />
             );
