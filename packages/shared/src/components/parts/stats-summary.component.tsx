@@ -118,7 +118,7 @@ export const StatsSummary: React.FC<StatsSummaryProps> = ({ type, data }) => {
             <>
               <div className="flex items-center justify-center gap-1 mb-1">
                 <PeopleIcon size={16} className="w-4 h-4 text-green-600" />
-                <p className=" text-green-600">1時間平均検出回数</p>
+                <p className="text-green-600">1時間平均検出回数</p>
               </div>
               <p className="text-lg font-medium text-green-800">
                 {statsData.avg.toLocaleString()}回
