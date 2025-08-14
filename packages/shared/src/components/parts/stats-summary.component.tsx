@@ -94,20 +94,23 @@ export const StatsSummary: React.FC<StatsSummaryProps> = ({ type, data }) => {
                 value={statsData.avg}
                 max={maxAvg}
                 valueColor="text-blue-700"
+                type={type}
               />
               <AverageBar
                 color="bg-green-500"
-                label="平日平均"
+                label={type === "day" ? "平日平均" : "平日合計の平均"}
                 value={statsData.weekdayAvg}
                 max={maxAvg}
                 valueColor="text-green-700"
+                type={type}
               />
               <AverageBar
                 color="bg-orange-500"
-                label="土日祝平均"
+                label={type === "day" ? "土日祝平均" : "土日祝合計の平均"}
                 value={statsData.weekendAvg}
                 max={maxAvg}
                 valueColor="text-orange-700"
+                type={type}
               />
             </>
           ) : (
