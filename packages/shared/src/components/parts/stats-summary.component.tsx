@@ -43,11 +43,11 @@ function getWeekdayAverages(data: AggregatedData[], type: keyof typeof GRAPH_VIE
     );
     const weekdayAvg =
       weekdays.length > 0
-        ? weekdays.reduce((acc, cur) => acc + Number(cur["total count"] ?? 0), 0) / weekdays.length
+        ? weekdays.reduce((acc, cur) => acc + Number(cur["totalCount"] ?? 0), 0) / weekdays.length
         : 0;
     const weekendAvg =
       weekends.length > 0
-        ? weekends.reduce((acc, cur) => acc + Number(cur["total count"] ?? 0), 0) / weekends.length
+        ? weekends.reduce((acc, cur) => acc + Number(cur["totalCount"] ?? 0), 0) / weekends.length
         : 0;
     return { weekdayAvg, weekendAvg };
   }
