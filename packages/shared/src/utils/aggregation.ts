@@ -15,22 +15,38 @@ function filterByRange(data: AggregatedData[], from: Date, to: Date) {
  */
 export function aggregateMonthly(data: AggregatedData[], start: Date, end: Date): AggregatedData[] {
   const filtered = filterByRange(data, start, end);
-  const monthlyMap = new Map<string, AggregatedData>();
+  const monthlyMap = new Map<
+    string,
+    AggregatedData & {
+      weekdayTotal?: number;
+      weekendTotal?: number;
+    }
+  >();
   filtered.forEach((row) => {
     const date = new Date(row[AGGREGATE_FROM_KEY]);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    const dayOfWeek = date.getDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const isHoliday = holidayJP.isHoliday(date);
+    const isWeekendOrHoliday = isWeekend || isHoliday;
     if (!monthlyMap.has(monthKey)) {
       monthlyMap.set(monthKey, {
         ...row,
         aggregateFrom: monthKey,
         aggregateTo: monthKey,
         totalCount: Number(row[TOTAL_COUNT_KEY]),
+        weekdayTotal: !isWeekendOrHoliday ? Number(row[TOTAL_COUNT_KEY]) : 0,
+        weekendTotal: isWeekendOrHoliday ? Number(row[TOTAL_COUNT_KEY]) : 0,
       });
     } else {
       const prev = monthlyMap.get(monthKey)!;
       monthlyMap.set(monthKey, {
         ...prev,
         totalCount: Number(prev.totalCount) + Number(row[TOTAL_COUNT_KEY]),
+        weekdayTotal:
+          (prev.weekdayTotal ?? 0) + (!isWeekendOrHoliday ? Number(row[TOTAL_COUNT_KEY]) : 0),
+        weekendTotal:
+          (prev.weekendTotal ?? 0) + (isWeekendOrHoliday ? Number(row[TOTAL_COUNT_KEY]) : 0),
       });
     }
   });
@@ -66,12 +82,30 @@ export function aggregateWeekly(
       weekRows = filtered.slice(i, i + 7);
       i += 7;
     }
+    if (weekRows.length === 0) continue;
     const total = weekRows.reduce((sum, row) => sum + Number(row[TOTAL_COUNT_KEY]), 0);
+    let weekdayTotal = 0;
+    let weekendTotal = 0;
+    weekRows.forEach((row) => {
+      const date = new Date(row[AGGREGATE_FROM_KEY]);
+      const dayOfWeek = date.getDay();
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+      const isHoliday = holidayJP.isHoliday(date);
+      const isWeekendOrHoliday = isWeekend || isHoliday;
+      if (isWeekendOrHoliday) {
+        weekendTotal += Number(row[TOTAL_COUNT_KEY]);
+      } else {
+        weekdayTotal += Number(row[TOTAL_COUNT_KEY]);
+      }
+    });
+
     weeklyAggregated.push({
       ...weekRows[0],
-      aggregateFrom: `${formatDate(new Date(weekRows[0][AGGREGATE_FROM_KEY]))}〜`,
-      aggregateTo: `${formatDate(new Date(weekRows[weekRows.length - 1][AGGREGATE_FROM_KEY]))}`,
+      aggregateFrom: `${formatDate(new Date(weekRows[0][AGGREGATE_FROM_KEY]), "-")}週`,
+      aggregateTo: `${formatDate(new Date(weekRows[weekRows.length - 1][AGGREGATE_FROM_KEY]), "-")}`,
       totalCount: total,
+      weekdayTotal,
+      weekendTotal,
     });
   }
   return weeklyAggregated;
@@ -119,9 +153,9 @@ export function aggregateDaily(data: AggregatedData[], start: Date, end: Date): 
 export function aggregateHourly(data: AggregatedData[]): AggregatedData[] {
   const hourlyMap = new Map<string, AggregatedData>();
   data.forEach((row) => {
+    if (!row[AGGREGATE_FROM_KEY]) return;
     const date = new Date(row[AGGREGATE_FROM_KEY]);
-    const hourKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:00`;
-
+    const hourKey = `${formatDate(date, "-")} ${String(date.getHours()).padStart(2, "0")}:00`;
     const dayOfWeek = WEEK_DAYS[date.getDay()];
     const isHoliday = holidayJP.isHoliday(date);
     let holidayName = "";
