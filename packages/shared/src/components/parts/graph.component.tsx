@@ -7,6 +7,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@fukui-kanko/shared/components/ui";
+import { WEEK_DAYS } from "@fukui-kanko/shared/utils";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 type GraphProps = {
@@ -78,7 +79,7 @@ const CustomizedXAxisTick = ({
   );
 };
 
-const weekdayColors: Record<string, string> = {
+const weekdayColors: Record<(typeof WEEK_DAYS)[number], string> = {
   日: "#F44336",
   月: "#000000",
   火: "#FF9800",
@@ -119,9 +120,8 @@ const Graph: React.FC<GraphProps> = ({
         <LineChart margin={{ top: 10, right: 40 }}>
           {Object.entries(grouped).map(([date, rows]) => {
             const isHoliday = !!rows[0]?.holidayName;
-            const strokeColor = isHoliday
-              ? "#F44336"
-              : (weekdayColors[rows[0]?.dayOfWeek as string] ?? "#888");
+            const d = rows[0]?.dayOfWeek as (typeof WEEK_DAYS)[number] | undefined;
+            const strokeColor = isHoliday ? "#F44336" : d ? weekdayColors[d] : "#888";
             return (
               <Line
                 key={date}

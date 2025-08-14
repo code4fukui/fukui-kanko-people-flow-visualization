@@ -1,5 +1,6 @@
 import * as holidayJP from "@holiday-jp/holiday_jp";
 import { AGGREGATE_FROM_KEY, AggregatedData, TOTAL_COUNT_KEY } from "../types";
+import { WEEK_DAYS } from "./date";
 import { formatDate } from "./utils";
 
 function filterByRange(data: AggregatedData[], from: Date, to: Date) {
@@ -94,7 +95,7 @@ export function aggregateDaily(data: AggregatedData[], start: Date, end: Date): 
   filtered.forEach((row) => {
     const date = new Date(row[AGGREGATE_FROM_KEY]);
     const dayKey = formatDate(date, "-");
-    const dayOfWeek = ["日", "月", "火", "水", "木", "金", "土"][date.getDay()];
+    const dayOfWeek = WEEK_DAYS[date.getDay()];
     const holidayName = holidayMap.get(dayKey) ?? "";
 
     if (!dailyMap.has(dayKey)) {
@@ -121,7 +122,7 @@ export function aggregateHourly(data: AggregatedData[]): AggregatedData[] {
     const date = new Date(row[AGGREGATE_FROM_KEY]);
     const hourKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:00`;
 
-    const dayOfWeek = ["日", "月", "火", "水", "木", "金", "土"][date.getDay()];
+    const dayOfWeek = WEEK_DAYS[date.getDay()];
     const isHoliday = holidayJP.isHoliday(date);
     let holidayName = "";
     if (isHoliday) {
