@@ -159,7 +159,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                 {type === "week"
                   ? end
                     ? `${formatDate(end.from, "/")}週`
-                    : "Select week"
+                    : "週を選択"
                   : end
                     ? formatDate(end, "/")
                     : "日付を選択"}
