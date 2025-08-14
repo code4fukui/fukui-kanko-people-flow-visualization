@@ -90,8 +90,8 @@ function App() {
               } else {
                 // 数値データは合計を計算
                 sum[k as keyof AggregatedData] = (
-                  (Object.keys(sum).includes(k) ? parseInt(`${sum[k]}`) : 0) +
-                  (typeof v === "number" ? v : parseInt(v))
+                  (k in sum ? parseInt(`${sum[k]}`) : 0) +
+                  (typeof v === "number" ? v : !isNaN(parseInt(v)) ? parseInt(v) : 0)
                 ).toString();
               }
             });
