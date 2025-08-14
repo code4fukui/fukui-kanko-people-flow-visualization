@@ -90,8 +90,8 @@ function App() {
               } else {
                 // 数値データは合計を計算
                 sum[k as keyof RainbowLineAggregatedData] = (
-                  (k in sum ? parseInt(`${sum[k]}`) : 0) +
-                  (typeof v === "number" ? v : !isNaN(parseInt(v)) ? parseInt(v) : 0)
+                  (k in sum ? Number(`${sum[k]}`) : 0) +
+                  (typeof v === "number" ? v : !isNaN(Number(v)) ? Number(v) : 0)
                 ).toString();
               }
             });
@@ -136,7 +136,7 @@ function App() {
         <span>
           合計:{" "}
           {JSON.stringify(
-            processedData.reduce((sum, v) => (sum += parseInt(`${v["total count"]}`)), 0),
+            processedData.reduce((sum, v) => (sum += Number(`${v["total count"]}`)), 0),
           )}
         </span>
       </div>
