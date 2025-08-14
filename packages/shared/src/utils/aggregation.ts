@@ -34,8 +34,8 @@ export function aggregateMonthly(data: AggregatedData[], start: Date, end: Date)
         aggregateFrom: monthKey,
         aggregateTo: monthKey,
         totalCount: Number(row[TOTAL_COUNT_KEY]),
-        weekdayTotal: !isWeekendOrHoliday ? Number(row["total count"]) : 0,
-        weekendTotal: isWeekendOrHoliday ? Number(row["total count"]) : 0,
+        weekdayTotal: !isWeekendOrHoliday ? Number(row[TOTAL_COUNT_KEY]) : 0,
+        weekendTotal: isWeekendOrHoliday ? Number(row[TOTAL_COUNT_KEY]) : 0,
       });
     } else {
       const prev = monthlyMap.get(monthKey)!;
@@ -43,9 +43,9 @@ export function aggregateMonthly(data: AggregatedData[], start: Date, end: Date)
         ...prev,
         totalCount: Number(prev.totalCount) + Number(row[TOTAL_COUNT_KEY]),
         weekdayTotal:
-          (prev.weekdayTotal ?? 0) + (!isWeekendOrHoliday ? Number(row["total count"]) : 0),
+          (prev.weekdayTotal ?? 0) + (!isWeekendOrHoliday ? Number(row[TOTAL_COUNT_KEY]) : 0),
         weekendTotal:
-          (prev.weekendTotal ?? 0) + (isWeekendOrHoliday ? Number(row["total count"]) : 0),
+          (prev.weekendTotal ?? 0) + (isWeekendOrHoliday ? Number(row[TOTAL_COUNT_KEY]) : 0),
       });
     }
   });
@@ -95,9 +95,9 @@ export function aggregateWeekly(
       const isHoliday = holidayJP.isHoliday(date);
       const isWeekendOrHoliday = isWeekend || isHoliday;
       if (isWeekendOrHoliday) {
-        weekendTotal += Number(row["total count"]);
+        weekendTotal += Number(row[TOTAL_COUNT_KEY]);
       } else {
-        weekdayTotal += Number(row["total count"]);
+        weekdayTotal += Number(row[TOTAL_COUNT_KEY]);
       }
     });
 
