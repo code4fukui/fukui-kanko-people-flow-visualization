@@ -133,8 +133,10 @@ function App() {
         <span>{JSON.stringify(type)}</span>
         <span>{JSON.stringify(compareMode)}</span>
         <span>
-          期間の合計:{" "}
-          {JSON.stringify(processedData.reduce((sum, v) => (sum += v["total count"]), 0))}
+          合計:{" "}
+          {JSON.stringify(
+            processedData.reduce((sum, v) => (sum += parseInt(`${v["total count"]}`)), 0),
+          )}
         </span>
       </div>
     </div>
