@@ -1,3 +1,4 @@
+export * from "./average-bar.component";
 export * from "./graph.component";
 export * from "./loading-spinner.component";
 export * from "./month-picker.component";
