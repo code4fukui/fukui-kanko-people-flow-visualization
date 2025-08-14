@@ -52,6 +52,7 @@ function App() {
   });
 
   useEffect(() => {
+    const processedAggregatedFrom = new Set<string>();
     const processed = data
       // 駐車場のフィルタが設定されていれば適用
       .filter((row) => {
@@ -62,7 +63,8 @@ function App() {
       })
       // 同じ時点から集計している行が第一駐車場と第二駐車場で2つある場合があるので、これを合計値に変更する
       .reduce((acc, row, _index, array) => {
-        if (acc.some((r) => r["aggregate from"] === row["aggregate from"])) return acc; // すでに同じ時点のデータがある場合はスキップ
+        if (processedAggregatedFrom.has(row["aggregate from"])) return acc; // すでに同じ時点のデータがある場合はスキップ
+        processedAggregatedFrom.add(row["aggregate from"]);
         // 集計の開始時点を取得
         const aggregatedFrom = row["aggregate from"];
 
