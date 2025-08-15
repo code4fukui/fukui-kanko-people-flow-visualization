@@ -95,6 +95,7 @@ const Graph: React.FC<GraphProps> = ({
   xKey = "aggregateFrom",
   yKey = "totalCount",
   type,
+  className,
 }) => {
   const tickRenderer = useCallback(
     (props: XAxisTickProps) => renderTick(props, data, xKey),
