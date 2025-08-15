@@ -3,7 +3,6 @@ import {
   AggregatedData,
   AggregatedDataBase,
   CAR_CATEGORIES,
-  getMaxDate,
   getRawData,
   GRAPH_VIEW_TYPES,
   Placement,
@@ -11,10 +10,11 @@ import {
   REGIONS_PREFECTURES,
   useInitialization,
 } from "@fukui-kanko/shared";
-import { Graph, RangeSelector, TypeSelect } from "@fukui-kanko/shared/components/parts";
+import { TypeSelect } from "@fukui-kanko/shared/components/parts";
 import { Checkbox, Label } from "@fukui-kanko/shared/components/ui";
 import { FiltersSample } from "./components/parts/filters";
 import { HeaderPlaceHolder } from "./components/parts/ph-header";
+import { RainbowLineChartPanel } from "./components/parts/rainbow-line-chart-panel";
 import { FILTER_ATTRIBUTES } from "./interfaces/filter-attributes";
 
 type RainbowLineAggregatedData = AggregatedDataBase<Placement | "rainbow-line-all"> &
@@ -38,15 +38,6 @@ function App() {
   const [data, setData] = useState<AggregatedData[]>([]);
   const [processedData, setProcessedData] = useState<RainbowLineAggregatedData[]>([]);
 
-  const [graphRange, setGraghRange] = useState<{
-    from: Date | undefined;
-    to: Date | undefined;
-  }>({
-    // 重複処理が行えている期間のみを表示
-    from: new Date("2024-12-20"),
-    to: getMaxDate(),
-  });
-
   useInitialization(() => {
     Promise.all([
       getRawData({
@@ -67,13 +58,6 @@ function App() {
   useEffect(() => {
     const processedAggregatedFrom = new Set<string>();
     const processed = data
-      .filter((row) => {
-        const aggregatedFrom = new Date(row["aggregate from"]);
-        return (
-          aggregatedFrom >= (graphRange.from || new Date(0)) &&
-          aggregatedFrom < (graphRange.to || new Date())
-        );
-      })
       // 駐車場のフィルタが設定されていれば適用
       .filter((row) => {
         if (filters["parkingLot"] === "all") return true;
@@ -162,7 +146,7 @@ function App() {
         return filteredRow;
       });
     setProcessedData(processed);
-  }, [data, filters, graphRange]);
+  }, [data, filters]);
 
   return (
     <div className="flex flex-col w-full h-[100dvh] p-4 overflow-hidden">
@@ -186,23 +170,9 @@ function App() {
           </Label>
         </div>
       </div>
-      <div className="flex flex-col items-center w-full h-full max-h-full py-4 overflow-hidden">
-        <RangeSelector
-          type={"date"}
-          start={graphRange.from}
-          end={graphRange.to}
-          setStart={(d) => setGraghRange({ ...graphRange, from: d })}
-          setEnd={(d) => setGraghRange({ ...graphRange, to: d })}
-        ></RangeSelector>
-
-        <div className="flex flex-col gap-y-4 w-full max-h-full h-full overflow-auto">
-          <Graph
-            data={processedData as AggregatedData[]}
-            type="day"
-            xKey="aggregate from"
-            yKey="total count"
-          />
-        </div>
+      <div className="flex items-center gap-x-4 grow w-full h-full max-h-full py-4">
+        <RainbowLineChartPanel data={processedData as AggregatedData[]} />
+        {compareMode && <RainbowLineChartPanel data={processedData as AggregatedData[]} />}
       </div>
     </div>
   );
