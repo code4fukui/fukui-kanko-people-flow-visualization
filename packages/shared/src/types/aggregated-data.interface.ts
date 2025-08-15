@@ -17,10 +17,10 @@ export type ObjectClass = keyof typeof OBJECT_CLASS;
 
 export const TOTAL_COUNT_KEY = "total count";
 export const AGGREGATE_FROM_KEY = "aggregate from";
-export type AggregatedDataBase = {
-  placement: Placement;
+export type AggregatedDataBase<P = Placement> = {
+  placement: P;
   "object class": ObjectClass;
-  "aggregate from": string;
+  [AGGREGATE_FROM_KEY]: string;
   "aggregate to": string;
   [TOTAL_COUNT_KEY]: number;
 };

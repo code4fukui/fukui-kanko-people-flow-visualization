@@ -109,10 +109,10 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                 {type === "week"
                   ? start
                     ? `${formatDate(start.from, "/")}週`
-                    : "Select week"
+                    : "週を選択"
                   : start
                     ? formatDate(start, "/")
-                    : "Select date"}
+                    : "日付を選択"}
               </span>
               <CalendarIcon size={24} />
             </Button>
@@ -122,6 +122,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
               <Calendar
                 mode="range"
                 selected={start}
+                defaultMonth={start?.from}
                 captionLayout="dropdown"
                 disabled={(date) => !isValidDate(date)}
                 onSelect={(date) => {
@@ -132,6 +133,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
               <Calendar
                 mode="single"
                 selected={start}
+                defaultMonth={start}
                 captionLayout="dropdown"
                 disabled={(date) => !isValidDate(date)}
                 onSelect={(date) => {
@@ -157,10 +159,10 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                 {type === "week"
                   ? end
                     ? `${formatDate(end.from, "/")}週`
-                    : "Select week"
+                    : "週を選択"
                   : end
                     ? formatDate(end, "/")
-                    : "Select date"}
+                    : "日付を選択"}
               </span>
               <CalendarIcon size={24} />
             </Button>
@@ -170,6 +172,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
               <Calendar
                 mode="range"
                 selected={end}
+                defaultMonth={end?.from}
                 captionLayout="dropdown"
                 disabled={(date) => !isValidDate(date, start?.from)}
                 onSelect={(date) => {
@@ -180,6 +183,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
               <Calendar
                 mode="single"
                 selected={end}
+                defaultMonth={end}
                 captionLayout="dropdown"
                 disabled={(date) => !isValidDate(date, start)}
                 onSelect={(date) => {
