@@ -91,35 +91,37 @@ function App() {
       <div className="text-center w-1/2">
         <h1 className="text-4xl font-bold text-gray-800 mb-4">福井駅周辺データ可視化</h1>
         <div className="flex flex-col items-center gap-6 my-8">
-          <TypeSelect
-            type={type}
-            onChange={(newType) => {
-              setType(newType);
-              // タイプ変更時に値をリセット
-              setPeriod({
-                startDate: undefined,
-                endDate: undefined,
-                startMonth: undefined,
-                endMonth: undefined,
-                startWeekRange: undefined,
-                endWeekRange: undefined,
-              });
-              setComparePeriod({
-                startDate: undefined,
-                endDate: undefined,
-                startMonth: undefined,
-                endMonth: undefined,
-                startWeekRange: undefined,
-                endWeekRange: undefined,
-              });
-            }}
-          />
-          <Checkbox
-            checked={compareMode}
-            onCheckedChange={(v) => setCompareMode(!!v)}
-            className="bg-white"
-          />
-          <Label htmlFor="terms">2期間比較</Label>
+          <div className="flex flex-row items-center gap-4">
+            <TypeSelect
+              type={type}
+              onChange={(newType) => {
+                setType(newType);
+                // タイプ変更時に値をリセット
+                setPeriod({
+                  startDate: undefined,
+                  endDate: undefined,
+                  startMonth: undefined,
+                  endMonth: undefined,
+                  startWeekRange: undefined,
+                  endWeekRange: undefined,
+                });
+                setComparePeriod({
+                  startDate: undefined,
+                  endDate: undefined,
+                  startMonth: undefined,
+                  endMonth: undefined,
+                  startWeekRange: undefined,
+                  endWeekRange: undefined,
+                });
+              }}
+            />
+            <Checkbox
+              checked={compareMode}
+              onCheckedChange={(v) => setCompareMode(!!v)}
+              className="bg-white"
+            />
+            <Label htmlFor="terms">2期間比較</Label>
+          </div>
           <div className="flex flex-row gap-8 justify-center">
             <PeriodGraphPanel
               type={type}
