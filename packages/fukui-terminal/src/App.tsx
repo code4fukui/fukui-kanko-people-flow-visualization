@@ -81,10 +81,10 @@ function App() {
   useDailyDataEffect(type, comparePeriod, setCompareCsvDailyData, setCompareIsLoading);
 
   return (
-    <div className="h-full w-full max-w-full">
+    <div className="h-full w-full max-w-full text-center flex flex-col items-center gap-2 mt-3">
       <div className="text-center w-full h-full">
         <div className="flex flex-col items-center gap-2 mt-3">
-          <div className="flex flex-row items-center gap-4">
+          <div className="flex flex-row items-center gap-17 mr-24">
             <TypeSelect
               type={type}
               onChange={(newType) => {
@@ -108,12 +108,16 @@ function App() {
                 });
               }}
             />
-            <Checkbox
-              checked={compareMode}
-              onCheckedChange={(v) => setCompareMode(!!v)}
-              className="bg-white"
-            />
-            <Label htmlFor="terms">2期間比較</Label>
+            <div className="flex flex-row items-center gap-2">
+              <Checkbox
+                checked={compareMode}
+                onCheckedChange={(v) => setCompareMode(!!v)}
+                className="bg-white"
+              />
+              <Label htmlFor="terms" className="text-base">
+                2期間比較
+              </Label>
+            </div>
           </div>
           <div className="flex flex-row w-full gap-8 justify-center">
             <PeriodGraphPanel
