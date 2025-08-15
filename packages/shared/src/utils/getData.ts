@@ -78,7 +78,11 @@ export async function getRawData<T extends AggregatedRange>(params: getRawDataPr
     url += `/${year}/${month}/${day}/${year}-${month}-${day}-${hour}.csv`;
   }
 
-  const csvResponse = await fetch(url);
+  const csvResponse = await fetch(url, {
+    headers: {
+      "Content-Type": "text/csv",
+    },
+  });
   const csvRawText = await csvResponse.text();
   const csvFormattedText = csvRawText.replaceAll(/\n{2,}/g, "\n");
 
