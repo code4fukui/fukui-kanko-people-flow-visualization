@@ -5,6 +5,7 @@ import {
   MonthRangePicker,
   RangeSelector,
 } from "@fukui-kanko/shared/components/parts";
+import { cn } from "@fukui-kanko/shared/utils";
 
 type PeriodGraphPanelProps = {
   type: keyof typeof GRAPH_VIEW_TYPES;
@@ -13,6 +14,7 @@ type PeriodGraphPanelProps = {
   isLoading: boolean;
   filteredData: AggregatedData[];
   filteredDailyData: AggregatedData[];
+  className?: string;
 };
 export function PeriodGraphPanel({
   type,
@@ -21,9 +23,10 @@ export function PeriodGraphPanel({
   isLoading,
   filteredData,
   filteredDailyData,
+  className,
 }: PeriodGraphPanelProps) {
   return (
-    <div>
+    <div className={cn(className)}>
       {type === "month" && (
         <MonthRangePicker
           startMonth={period.startMonth}
