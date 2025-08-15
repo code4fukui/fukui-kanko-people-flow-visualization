@@ -1,11 +1,17 @@
 import { useEffect } from "react";
-import { AggregatedData, getFilteredData, getRawData, Period } from "@fukui-kanko/shared";
+import {
+  AggregatedData,
+  getFilteredData,
+  getRawData,
+  GRAPH_VIEW_TYPES,
+  Period,
+} from "@fukui-kanko/shared";
 
 /**
  * テーマ・期間ごとに適切な集計データを返すカスタムフック
  */
 export function useFilteredData(
-  type: "month" | "week" | "day" | "hour",
+  type: keyof typeof GRAPH_VIEW_TYPES,
   period: Period,
   csvData: AggregatedData[],
   csvDailyData: AggregatedData[],
@@ -33,7 +39,7 @@ export function useFilteredData(
  * 時間別データを取得・更新するフック
  */
 export function useDailyDataEffect(
-  type: "month" | "week" | "day" | "hour",
+  type: keyof typeof GRAPH_VIEW_TYPES,
   period: Period,
   setDailyData: (data: AggregatedData[]) => void,
   setIsLoading: (loading: boolean) => void,

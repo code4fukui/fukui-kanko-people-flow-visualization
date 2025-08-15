@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   AggregatedData,
   getRawData,
+  GRAPH_VIEW_TYPES,
   Period,
   useDailyDataEffect,
   useFilteredData,
@@ -15,14 +16,13 @@ function App() {
   // ローカル開発時はランディングページのポート、本番時は相対パス
   const homeUrl = isDev ? "http://localhost:3004" : "../";
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [compareIsLoading, setCompareIsLoading] = useState(false);
-  const [compareMode, setCompareMode] = useState(false);
-  const [compareCsvDailyData, setCompareCsvDailyData] = useState<AggregatedData[]>([]);
-
-  const [type, setType] = useState<"month" | "week" | "day" | "hour">("month");
+  const [type, setType] = useState<keyof typeof GRAPH_VIEW_TYPES>("month");
   const [csvData, setCsvData] = useState<AggregatedData[]>([]);
   const [csvDailyData, setCsvDailyData] = useState<AggregatedData[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareCsvDailyData, setCompareCsvDailyData] = useState<AggregatedData[]>([]);
+  const [compareIsLoading, setCompareIsLoading] = useState(false);
 
   // 本期間の状態
   const [period, setPeriod] = useState<Period>({
@@ -33,7 +33,6 @@ function App() {
     startWeekRange: undefined,
     endWeekRange: undefined,
   });
-
   const [filteredData, setFilteredData] = useState<AggregatedData[]>([]);
   const [filteredDailyData, setFilteredDailyData] = useState<AggregatedData[]>([]);
 

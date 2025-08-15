@@ -1,4 +1,4 @@
-import { AggregatedData, Period } from "@fukui-kanko/shared";
+import { AggregatedData, GRAPH_VIEW_TYPES, Period } from "@fukui-kanko/shared";
 import {
   Graph,
   LoadingSpinner,
@@ -7,7 +7,7 @@ import {
 } from "@fukui-kanko/shared/components/parts";
 
 type PeriodGraphPanelProps = {
-  type: "month" | "week" | "day" | "hour";
+  type: keyof typeof GRAPH_VIEW_TYPES;
   period: Period;
   setPeriod: React.Dispatch<React.SetStateAction<Period>>;
   isLoading: boolean;
