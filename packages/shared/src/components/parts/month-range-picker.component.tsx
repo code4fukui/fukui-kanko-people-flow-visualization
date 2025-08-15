@@ -39,8 +39,8 @@ export function MonthRangePicker({ startMonth, endMonth, onChange }: MonthRangeP
 
   return (
     <div className="flex flex-row gap-6">
-      <div className="flex flex-col gap-3">
-        <Label className="px-1">開始</Label>
+      <div className="flex flex-col gap-1">
+        <Label className="px-1 text-base">開始</Label>
         <Popover open={openStartMonth} onOpenChange={setOpenStartMonth}>
           <PopoverTrigger asChild>
             <Button variant="outline" className="w-48 justify-between font-normal">
@@ -64,8 +64,8 @@ export function MonthRangePicker({ startMonth, endMonth, onChange }: MonthRangeP
         </Popover>
       </div>
       <div className="flex items-end pb-1 text-xl">〜</div>
-      <div className="flex flex-col gap-3">
-        <Label className="px-1">終了</Label>
+      <div className="flex flex-col gap-1">
+        <Label className="px-1 text-base">終了</Label>
         <Popover open={openEndMonth} onOpenChange={setOpenEndMonth}>
           <PopoverTrigger asChild>
             <Button
