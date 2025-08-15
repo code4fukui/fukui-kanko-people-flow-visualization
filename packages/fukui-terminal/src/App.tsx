@@ -82,66 +82,62 @@ function App() {
 
   return (
     <div className="h-full w-full max-w-full text-center flex flex-col items-center gap-2 mt-3">
-      <div className="text-center w-full h-full">
-        <div className="flex flex-col items-center gap-2 mt-3">
-          <div className="flex flex-row items-center gap-17 mr-24">
-            <TypeSelect
-              type={type}
-              onChange={(newType) => {
-                setType(newType);
-                // タイプ変更時に値をリセット
-                setPeriod({
-                  startDate: undefined,
-                  endDate: undefined,
-                  startMonth: undefined,
-                  endMonth: undefined,
-                  startWeekRange: undefined,
-                  endWeekRange: undefined,
-                });
-                setComparePeriod({
-                  startDate: undefined,
-                  endDate: undefined,
-                  startMonth: undefined,
-                  endMonth: undefined,
-                  startWeekRange: undefined,
-                  endWeekRange: undefined,
-                });
-              }}
-            />
-            <div className="flex flex-row items-center gap-2">
-              <Checkbox
-                checked={compareMode}
-                onCheckedChange={(v) => setCompareMode(!!v)}
-                className="bg-white border-black hover:bg-gray-100"
-              />
-              <Label htmlFor="terms" className="text-base">
-                2期間比較
-              </Label>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row w-full gap-8 justify-center">
-            <PeriodGraphPanel
-              type={type}
-              period={period}
-              setPeriod={setPeriod}
-              isCompareMode={compareMode}
-              isLoading={isLoading}
-              filteredData={filteredData}
-              filteredDailyData={filteredDailyData}
-            />
-            {compareMode && (
-              <PeriodGraphPanel
-                type={type}
-                period={comparePeriod}
-                setPeriod={setComparePeriod}
-                isCompareMode={compareMode}
-                isLoading={compareIsLoading}
-                filteredData={compareFilteredData}
-                filteredDailyData={compareFilteredDailyData}
-              />
-            )}
-          </div>
+      <div className="flex flex-row items-center gap-17 mr-24">
+        <TypeSelect
+          type={type}
+          onChange={(newType) => {
+            setType(newType);
+            // タイプ変更時に値をリセット
+            setPeriod({
+              startDate: undefined,
+              endDate: undefined,
+              startMonth: undefined,
+              endMonth: undefined,
+              startWeekRange: undefined,
+              endWeekRange: undefined,
+            });
+            setComparePeriod({
+              startDate: undefined,
+              endDate: undefined,
+              startMonth: undefined,
+              endMonth: undefined,
+              startWeekRange: undefined,
+              endWeekRange: undefined,
+            });
+          }}
+        />
+        <div className="flex flex-row items-center gap-2">
+          <Checkbox
+            checked={compareMode}
+            onCheckedChange={(v) => setCompareMode(!!v)}
+            className="bg-white border-black hover:bg-gray-100"
+          />
+          <Label htmlFor="terms" className="text-base">
+            2期間比較
+          </Label>
         </div>
+      </div>
+      <div className="flex flex-col sm:flex-row w-full gap-8 justify-center">
+        <PeriodGraphPanel
+          type={type}
+          period={period}
+          setPeriod={setPeriod}
+          isCompareMode={compareMode}
+          isLoading={isLoading}
+          filteredData={filteredData}
+          filteredDailyData={filteredDailyData}
+        />
+        {compareMode && (
+          <PeriodGraphPanel
+            type={type}
+            period={comparePeriod}
+            setPeriod={setComparePeriod}
+            isCompareMode={compareMode}
+            isLoading={compareIsLoading}
+            filteredData={compareFilteredData}
+            filteredDailyData={compareFilteredDailyData}
+          />
+        )}
       </div>
     </div>
   );
