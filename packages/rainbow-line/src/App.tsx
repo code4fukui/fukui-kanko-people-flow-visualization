@@ -3,6 +3,7 @@ import {
   AggregatedData,
   AggregatedDataBase,
   CAR_CATEGORIES,
+  getMaxDate,
   getRawData,
   GRAPH_VIEW_TYPES,
   Placement,
@@ -41,8 +42,9 @@ function App() {
     from: Date | undefined;
     to: Date | undefined;
   }>({
-    from: undefined,
-    to: undefined,
+    // 重複処理が行えている期間のみを表示
+    from: new Date("2024-12-20"),
+    to: getMaxDate(),
   });
 
   useInitialization(() => {
@@ -163,7 +165,7 @@ function App() {
   }, [data, filters, graphRange]);
 
   return (
-    <div className="flex flex-col w-full h-full min-h-[100dvh] p-4">
+    <div className="flex flex-col w-full h-[100dvh] p-4 overflow-hidden">
       <HeaderPlaceHolder title="レインボーライン" />
       <div className="grid grid-cols-[1fr_auto] grid-rows-2 w-fit mx-auto place-content-center gap-4 pt-4">
         <FiltersSample
@@ -184,7 +186,7 @@ function App() {
           </Label>
         </div>
       </div>
-      <div className="flex flex-col items-center w-full h-full min-h-full mt-4">
+      <div className="flex flex-col items-center w-full h-full max-h-full py-4 overflow-hidden">
         <RangeSelector
           type={"date"}
           start={graphRange.from}
@@ -193,11 +195,11 @@ function App() {
           setEnd={(d) => setGraghRange({ ...graphRange, to: d })}
         ></RangeSelector>
 
-        <div className="w-full max-h-1/2 h-1/2 overflow-hidden">
+        <div className="flex flex-col gap-y-4 w-full max-h-full h-full overflow-auto">
           <Graph
             data={processedData as AggregatedData[]}
             type="day"
-            xKey="aggregated from"
+            xKey="aggregate from"
             yKey="total count"
           />
         </div>
