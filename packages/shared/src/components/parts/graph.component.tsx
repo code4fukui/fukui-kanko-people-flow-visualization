@@ -38,7 +38,7 @@ const ClickableLegend: React.FC<{
   return (
     <div className="flex flex-wrap items-center justify-center gap-4 max-h-[4.5rem] overflow-y-auto">
       {payload.map((entry) => {
-        const key = `${entry.dataKey ?? entry.value}-${instanceSuffix}`;
+        const key = `${entry.dataKey}_${instanceSuffix}`;
         const name = String(entry.value ?? key);
         const color = entry.color ?? "#999";
         const isHidden = hidden.has(key);
@@ -175,6 +175,8 @@ const Graph: React.FC<GraphProps> = ({
             const isHoliday = !!rows[0]?.holidayName;
             const d = rows[0]?.dayOfWeek as (typeof WEEK_DAYS)[number] | undefined;
             const strokeColor = isHoliday ? "#F44336" : d ? weekdayColors[d] : "#888";
+            const legendKey = `${date}_${yKey}_${instanceId}`;
+            const isHidden = hiddenKeys.has(legendKey);
             return (
               <Line
                 key={date}
@@ -183,6 +185,7 @@ const Graph: React.FC<GraphProps> = ({
                 name={`${date}(${rows[0]?.dayOfWeek}${isHoliday ? "・祝" : ""})`}
                 stroke={strokeColor}
                 strokeWidth={2}
+                hide={isHidden}
               />
             );
           })}
