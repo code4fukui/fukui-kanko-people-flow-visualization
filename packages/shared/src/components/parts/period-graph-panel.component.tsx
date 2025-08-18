@@ -76,10 +76,15 @@ export function PeriodGraphPanel({
             (period.startWeekRange && period.endWeekRange) ||
             (period.startDate && period.endDate) ? (
             <>
-              <div className="rounded-lg w-full h-[60vh] overflow-hidden">
+              <div className="rounded-lg w-full h-[60vh]">
                 <Graph type={type} data={type === "hour" ? filteredDailyData : filteredData} />
               </div>
-              <div className={`${isCompareMode ? "w-full" : "w-2/3"} mx-auto px-4 mt-4`}>
+              <div
+                className={cn("mx-auto px-4 mt-4", {
+                  "w-full": isCompareMode,
+                  "w-2/3": !isCompareMode,
+                })}
+              >
                 <StatsSummary
                   type={type}
                   data={type === "hour" ? filteredDailyData : filteredData}
