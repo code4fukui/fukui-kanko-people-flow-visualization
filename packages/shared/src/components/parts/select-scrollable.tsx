@@ -3,15 +3,17 @@ import { cn } from "../../utils";
 import { Button, ScrollArea } from "../ui";
 
 export function SelectScrollable<T = string | number>({
+  defaultValue,
   items,
   onChange,
   className,
 }: {
+  defaultValue?: T;
   items: ArrayLike<{ text: string; value: T }>;
   className?: string;
   onChange: (value: T) => void;
 }) {
-  const [selected, setSelected] = useState<T | undefined>(undefined);
+  const [selected, setSelected] = useState<T | undefined>(defaultValue || undefined);
   return (
     <ScrollArea className={cn(className)}>
       <div className="flex flex-col">

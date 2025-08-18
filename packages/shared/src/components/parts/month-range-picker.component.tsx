@@ -47,7 +47,7 @@ export function MonthRangePicker({ startMonth, endMonth, onChange }: MonthRangeP
               <span>
                 {startMonth
                   ? `${startMonth.getFullYear()}/${String(startMonth.getMonth() + 1).padStart(2, "0")}`
-                  : "Select month"}
+                  : "月を選択"}
               </span>
               <CalendarIcon size={24} />
             </Button>
@@ -79,7 +79,7 @@ export function MonthRangePicker({ startMonth, endMonth, onChange }: MonthRangeP
               <span>
                 {endMonth
                   ? `${endMonth.getFullYear()}/${String(endMonth.getMonth() + 1).padStart(2, "0")}`
-                  : "Select month"}
+                  : "月を選択"}
               </span>
               <CalendarIcon size={24} />
             </Button>
