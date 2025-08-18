@@ -38,6 +38,7 @@ const ClickableLegend: React.FC<{
   onScrollPersist?: (top: number) => void;
 }> = ({ payload = [], hidden, onToggle, instanceSuffix, savedScrollTop = 0, onScrollPersist }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [hoveredKey, setHoveredKey] = useState<string | undefined>(undefined);
 
   // 再マウント時にスクロール位置を復元（描画前に反映）
   useLayoutEffect(() => {
@@ -60,6 +61,8 @@ const ClickableLegend: React.FC<{
         const name = String(entry.value ?? key);
         const color = entry.color ?? "#999";
         const isHidden = hidden.has(key);
+        const hoveredIsHidden = hoveredKey ? hidden.has(hoveredKey) : false;
+        const isDimmedByHover = hoveredKey !== undefined && hoveredKey !== key && !hoveredIsHidden;
         return (
           <div key={key}>
             <button
@@ -67,7 +70,14 @@ const ClickableLegend: React.FC<{
                 onScrollPersist?.(containerRef.current?.scrollTop ?? 0);
                 onToggle(key);
               }}
-              className={cn("flex items-center gap-1.5", isHidden && "opacity-40")}
+              onMouseEnter={() => setHoveredKey(key)}
+              onMouseLeave={() => setHoveredKey(undefined)}
+              onFocus={() => setHoveredKey(key)}
+              onBlur={() => setHoveredKey(undefined)}
+              className={cn(
+                "flex items-center gap-1.5 cursor-pointer",
+                (isHidden || isDimmedByHover) && "opacity-40",
+              )}
             >
               <div className="h-2 w-2 shrink-0 rounded-[2px]" style={{ backgroundColor: color }} />
               {name}
