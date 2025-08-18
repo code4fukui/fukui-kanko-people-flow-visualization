@@ -1,4 +1,5 @@
 export * from "./average-bar.component";
+export * from "./clickable-legend";
 export * from "./external-navigation.component";
 export * from "./graph.component";
 export * from "./header.component";
