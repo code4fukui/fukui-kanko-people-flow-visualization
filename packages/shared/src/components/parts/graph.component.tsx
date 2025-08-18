@@ -106,7 +106,9 @@ const Graph: React.FC<GraphProps> = ({
     if (type !== "day") return undefined;
     const uniqueDays = new Set(data.map((row) => String(row[xKey]))).size;
     if (uniqueDays <= 15) return undefined;
-    const ticks = data.filter((row) => row.dayOfWeek === "日").map((row) => String(row[xKey]));
+    const ticks = data
+      .filter((row) => row.dayOfWeek !== undefined && row.dayOfWeek === "日")
+      .map((row) => String(row[xKey]));
     return ticks;
   }, [data, type, xKey]);
 
