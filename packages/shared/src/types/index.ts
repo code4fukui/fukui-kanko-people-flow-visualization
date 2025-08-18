@@ -3,4 +3,5 @@
 
 export * from "./aggregated-data.interface";
 export * from "./graphTypes.interface";
+export * from "./period.interface";
 export * from "./placement.interface";
