@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useId, useMemo, useState } from "react";
 import { AggregatedData } from "@fukui-kanko/shared";
 import {
   ChartContainer,
@@ -33,11 +33,12 @@ const ClickableLegend: React.FC<{
   payload?: LegendProps["payload"];
   hidden: Set<string>;
   onToggle: (key: string) => void;
-}> = ({ payload = [], hidden, onToggle }) => {
+  instanceSuffix: string;
+}> = ({ payload = [], hidden, onToggle, instanceSuffix }) => {
   return (
     <div className="flex flex-wrap items-center justify-center gap-4 max-h-[4.5rem] overflow-y-auto">
       {payload.map((entry) => {
-        const key = entry.dataKey ?? entry.value;
+        const key = `${entry.dataKey ?? entry.value}-${instanceSuffix}`;
         const name = String(entry.value ?? key);
         const color = entry.color ?? "#999";
         const isHidden = hidden.has(key);
@@ -124,6 +125,7 @@ const Graph: React.FC<GraphProps> = ({
   yKey = "totalCount",
   type,
 }) => {
+  const instanceId = useId();
   const tickRenderer = useCallback(
     (props: XAxisTickProps) => renderTick(props, data, xKey),
     [data, xKey],
@@ -193,7 +195,12 @@ const Graph: React.FC<GraphProps> = ({
           />
           <ChartLegend
             content={(props) => (
-              <ClickableLegend payload={props.payload} hidden={hiddenKeys} onToggle={toggleKey} />
+              <ClickableLegend
+                payload={props.payload}
+                hidden={hiddenKeys}
+                onToggle={toggleKey}
+                instanceSuffix={instanceId}
+              />
             )}
           />
         </LineChart>
