@@ -7,7 +7,7 @@ import {
   ThreeBarsIcon,
 } from "@primer/octicons-react";
 
-export function ExternalNavigaton() {
+export function ExternalNavigation() {
   return (
     <>
       <nav className="md:hidden">

@@ -1,4 +1,4 @@
-import { ExternalNavigaton } from "@fukui-kanko/shared/components/parts";
+import { ExternalNavigation } from "@fukui-kanko/shared/components/parts";
 
 export function Header() {
   return (
@@ -8,7 +8,7 @@ export function Header() {
           福井駅東口案内所 人流データ
         </h1>
       </div>
-      <ExternalNavigaton />
+      <ExternalNavigation />
     </header>
   );
 }
