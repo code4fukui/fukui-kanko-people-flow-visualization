@@ -4,6 +4,7 @@ import {
   LoadingSpinner,
   MonthRangePicker,
   RangeSelector,
+  StatsSummary,
 } from "@fukui-kanko/shared/components/parts";
 import { cn } from "@fukui-kanko/shared/utils";
 
@@ -11,6 +12,7 @@ type PeriodGraphPanelProps = {
   type: keyof typeof GRAPH_VIEW_TYPES;
   period: Period;
   setPeriod: React.Dispatch<React.SetStateAction<Period>>;
+  isCompareMode: boolean;
   isLoading: boolean;
   filteredData: AggregatedData[];
   filteredDailyData: AggregatedData[];
@@ -20,13 +22,14 @@ export function PeriodGraphPanel({
   type,
   period,
   setPeriod,
+  isCompareMode,
   isLoading,
   filteredData,
   filteredDailyData,
   className,
 }: PeriodGraphPanelProps) {
   return (
-    <div className={cn(className)}>
+    <div className={cn("w-full min-w-0 flex flex-col items-center", className)}>
       {type === "month" && (
         <MonthRangePicker
           startMonth={period.startMonth}
@@ -57,16 +60,43 @@ export function PeriodGraphPanel({
         />
       )}
 
-      <div className="my-8">
-        {isLoading && type === "hour" ? (
-          <LoadingSpinner />
-        ) : (period.startMonth && period.endMonth) ||
-          (period.startWeekRange && period.endWeekRange) ||
-          (period.startDate && period.endDate) ? (
-          <Graph type={type} data={type === "hour" ? filteredDailyData : filteredData} />
-        ) : (
-          <p>範囲を選択してください。</p>
-        )}
+      <div className="w-full flex flex-col items-center justify-end min-h-[40vh]">
+        <div
+          className={`${
+            (period.startMonth && period.endMonth) ||
+            (period.startWeekRange && period.endWeekRange) ||
+            (period.startDate && period.endDate)
+              ? "min-h-[60vh] pt-4 pb-0 mt-2"
+              : "min-h-[20vh]"
+          } w-full`}
+        >
+          {isLoading && type === "hour" ? (
+            <LoadingSpinner />
+          ) : (period.startMonth && period.endMonth) ||
+            (period.startWeekRange && period.endWeekRange) ||
+            (period.startDate && period.endDate) ? (
+            <>
+              <div className="rounded-lg w-full h-[60vh]">
+                <Graph type={type} data={type === "hour" ? filteredDailyData : filteredData} />
+              </div>
+              <div
+                className={cn("mx-auto px-4 mt-4", {
+                  "w-full": isCompareMode,
+                  "w-2/3": !isCompareMode,
+                })}
+              >
+                <StatsSummary
+                  type={type}
+                  data={type === "hour" ? filteredDailyData : filteredData}
+                />
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-center h-full text-gray-500">
+              <p className="text-lg">表示したい期間を設定してください。</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
