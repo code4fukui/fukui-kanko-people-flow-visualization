@@ -82,7 +82,7 @@ function App() {
 
   return (
     <div className="h-full w-full max-w-full text-center flex flex-col items-center gap-2 mt-3">
-      <div className="flex flex-row items-center gap-17 mr-24">
+      <div className="flex flex-row items-center gap-[4.25rem] mr-24">
         <TypeSelect
           type={type}
           onChange={(newType) => {
