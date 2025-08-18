@@ -153,7 +153,7 @@ const Graph: React.FC<GraphProps> = ({
           />
           <ChartLegend
             content={<ChartLegendContent />}
-            className="bg-white max-h-21"
+            className="bg-white max-h-[5.25rem]"
             wrapperStyle={{
               width: "100%",
             }}
