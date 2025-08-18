@@ -36,9 +36,24 @@ const ClickableLegend: React.FC<{
   instanceSuffix: string;
   savedScrollTop?: number;
   onScrollPersist?: (top: number) => void;
-}> = ({ payload = [], hidden, onToggle, instanceSuffix, savedScrollTop = 0, onScrollPersist }) => {
+  hoveredKey?: string;
+  onHoverKeyChange?: (key?: string) => void;
+}> = ({
+  payload = [],
+  hidden,
+  onToggle,
+  instanceSuffix,
+  savedScrollTop = 0,
+  onScrollPersist,
+  hoveredKey: controlledHoveredKey,
+  onHoverKeyChange,
+}) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [hoveredKey, setHoveredKey] = useState<string | undefined>(undefined);
+  const hoveredKey = controlledHoveredKey;
+
+  const setHover = (key?: string) => {
+    if (onHoverKeyChange) onHoverKeyChange(key);
+  };
 
   // 再マウント時にスクロール位置を復元（描画前に反映）
   useLayoutEffect(() => {
@@ -70,10 +85,10 @@ const ClickableLegend: React.FC<{
                 onScrollPersist?.(containerRef.current?.scrollTop ?? 0);
                 onToggle(key);
               }}
-              onMouseEnter={() => setHoveredKey(key)}
-              onMouseLeave={() => setHoveredKey(undefined)}
-              onFocus={() => setHoveredKey(key)}
-              onBlur={() => setHoveredKey(undefined)}
+              onMouseEnter={() => setHover(key)}
+              onMouseLeave={() => setHover(undefined)}
+              onFocus={() => setHover(key)}
+              onBlur={() => setHover(undefined)}
               className={cn(
                 "flex items-center gap-1.5 cursor-pointer",
                 (isHidden || isDimmedByHover) && "opacity-40",
@@ -174,6 +189,8 @@ const Graph: React.FC<GraphProps> = ({
     });
   }, []);
 
+  const [hoveredLegendKey, setHoveredLegendKey] = useState<string | undefined>(undefined);
+
   // 15日より多いデータ数の場合、日曜基準の目盛りを表示
   const sundayTicks = useMemo(() => {
     if (type !== "day") return undefined;
@@ -210,6 +227,11 @@ const Graph: React.FC<GraphProps> = ({
             const strokeColor = isHoliday ? "#F44336" : d ? weekdayColors[d] : "#888";
             const legendKey = `${date}_${yKey}_${instanceId}`;
             const isHidden = hiddenKeys.has(legendKey);
+
+            // ホバーに応じて他ラインを減光、対象を強調
+            const shouldDimOthers =
+              hoveredLegendKey !== undefined && !hiddenKeys.has(hoveredLegendKey);
+            const isDimmed = shouldDimOthers && hoveredLegendKey !== legendKey;
             return (
               <Line
                 key={date}
@@ -217,7 +239,8 @@ const Graph: React.FC<GraphProps> = ({
                 dataKey={`${date}_${yKey}`}
                 name={`${date}(${rows[0]?.dayOfWeek}${isHoliday ? "・祝" : ""})`}
                 stroke={strokeColor}
-                strokeWidth={2}
+                strokeWidth={hoveredLegendKey === legendKey ? 3 : 2}
+                strokeOpacity={isDimmed ? 0.1 : 1}
                 hide={isHidden}
               />
             );
@@ -240,6 +263,8 @@ const Graph: React.FC<GraphProps> = ({
                 onScrollPersist={(top) => {
                   legendScrollTopRef.current = top;
                 }}
+                hoveredKey={hoveredLegendKey}
+                onHoverKeyChange={setHoveredLegendKey}
               />
             )}
           />
