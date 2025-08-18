@@ -151,7 +151,13 @@ const Graph: React.FC<GraphProps> = ({
             cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
             content={<ChartTooltipContent className="bg-white" />}
           />
-          <ChartLegend content={<ChartLegendContent />} />
+          <ChartLegend
+            content={<ChartLegendContent />}
+            className="bg-white max-h-21"
+            wrapperStyle={{
+              width: "100%",
+            }}
+          />
         </LineChart>
       </ChartContainer>
     );
