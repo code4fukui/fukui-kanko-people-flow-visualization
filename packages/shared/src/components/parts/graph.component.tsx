@@ -1,4 +1,4 @@
-import React, { useCallback, useId, useMemo, useState } from "react";
+import React, { useCallback, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AggregatedData } from "@fukui-kanko/shared";
 import {
   ChartContainer,
@@ -34,9 +34,27 @@ const ClickableLegend: React.FC<{
   hidden: Set<string>;
   onToggle: (key: string) => void;
   instanceSuffix: string;
-}> = ({ payload = [], hidden, onToggle, instanceSuffix }) => {
+  savedScrollTop?: number;
+  onScrollPersist?: (top: number) => void;
+}> = ({ payload = [], hidden, onToggle, instanceSuffix, savedScrollTop = 0, onScrollPersist }) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // 再マウント時にスクロール位置を復元（描画前に反映）
+  useLayoutEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = savedScrollTop;
+    }
+  }, [savedScrollTop]);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    onScrollPersist?.(e.currentTarget.scrollTop);
+  };
   return (
-    <div className="flex flex-wrap items-center justify-center gap-4 max-h-[4.5rem] overflow-y-auto">
+    <div
+      ref={containerRef}
+      className="flex flex-wrap items-center justify-center gap-4 max-h-[4.5rem] overflow-y-auto"
+      onScroll={handleScroll}
+    >
       {payload.map((entry) => {
         const key = `${entry.dataKey}_${instanceSuffix}`;
         const name = String(entry.value ?? key);
@@ -45,7 +63,10 @@ const ClickableLegend: React.FC<{
         return (
           <div key={key}>
             <button
-              onClick={() => onToggle(key)}
+              onClick={() => {
+                onScrollPersist?.(containerRef.current?.scrollTop ?? 0);
+                onToggle(key);
+              }}
               className={cn("flex items-center gap-1.5", isHidden && "opacity-40")}
             >
               <div className="h-2 w-2 shrink-0 rounded-[2px]" style={{ backgroundColor: color }} />
@@ -131,6 +152,8 @@ const Graph: React.FC<GraphProps> = ({
     [data, xKey],
   );
 
+  const legendScrollTopRef = useRef(0);
+
   const [hiddenKeys, setHiddenKeys] = useState<Set<string>>(new Set());
   const toggleKey = useCallback((key: string) => {
     setHiddenKeys((prev) => {
@@ -203,6 +226,10 @@ const Graph: React.FC<GraphProps> = ({
                 hidden={hiddenKeys}
                 onToggle={toggleKey}
                 instanceSuffix={instanceId}
+                savedScrollTop={legendScrollTopRef.current}
+                onScrollPersist={(top) => {
+                  legendScrollTopRef.current = top;
+                }}
               />
             )}
           />
