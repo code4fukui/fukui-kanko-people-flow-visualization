@@ -1,14 +1,14 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { AggregatedData } from "@fukui-kanko/shared";
 import {
   ChartContainer,
   ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@fukui-kanko/shared/components/ui";
 import { GRAPH_VIEW_TYPES } from "@fukui-kanko/shared/types";
-import { WEEK_DAYS } from "@fukui-kanko/shared/utils";
+import { cn, WEEK_DAYS } from "@fukui-kanko/shared/utils";
+import type { LegendProps } from "recharts";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 type GraphProps = {
@@ -27,6 +27,34 @@ type XAxisTickProps = {
 
 const chartConfig = {
   totalCount: { label: "人物検出回数" },
+};
+
+const ClickableLegend: React.FC<{
+  payload?: LegendProps["payload"];
+  hidden: Set<string>;
+  onToggle: (key: string) => void;
+}> = ({ payload = [], hidden, onToggle }) => {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-4 max-h-[4.5rem] overflow-y-auto">
+      {payload.map((entry) => {
+        const key = entry.dataKey ?? entry.value;
+        const name = String(entry.value ?? key);
+        const color = entry.color ?? "#999";
+        const isHidden = hidden.has(key);
+        return (
+          <div key={key}>
+            <button
+              onClick={() => onToggle(key)}
+              className={cn("flex items-center gap-1.5", isHidden && "opacity-40")}
+            >
+              <div className="h-2 w-2 shrink-0 rounded-[2px]" style={{ backgroundColor: color }} />
+              {name}
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  );
 };
 
 function renderTick(props: XAxisTickProps, data: AggregatedData[], xKey: string) {
@@ -101,6 +129,16 @@ const Graph: React.FC<GraphProps> = ({
     [data, xKey],
   );
 
+  const [hiddenKeys, setHiddenKeys] = useState<Set<string>>(new Set());
+  const toggleKey = useCallback((key: string) => {
+    setHiddenKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }, []);
+
   // 15日より多いデータ数の場合、日曜基準の目盛りを表示
   const sundayTicks = useMemo(() => {
     if (type !== "day") return undefined;
@@ -154,11 +192,9 @@ const Graph: React.FC<GraphProps> = ({
             content={<ChartTooltipContent className="bg-white" />}
           />
           <ChartLegend
-            content={<ChartLegendContent />}
-            className="bg-white max-h-[5.25rem]"
-            wrapperStyle={{
-              width: "100%",
-            }}
+            content={(props) => (
+              <ClickableLegend payload={props.payload} hidden={hiddenKeys} onToggle={toggleKey} />
+            )}
           />
         </LineChart>
       </ChartContainer>
