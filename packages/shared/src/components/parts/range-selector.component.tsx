@@ -99,12 +99,12 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
   }, [type, start, end, setEnd]);
 
   return (
-    <div className="flex flex-row gap-6 mb-6">
-      <div className="flex flex-col gap-3">
-        <Label className="px-1">開始</Label>
+    <div className="flex flex-row gap-6">
+      <div className="flex flex-col gap-1">
+        <Label className="px-1 text-base">開始</Label>
         <Popover open={openStart} onOpenChange={setOpenStart}>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="w-48 justify-between font-normal">
+            <Button variant="outline" className="lg:w-48 justify-between font-normal border-black">
               <span>
                 {type === "week"
                   ? start
@@ -146,13 +146,13 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
         </Popover>
       </div>
       <div className="flex items-end pb-1 text-xl">〜</div>
-      <div className="flex flex-col gap-3">
-        <Label className="px-1">終了</Label>
+      <div className="flex flex-col gap-1">
+        <Label className="px-1 text-base">終了</Label>
         <Popover open={openEnd} onOpenChange={setOpenEnd}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="w-48 justify-between font-normal"
+              className="lg:w-48 justify-between font-normal border-black"
               disabled={!start}
             >
               <span>
