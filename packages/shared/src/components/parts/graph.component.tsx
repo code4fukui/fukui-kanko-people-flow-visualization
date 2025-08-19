@@ -1,14 +1,14 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AggregatedData } from "@fukui-kanko/shared";
+import { ClickableLegend } from "@fukui-kanko/shared/components/parts";
 import {
   ChartContainer,
   ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@fukui-kanko/shared/components/ui";
 import { GRAPH_VIEW_TYPES } from "@fukui-kanko/shared/types";
-import { WEEK_DAYS } from "@fukui-kanko/shared/utils";
+import { getLegendKey, HOVER_CLEAR_DELAY_MS, WEEK_DAYS } from "@fukui-kanko/shared/utils";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 type GraphProps = {
@@ -96,10 +96,50 @@ const Graph: React.FC<GraphProps> = ({
   yKey = "totalCount",
   type,
 }) => {
+  const instanceId = useId();
   const tickRenderer = useCallback(
     (props: XAxisTickProps) => renderTick(props, data, xKey),
     [data, xKey],
   );
+
+  const legendScrollTopRef = useRef(0);
+
+  const [hiddenKeys, setHiddenKeys] = useState<Set<string>>(new Set());
+  const toggleKey = useCallback((key: string) => {
+    setHiddenKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }, []);
+
+  const [hoveredLegendKey, setHoveredLegendKey] = useState<string | undefined>(undefined);
+  const hoverClearTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const setHoveredLegendKeyStable = useCallback((key?: string) => {
+    if (hoverClearTimerRef.current !== undefined) {
+      clearTimeout(hoverClearTimerRef.current);
+      hoverClearTimerRef.current = undefined;
+    }
+    if (key === undefined) {
+      hoverClearTimerRef.current = setTimeout(() => {
+        setHoveredLegendKey(undefined);
+        hoverClearTimerRef.current = undefined;
+      }, HOVER_CLEAR_DELAY_MS);
+    } else {
+      setHoveredLegendKey(key);
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (hoverClearTimerRef.current !== undefined) {
+        clearTimeout(hoverClearTimerRef.current);
+        hoverClearTimerRef.current = undefined;
+      }
+    };
+  }, []);
 
   // 15日より多いデータ数の場合、日曜基準の目盛りを表示
   const sundayTicks = useMemo(() => {
@@ -135,6 +175,13 @@ const Graph: React.FC<GraphProps> = ({
             const isHoliday = !!rows[0]?.holidayName;
             const d = rows[0]?.dayOfWeek as (typeof WEEK_DAYS)[number] | undefined;
             const strokeColor = isHoliday ? "#F44336" : d ? weekdayColors[d] : "#888";
+            const legendKey = getLegendKey(`${date}_${yKey}`, instanceId);
+            const isHidden = hiddenKeys.has(legendKey);
+
+            // ホバーに応じて他ラインを減光、対象を強調
+            const shouldDimOthers =
+              hoveredLegendKey !== undefined && !hiddenKeys.has(hoveredLegendKey);
+            const isDimmed = shouldDimOthers && hoveredLegendKey !== legendKey;
             return (
               <Line
                 key={date}
@@ -142,7 +189,9 @@ const Graph: React.FC<GraphProps> = ({
                 dataKey={`${date}_${yKey}`}
                 name={`${date}(${rows[0]?.dayOfWeek}${isHoliday ? "・祝" : ""})`}
                 stroke={strokeColor}
-                strokeWidth={2}
+                strokeWidth={hoveredLegendKey === legendKey ? 3 : 2}
+                strokeOpacity={isDimmed ? 0.1 : 1}
+                hide={isHidden}
               />
             );
           })}
@@ -154,11 +203,21 @@ const Graph: React.FC<GraphProps> = ({
             content={<ChartTooltipContent className="bg-white" />}
           />
           <ChartLegend
-            content={<ChartLegendContent />}
-            className="bg-white max-h-[5.25rem]"
-            wrapperStyle={{
-              width: "100%",
-            }}
+            wrapperStyle={{ width: "100%" }}
+            content={(props) => (
+              <ClickableLegend
+                payload={props.payload}
+                hidden={hiddenKeys}
+                onToggle={toggleKey}
+                instanceSuffix={instanceId}
+                savedScrollTop={legendScrollTopRef.current}
+                onScrollPersist={(top) => {
+                  legendScrollTopRef.current = top;
+                }}
+                hoveredKey={hoveredLegendKey}
+                onHoverKeyChange={setHoveredLegendKeyStable}
+              />
+            )}
           />
         </LineChart>
       </ChartContainer>
