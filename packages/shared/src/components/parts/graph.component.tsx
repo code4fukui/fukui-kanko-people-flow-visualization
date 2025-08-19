@@ -1,4 +1,4 @@
-import React, { useCallback, useId, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { AggregatedData } from "@fukui-kanko/shared";
 import { ClickableLegend } from "@fukui-kanko/shared/components/parts";
 import {
@@ -115,6 +115,31 @@ const Graph: React.FC<GraphProps> = ({
   }, []);
 
   const [hoveredLegendKey, setHoveredLegendKey] = useState<string | undefined>(undefined);
+  const hoverClearTimerRef = useRef<number | undefined>(undefined);
+
+  const setHoveredLegendKeyStable = useCallback((key?: string) => {
+    if (hoverClearTimerRef.current !== undefined) {
+      window.clearTimeout(hoverClearTimerRef.current);
+      hoverClearTimerRef.current = undefined;
+    }
+    if (key === undefined) {
+      hoverClearTimerRef.current = window.setTimeout(() => {
+        setHoveredLegendKey(undefined);
+        hoverClearTimerRef.current = undefined;
+      }, 100);
+    } else {
+      setHoveredLegendKey(key);
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (hoverClearTimerRef.current !== undefined) {
+        window.clearTimeout(hoverClearTimerRef.current);
+        hoverClearTimerRef.current = undefined;
+      }
+    };
+  }, []);
 
   // 15日より多いデータ数の場合、日曜基準の目盛りを表示
   const sundayTicks = useMemo(() => {
@@ -189,7 +214,7 @@ const Graph: React.FC<GraphProps> = ({
                   legendScrollTopRef.current = top;
                 }}
                 hoveredKey={hoveredLegendKey}
-                onHoverKeyChange={setHoveredLegendKey}
+                onHoverKeyChange={setHoveredLegendKeyStable}
               />
             )}
           />
