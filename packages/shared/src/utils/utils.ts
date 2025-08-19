@@ -34,3 +34,8 @@ export function getMaxDate(): Date {
  * データのある最初の週の終了日
  */
 export const FIRST_WEEK_END_DATE = new Date("2024-10-19");
+
+/**
+ * グラフ凡例のホバー解除時に適用する遅延時間（ミリ秒）。
+ */
+export const HOVER_CLEAR_DELAY_MS = 100;

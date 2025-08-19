@@ -8,7 +8,7 @@ import {
   ChartTooltipContent,
 } from "@fukui-kanko/shared/components/ui";
 import { GRAPH_VIEW_TYPES } from "@fukui-kanko/shared/types";
-import { WEEK_DAYS } from "@fukui-kanko/shared/utils";
+import { HOVER_CLEAR_DELAY_MS, WEEK_DAYS } from "@fukui-kanko/shared/utils";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 type GraphProps = {
@@ -126,7 +126,7 @@ const Graph: React.FC<GraphProps> = ({
       hoverClearTimerRef.current = window.setTimeout(() => {
         setHoveredLegendKey(undefined);
         hoverClearTimerRef.current = undefined;
-      }, 100);
+      }, HOVER_CLEAR_DELAY_MS);
     } else {
       setHoveredLegendKey(key);
     }
