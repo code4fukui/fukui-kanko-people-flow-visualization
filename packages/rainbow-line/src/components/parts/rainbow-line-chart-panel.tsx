@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Graph, RangeSelector } from "@fukui-kanko/shared/components/parts";
 import { AggregatedData } from "@fukui-kanko/shared/types";
 import { cn, getMaxDate } from "@fukui-kanko/shared/utils";
+import { RainbowLinePieChart } from "./rainbowe-line-pie-chart";
 
 export function RainbowLineChartPanel({
   data,
@@ -41,20 +42,13 @@ export function RainbowLineChartPanel({
       ></RangeSelector>
 
       <div className="flex flex-col gap-y-4 w-full min-w-full grow overflow-auto">
-        <Graph
+        <Graph data={dataInRange} type="day" xKey="aggregate from" yKey="total count" />
+        <RainbowLinePieChart
           data={dataInRange}
-          type="day"
-          xKey="aggregate from"
-          yKey="total count"
+          focusedAttribute="carCategories"
           className="w-full min-h-[calc(100dvh_-_(32px_+_48px_+_200px_+_16px_+_62px_+_16px))]"
         />
-        <Graph
-          data={dataInRange}
-          type="day"
-          xKey="aggregate from"
-          yKey="total count"
-          className="w-full min-h-[calc(100dvh_-_400px)]"
-        />
+        <Graph data={dataInRange} type="day" xKey="aggregate from" yKey="total count" />
       </div>
     </div>
   );
