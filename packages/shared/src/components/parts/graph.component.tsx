@@ -115,15 +115,15 @@ const Graph: React.FC<GraphProps> = ({
   }, []);
 
   const [hoveredLegendKey, setHoveredLegendKey] = useState<string | undefined>(undefined);
-  const hoverClearTimerRef = useRef<number | undefined>(undefined);
+  const hoverClearTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const setHoveredLegendKeyStable = useCallback((key?: string) => {
     if (hoverClearTimerRef.current !== undefined) {
-      window.clearTimeout(hoverClearTimerRef.current);
+      clearTimeout(hoverClearTimerRef.current);
       hoverClearTimerRef.current = undefined;
     }
     if (key === undefined) {
-      hoverClearTimerRef.current = window.setTimeout(() => {
+      hoverClearTimerRef.current = setTimeout(() => {
         setHoveredLegendKey(undefined);
         hoverClearTimerRef.current = undefined;
       }, HOVER_CLEAR_DELAY_MS);
@@ -135,7 +135,7 @@ const Graph: React.FC<GraphProps> = ({
   useEffect(() => {
     return () => {
       if (hoverClearTimerRef.current !== undefined) {
-        window.clearTimeout(hoverClearTimerRef.current);
+        clearTimeout(hoverClearTimerRef.current);
         hoverClearTimerRef.current = undefined;
       }
     };
