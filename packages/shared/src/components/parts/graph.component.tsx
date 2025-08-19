@@ -8,7 +8,7 @@ import {
   ChartTooltipContent,
 } from "@fukui-kanko/shared/components/ui";
 import { GRAPH_VIEW_TYPES } from "@fukui-kanko/shared/types";
-import { HOVER_CLEAR_DELAY_MS, WEEK_DAYS } from "@fukui-kanko/shared/utils";
+import { getLegendKey, HOVER_CLEAR_DELAY_MS, WEEK_DAYS } from "@fukui-kanko/shared/utils";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 type GraphProps = {
@@ -175,7 +175,7 @@ const Graph: React.FC<GraphProps> = ({
             const isHoliday = !!rows[0]?.holidayName;
             const d = rows[0]?.dayOfWeek as (typeof WEEK_DAYS)[number] | undefined;
             const strokeColor = isHoliday ? "#F44336" : d ? weekdayColors[d] : "#888";
-            const legendKey = `${date}_${yKey}_${instanceId}`;
+            const legendKey = getLegendKey(`${date}_${yKey}`, instanceId);
             const isHidden = hiddenKeys.has(legendKey);
 
             // ホバーに応じて他ラインを減光、対象を強調

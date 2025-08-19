@@ -39,3 +39,10 @@ export const FIRST_WEEK_END_DATE = new Date("2024-10-19");
  * グラフ凡例のホバー解除時に適用する遅延時間（ミリ秒）。
  */
 export const HOVER_CLEAR_DELAY_MS = 100;
+
+/**
+ * グラフ凡例用のユニークキーを生成
+ */
+export function getLegendKey(dataKey: string, instanceSuffix: string) {
+  return [dataKey, instanceSuffix].join("::");
+}

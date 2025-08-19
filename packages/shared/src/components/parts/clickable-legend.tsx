@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useRef } from "react";
-import { cn } from "@fukui-kanko/shared/utils";
+import { cn, getLegendKey } from "@fukui-kanko/shared/utils";
 import type { LegendProps } from "recharts";
 
 export type ClickableLegendProps = {
@@ -48,7 +48,7 @@ export const ClickableLegend: React.FC<ClickableLegendProps> = React.memo(
         onScroll={handleScroll}
       >
         {payload.map((entry) => {
-          const key = `${entry.dataKey}_${instanceSuffix}`;
+          const key = getLegendKey(String(entry.dataKey), instanceSuffix);
           const name = String(entry.value ?? key);
           const color = entry.color ?? "#999";
           const isHidden = hidden.has(key);
