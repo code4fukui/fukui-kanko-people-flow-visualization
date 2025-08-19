@@ -16,14 +16,25 @@ type DownloadCSVButtonProps = {
 function convertToCSV(data: AggregatedData[], viewType: keyof typeof GRAPH_VIEW_TYPES): string {
   const isDailyOrHourly = viewType === "day" || viewType === "hour";
 
-  const headers = isDailyOrHourly
-    ? (["aggregateFrom", "totalCount", "dayOfWeek", "holidayName"] as const)
-    : (["aggregateFrom", "totalCount", "weekdayTotal", "weekendTotal"] as const);
+  const dailyHeaders: readonly (keyof AggregatedData)[] = [
+    "aggregateFrom",
+    "totalCount",
+    "dayOfWeek",
+    "holidayName",
+  ];
+  const periodHeaders: readonly (keyof AggregatedData)[] = [
+    "aggregateFrom",
+    "totalCount",
+    "weekdayTotal",
+    "weekendTotal",
+  ];
+
+  const headers = isDailyOrHourly ? dailyHeaders : periodHeaders;
   if (data.length === 0) return headers.join(",") + "\n";
   const rows = data.map((row) =>
     headers
       .map((h) => {
-        const value = (row as Record<string, unknown>)[h] ?? "";
+        const value = row[h];
         const escaped = String(value).replace(/"/g, '""');
         return `"${escaped}"`;
       })
