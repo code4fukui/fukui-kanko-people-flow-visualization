@@ -25,7 +25,6 @@ export const ClickableLegend: React.FC<ClickableLegendProps> = React.memo(
     onHoverKeyChange,
   }) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
-    const hoveredKey = controlledHoveredKey;
 
     const setHover = (key?: string) => {
       onHoverKeyChange?.(key);
@@ -53,9 +52,9 @@ export const ClickableLegend: React.FC<ClickableLegendProps> = React.memo(
           const name = String(entry.value ?? key);
           const color = entry.color ?? "#999";
           const isHidden = hidden.has(key);
-          const hoveredIsHidden = hoveredKey ? hidden.has(hoveredKey) : false;
+          const hoveredIsHidden = controlledHoveredKey ? hidden.has(controlledHoveredKey) : false;
           const isDimmedByHover =
-            hoveredKey !== undefined && hoveredKey !== key && !hoveredIsHidden;
+            controlledHoveredKey !== undefined && controlledHoveredKey !== key && !hoveredIsHidden;
 
           return (
             <div key={key}>
