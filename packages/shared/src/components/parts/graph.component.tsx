@@ -1,6 +1,5 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { AggregatedData } from "@fukui-kanko/shared";
-import { StatsSummary } from "@fukui-kanko/shared/components/parts";
 import {
   ChartContainer,
   ChartLegend,
@@ -96,12 +95,23 @@ const Graph: React.FC<GraphProps> = ({
   xKey = "aggregateFrom",
   yKey = "totalCount",
   type,
-  className,
 }) => {
   const tickRenderer = useCallback(
     (props: XAxisTickProps) => renderTick(props, data, xKey),
     [data, xKey],
   );
+
+  // 15日より多いデータ数の場合、日曜基準の目盛りを表示
+  const sundayTicks = useMemo(() => {
+    if (type !== "day") return undefined;
+    const uniqueDays = new Set(data.map((row) => String(row[xKey]))).size;
+    if (uniqueDays <= 15) return undefined;
+    const ticks = data
+      .filter((row) => row.dayOfWeek !== undefined && row.dayOfWeek === "日")
+      .map((row) => String(row[xKey]));
+    return ticks;
+  }, [data, type, xKey]);
+
   if (type === "hour") {
     // 日付ごとにグループ化し、xKeyを時間のみに変換
     const grouped: { [date: string]: AggregatedData[] } = {};
@@ -119,55 +129,60 @@ const Graph: React.FC<GraphProps> = ({
     });
 
     return (
-      <div>
-        <ChartContainer config={chartConfig}>
-          <LineChart margin={{ top: 10, right: 40 }}>
-            {Object.entries(grouped).map(([date, rows]) => {
-              const isHoliday = !!rows[0]?.holidayName;
-              const d = rows[0]?.dayOfWeek as (typeof WEEK_DAYS)[number] | undefined;
-              const strokeColor = isHoliday ? "#F44336" : d ? weekdayColors[d] : "#888";
-              return (
-                <Line
-                  key={date}
-                  data={rows}
-                  dataKey={`${date}_${yKey}`}
-                  name={`${date}(${rows[0]?.dayOfWeek}${isHoliday ? "・祝" : ""})`}
-                  stroke={strokeColor}
-                />
-              );
-            })}
-            <CartesianGrid />
-            <XAxis dataKey={xKey} tickMargin={8} allowDuplicatedCategory={false} />
-            <YAxis />
-            <ChartTooltip
-              cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
-              content={<ChartTooltipContent className="bg-white" />}
-            />
-            <ChartLegend content={<ChartLegendContent />} />
-          </LineChart>
-        </ChartContainer>
-        <StatsSummary type={type} data={data} />
-      </div>
+      <ChartContainer config={chartConfig} className="h-full w-full">
+        <LineChart margin={{ top: 10, right: 40 }}>
+          {Object.entries(grouped).map(([date, rows]) => {
+            const isHoliday = !!rows[0]?.holidayName;
+            const d = rows[0]?.dayOfWeek as (typeof WEEK_DAYS)[number] | undefined;
+            const strokeColor = isHoliday ? "#F44336" : d ? weekdayColors[d] : "#888";
+            return (
+              <Line
+                key={date}
+                data={rows}
+                dataKey={`${date}_${yKey}`}
+                name={`${date}(${rows[0]?.dayOfWeek}${isHoliday ? "・祝" : ""})`}
+                stroke={strokeColor}
+                strokeWidth={2}
+              />
+            );
+          })}
+          <CartesianGrid />
+          <XAxis dataKey={xKey} tickMargin={8} allowDuplicatedCategory={false} />
+          <YAxis />
+          <ChartTooltip
+            cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
+            content={<ChartTooltipContent className="bg-white" />}
+          />
+          <ChartLegend
+            content={<ChartLegendContent />}
+            className="bg-white max-h-[5.25rem]"
+            wrapperStyle={{
+              width: "100%",
+            }}
+          />
+        </LineChart>
+      </ChartContainer>
     );
   }
   if (type === "month" || type === "week" || type === "day") {
     return (
-      <div>
-        <ChartContainer config={chartConfig}>
-          <LineChart data={data} margin={{ top: 10, right: 40 }}>
-            <Line dataKey={yKey} />
-            <CartesianGrid />
-            <XAxis dataKey={xKey} tick={type === "day" ? tickRenderer : undefined} tickMargin={8} />
-            <YAxis />
-            <ChartTooltip
-              cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
-              content={<ChartTooltipContent className="bg-white" />}
-            />
-            <ChartLegend content={<ChartLegendContent />} />
-          </LineChart>
-        </ChartContainer>
-        <StatsSummary type={type} data={data} />
-      </div>
+      <ChartContainer config={chartConfig} className="h-full w-full">
+        <LineChart data={data} margin={{ top: 10, bottom: 10, right: 40 }}>
+          <Line dataKey={yKey} strokeWidth={3} stroke="#2563eb" />
+          <CartesianGrid />
+          <XAxis
+            dataKey={xKey}
+            tick={type === "day" ? tickRenderer : undefined}
+            tickMargin={8}
+            ticks={sundayTicks}
+          />
+          <YAxis />
+          <ChartTooltip
+            cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
+            content={<ChartTooltipContent className="bg-white" />}
+          />
+        </LineChart>
+      </ChartContainer>
     );
   }
 

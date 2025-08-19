@@ -1,39 +1,47 @@
 import { useEffect, useState } from "react";
-import { AggregatedData, getRawData } from "@fukui-kanko/shared";
 import {
-  Graph,
-  LoadingSpinner,
-  MonthRangePicker,
-  RangeSelector,
-  TypeSelect,
-} from "@fukui-kanko/shared/components/parts";
-import {
-  aggregateDaily,
-  aggregateHourly,
-  aggregateMonthly,
-  aggregateWeekly,
-} from "@fukui-kanko/shared/utils";
+  AggregatedData,
+  getRawData,
+  GRAPH_VIEW_TYPES,
+  Period,
+  useDailyDataEffect,
+  useFilteredData,
+} from "@fukui-kanko/shared";
+import { PeriodGraphPanel, TypeSelect } from "@fukui-kanko/shared/components/parts";
+import { Checkbox, Label } from "@fukui-kanko/shared/components/ui";
 
 function App() {
-  // 開発環境かどうかを判定
-  const isDev = import.meta.env.DEV;
-  // ローカル開発時はランディングページのポート、本番時は相対パス
-  const homeUrl = isDev ? "http://localhost:3004" : "../";
-
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  const [startMonth, setStartMonth] = useState<Date | undefined>(undefined);
-  const [endMonth, setEndMonth] = useState<Date | undefined>(undefined);
-  const [startWeekRange, setStartWeekRange] = useState<{ from: Date; to: Date } | undefined>(
-    undefined,
-  );
-  const [endWeekRange, setEndWeekRange] = useState<{ from: Date; to: Date } | undefined>(undefined);
-  const [type, setType] = useState<"month" | "week" | "day" | "hour">("month");
+  const [type, setType] = useState<keyof typeof GRAPH_VIEW_TYPES>("month");
   const [csvData, setCsvData] = useState<AggregatedData[]>([]);
   const [csvDailyData, setCsvDailyData] = useState<AggregatedData[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareCsvDailyData, setCompareCsvDailyData] = useState<AggregatedData[]>([]);
+  const [compareIsLoading, setCompareIsLoading] = useState(false);
+
+  // 本期間の状態
+  const [period, setPeriod] = useState<Period>({
+    startDate: undefined,
+    endDate: undefined,
+    startMonth: undefined,
+    endMonth: undefined,
+    startWeekRange: undefined,
+    endWeekRange: undefined,
+  });
   const [filteredData, setFilteredData] = useState<AggregatedData[]>([]);
   const [filteredDailyData, setFilteredDailyData] = useState<AggregatedData[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+
+  // 比較期間の状態
+  const [comparePeriod, setComparePeriod] = useState<Period>({
+    startDate: undefined,
+    endDate: undefined,
+    startMonth: undefined,
+    endMonth: undefined,
+    startWeekRange: undefined,
+    endWeekRange: undefined,
+  });
+  const [compareFilteredData, setCompareFilteredData] = useState<AggregatedData[]>([]);
+  const [compareFilteredDailyData, setCompareFilteredDailyData] = useState<AggregatedData[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,148 +61,85 @@ function App() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    if (type !== "hour") {
-      setIsLoading(false);
-      return;
-    }
-    let isCurrent = true;
-    const fetchData = async () => {
-      if (startDate && endDate) {
-        setIsLoading(true);
-        const results: AggregatedData[] = [];
-        const current = new Date(startDate);
-        const end = new Date(endDate);
+  // 本期間の集計データを期間・テーマ・データ変更時に再計算
+  useFilteredData(type, period, csvData, csvDailyData, setFilteredData, setFilteredDailyData);
 
-        while (current <= end) {
-          // 1時間ごとに取得
-          const rawData = await getRawData({
-            objectClass: "Person",
-            placement: "fukui-station-east-entrance",
-            aggregateRange: "daily", // 1時間毎のデータはdailyに含まれています
-            date: new Date(current),
-          });
-          results.push(...rawData);
-          current.setDate(current.getDate() + 1);
-        }
-
-        if (isCurrent) {
-          setCsvDailyData(results);
-          setIsLoading(false);
-        }
-      }
-    };
-    fetchData();
-    return () => {
-      isCurrent = false;
-    };
-  }, [type, startDate, endDate]);
-
-  useEffect(() => {
-    let filtered = csvData;
-    const filteredDaily = csvDailyData;
-
-    if (type === "month" && startMonth && endMonth) {
-      // 月末を取得
-      const end = new Date(endMonth.getFullYear(), endMonth.getMonth() + 1, 0);
-      filtered = aggregateMonthly(filtered, startMonth, end);
-    }
-
-    if (type === "week" && startWeekRange && endWeekRange) {
-      filtered = aggregateWeekly(filtered, startWeekRange, endWeekRange);
-    }
-
-    if (type === "day" && startDate && endDate) {
-      filtered = aggregateDaily(filtered, startDate, endDate);
-    }
-
-    if (type === "hour" && startDate && endDate) {
-      setFilteredDailyData(aggregateHourly(filteredDaily));
-    }
-
-    setFilteredData(filtered);
-  }, [
+  // 比較期間の集計データを期間・テーマ・データ変更時に再計算
+  useFilteredData(
     type,
-    startMonth,
-    endMonth,
-    startWeekRange,
-    endWeekRange,
-    startDate,
-    endDate,
+    comparePeriod,
     csvData,
-    csvDailyData,
-  ]);
+    compareCsvDailyData,
+    setCompareFilteredData,
+    setCompareFilteredDailyData,
+  );
+
+  // 本期間の時間別データを取得・更新
+  useDailyDataEffect(type, period, setCsvDailyData, setIsLoading);
+
+  // 比較期間の時間別データを取得・更新
+  useDailyDataEffect(type, comparePeriod, setCompareCsvDailyData, setCompareIsLoading);
 
   return (
-    <>
-      <div className="min-h-screen w-screen bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center font-sans">
-        <div className="text-center w-1/2">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">福井駅周辺データ可視化</h1>
-          <div className="flex flex-col items-center gap-6 my-8">
-            <TypeSelect
-              type={type}
-              onChange={(newType) => {
-                setType(newType);
-                // タイプ変更時に値をリセット
-                setStartMonth(undefined);
-                setEndMonth(undefined);
-                setStartDate(undefined);
-                setEndDate(undefined);
-                setStartWeekRange(undefined);
-                setEndWeekRange(undefined);
-              }}
-            />
-            {type === "month" && (
-              <MonthRangePicker
-                startMonth={startMonth}
-                endMonth={endMonth}
-                onChange={(start, end) => {
-                  setStartMonth(start);
-                  setEndMonth(end);
-                }}
-              />
-            )}
-
-            {type === "week" && (
-              <RangeSelector
-                type="week"
-                start={startWeekRange}
-                end={endWeekRange}
-                setStart={setStartWeekRange}
-                setEnd={setEndWeekRange}
-              />
-            )}
-
-            {(type === "day" || type === "hour") && (
-              <RangeSelector
-                type="date"
-                start={startDate}
-                end={endDate}
-                setStart={setStartDate}
-                setEnd={setEndDate}
-              />
-            )}
-          </div>
-          <div className="my-8">
-            {isLoading && type === "hour" ? (
-              <LoadingSpinner />
-            ) : (startMonth && endMonth) ||
-              (startWeekRange && endWeekRange) ||
-              (startDate && endDate) ? (
-              <Graph type={type} data={type === "hour" ? filteredDailyData : filteredData} />
-            ) : (
-              <p>範囲を選択してください。</p>
-            )}
-          </div>
-          <a
-            href={homeUrl}
-            className="inline-block bg-emerald-500 hover:bg-emerald-600 text-white py-3 px-6 rounded-md transition-colors cursor-pointer"
-          >
-            ← トップページに戻る
-          </a>
+    <div className="h-full w-full max-w-full text-center flex flex-col items-center gap-2 mt-3">
+      <div className="flex flex-row items-center gap-[4.25rem] mr-24">
+        <TypeSelect
+          type={type}
+          onChange={(newType) => {
+            setType(newType);
+            // タイプ変更時に値をリセット
+            setPeriod({
+              startDate: undefined,
+              endDate: undefined,
+              startMonth: undefined,
+              endMonth: undefined,
+              startWeekRange: undefined,
+              endWeekRange: undefined,
+            });
+            setComparePeriod({
+              startDate: undefined,
+              endDate: undefined,
+              startMonth: undefined,
+              endMonth: undefined,
+              startWeekRange: undefined,
+              endWeekRange: undefined,
+            });
+          }}
+        />
+        <div className="flex flex-row items-center gap-2">
+          <Checkbox
+            checked={compareMode}
+            onCheckedChange={(v) => setCompareMode(!!v)}
+            className="bg-white border-black hover:bg-gray-100"
+          />
+          <Label htmlFor="terms" className="text-base">
+            2期間比較
+          </Label>
         </div>
       </div>
-    </>
+      <div className="flex flex-col sm:flex-row w-full gap-8 justify-center">
+        <PeriodGraphPanel
+          type={type}
+          period={period}
+          setPeriod={setPeriod}
+          isCompareMode={compareMode}
+          isLoading={isLoading}
+          filteredData={filteredData}
+          filteredDailyData={filteredDailyData}
+        />
+        {compareMode && (
+          <PeriodGraphPanel
+            type={type}
+            period={comparePeriod}
+            setPeriod={setComparePeriod}
+            isCompareMode={compareMode}
+            isLoading={compareIsLoading}
+            filteredData={compareFilteredData}
+            filteredDailyData={compareFilteredDailyData}
+          />
+        )}
+      </div>
+    </div>
   );
 }
 
