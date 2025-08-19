@@ -7,8 +7,7 @@ import {
   StatsSummary,
 } from "@fukui-kanko/shared/components/parts";
 import { cn } from "@fukui-kanko/shared/utils";
-import { DownloadIcon } from "@primer/octicons-react";
-import { saveAs } from "file-saver";
+import { DownloadCSVButton } from "./download-csv-button.component";
 
 type PeriodGraphPanelProps = {
   type: keyof typeof GRAPH_VIEW_TYPES;
@@ -21,13 +20,6 @@ type PeriodGraphPanelProps = {
   className?: string;
 };
 
-function convertToCSV(data: AggregatedData[]): string {
-  if (data.length === 0) return "";
-  const headers = Object.keys(data[0]);
-  const rows = data.map((row) => headers.map((h) => `"${row[h] ?? ""}"`).join(","));
-  return [headers.join(","), ...rows].join("\n");
-}
-
 export function PeriodGraphPanel({
   type,
   period,
@@ -38,12 +30,6 @@ export function PeriodGraphPanel({
   filteredDailyData,
   className,
 }: PeriodGraphPanelProps) {
-  const handleDownloadCSV = (data: AggregatedData[]) => {
-    const csv = convertToCSV(data);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    saveAs(blob, "fukui-terminal-data.csv");
-  };
-
   return (
     <div className={cn("w-full min-w-0 flex flex-col items-center", className)}>
       <div className="flex gap-2 pl-[5.25rem]">
@@ -77,22 +63,13 @@ export function PeriodGraphPanel({
           />
         )}
         <div className="flex items-end">
-          <button
-            className="h-9 px-3 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
-            onClick={() => handleDownloadCSV(type === "hour" ? filteredDailyData : filteredData)}
-            disabled={
-              !(
-                (period.startMonth && period.endMonth) ||
-                (period.startWeekRange && period.endWeekRange) ||
-                (period.startDate && period.endDate)
-              )
-            }
-          >
-            <span className="flex items-center gap-1">
-              <DownloadIcon size={16} />
-              {!isCompareMode && <span className="hidden sm:inline">CSV</span>}
-            </span>
-          </button>
+          <DownloadCSVButton
+            type={type}
+            period={period}
+            isCompareMode={isCompareMode}
+            filteredData={filteredData}
+            filteredDailyData={filteredDailyData}
+          />
         </div>
       </div>
       <div className="w-full flex flex-col items-center justify-end min-h-[40vh]">
