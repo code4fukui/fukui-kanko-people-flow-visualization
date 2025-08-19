@@ -19,7 +19,7 @@ function convertToCSV(data: AggregatedData[], viewType: keyof typeof GRAPH_VIEW_
   const headers = isDailyOrHourly
     ? (["aggregateFrom", "totalCount", "dayOfWeek", "holidayName"] as const)
     : (["aggregateFrom", "totalCount", "weekdayTotal", "weekendTotal"] as const);
-  if (data.length === 0) return headers.join(",");
+  if (data.length === 0) return headers.join(",") + "\n";
   const rows = data.map((row) =>
     headers
       .map((h) => {
@@ -47,13 +47,15 @@ export function DownloadCSVButton({
     saveAs(blob, `${placement}-data.csv`);
   };
 
-  const disabled = !(
+  const dataToDownload = type === "hour" ? filteredDailyData : filteredData;
+
+  const hasSelectedRange =
     (period.startMonth && period.endMonth) ||
     (period.startWeekRange && period.endWeekRange) ||
-    (period.startDate && period.endDate)
-  );
+    (period.startDate && period.endDate);
+  const hasData = Array.isArray(dataToDownload) && dataToDownload.length > 0;
 
-  const dataToDownload = type === "hour" ? filteredDailyData : filteredData;
+  const disabled = !(hasSelectedRange && hasData);
 
   return (
     <button
