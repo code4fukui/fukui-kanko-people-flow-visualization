@@ -13,11 +13,21 @@ type DownloadCSVButtonProps = {
   placement: string;
 };
 
-function convertToCSV(data: AggregatedData[]): string {
-  if (data.length === 0) return "";
-  const headers = Object.keys(data[0]);
+function convertToCSV(data: AggregatedData[], viewType: keyof typeof GRAPH_VIEW_TYPES): string {
+  const isDailyOrHourly = viewType === "day" || viewType === "hour";
+
+  const headers = isDailyOrHourly
+    ? (["aggregateFrom", "totalCount", "dayOfWeek", "holidayName"] as const)
+    : (["aggregateFrom", "totalCount", "weekdayTotal", "weekendTotal"] as const);
+  if (data.length === 0) return headers.join(",");
   const rows = data.map((row) =>
-    headers.map((h) => `"${row[h as keyof AggregatedData] ?? ""}"`).join(","),
+    headers
+      .map((h) => {
+        const value = (row as Record<string, unknown>)[h] ?? "";
+        const escaped = String(value).replace(/"/g, '""');
+        return `"${escaped}"`;
+      })
+      .join(","),
   );
   return [headers.join(","), ...rows].join("\n");
 }
@@ -32,7 +42,7 @@ export function DownloadCSVButton({
   placement,
 }: DownloadCSVButtonProps) {
   const handleDownloadCSV = (data: AggregatedData[]) => {
-    const csv = convertToCSV(data);
+    const csv = convertToCSV(data, type);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     saveAs(blob, `${placement}-data.csv`);
   };
