@@ -2,9 +2,12 @@ import { useEffect, useState } from "react";
 import {
   AggregatedData,
   AggregatedDataBase,
+  CAR_CATEGORIES,
   getRawData,
   GRAPH_VIEW_TYPES,
   Placement,
+  PREFECTURES,
+  REGIONS_PREFECTURES,
   useInitialization,
 } from "@fukui-kanko/shared";
 import { TypeSelect } from "@fukui-kanko/shared/components/parts";
@@ -105,7 +108,42 @@ function App() {
           });
         }
         return acc;
-      }, [] as RainbowLineAggregatedData[]);
+      }, [] as RainbowLineAggregatedData[])
+      .map((row) => {
+        let filteredRow = {} as RainbowLineAggregatedData;
+        // フィルター（カラム名からフィルターにマッチするかどうかを判別する関数）
+        const judge = (key: string) => {
+          let prefectures =
+            filters["region"] === "all"
+              ? Object.keys(PREFECTURES)
+              : REGIONS_PREFECTURES[filters["region"]].prefectures;
+          if (filters["prefecture"] !== "all")
+            prefectures = prefectures.filter((v) => v === filters["prefecture"]);
+          const carCategories =
+            filters["carCategory"] === "all"
+              ? Object.keys(CAR_CATEGORIES)
+              : [filters["carCategory"]];
+          return (
+            prefectures.some((v) => key.includes(v)) && carCategories.some((v) => key.includes(v))
+          );
+        };
+        // フィルターにマッチするカラムのみを抽出
+        Object.entries(row).forEach(([key, value]) => {
+          if (judge(key)) filteredRow[key] = value;
+        });
+        // 他に必要なカラムのデータを反映
+        filteredRow = {
+          ...filteredRow,
+          placement: row.placement,
+          "object class": row["object class"],
+          "aggregate from": row["aggregate from"],
+          "aggregate to": row["aggregate to"],
+          "total count": Number(
+            Object.values(filteredRow).reduce((sum, v) => Number(sum) + Number(v), 0),
+          ),
+        };
+        return filteredRow;
+      });
     setProcessedData(processed);
   }, [data, filters]);
 
