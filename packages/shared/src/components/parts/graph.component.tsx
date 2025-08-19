@@ -203,6 +203,7 @@ const Graph: React.FC<GraphProps> = ({
             content={<ChartTooltipContent className="bg-white" />}
           />
           <ChartLegend
+            wrapperStyle={{ width: "100%" }}
             content={(props) => (
               <ClickableLegend
                 payload={props.payload}
