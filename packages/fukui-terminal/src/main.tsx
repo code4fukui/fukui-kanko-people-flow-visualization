@@ -6,7 +6,7 @@ import "./index.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <Header />
+    <Header title="福井駅東口案内所 人流データ" />
     <App />
   </StrictMode>,
 );
