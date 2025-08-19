@@ -50,6 +50,7 @@ export function RainbowLineChartPanel({
       ></RangeSelector>
 
       <div className="flex flex-col gap-y-4 w-full min-w-full grow overflow-auto">
+        <Graph data={dataInRange} type="day" xKey="aggregate from" yKey="total count" />
         <RainbowLinePieChart
           data={dataInRange}
           focusedAttribute="carCategories"
@@ -60,6 +61,7 @@ export function RainbowLineChartPanel({
           focusedAttribute="prefectures"
           className="w-full min-h-[calc(100dvh_-_(32px_+_48px_+_200px_+_16px_+_62px_+_16px))]"
         />
+        <Graph data={dataInRange} type="day" xKey="aggregate from" yKey="total count" />
       </div>
     </div>
   );
