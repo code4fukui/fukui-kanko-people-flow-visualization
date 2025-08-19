@@ -69,6 +69,7 @@ export function PeriodGraphPanel({
             isCompareMode={isCompareMode}
             filteredData={filteredData}
             filteredDailyData={filteredDailyData}
+            placement="fukui-station-east-entrance"
           />
         </div>
       </div>

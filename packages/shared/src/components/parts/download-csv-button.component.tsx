@@ -1,4 +1,5 @@
 import { AggregatedData, GRAPH_VIEW_TYPES, Period } from "@fukui-kanko/shared";
+import { cn } from "@fukui-kanko/shared/utils";
 import { DownloadIcon } from "@primer/octicons-react";
 import { saveAs } from "file-saver";
 
@@ -9,6 +10,7 @@ type DownloadCSVButtonProps = {
   filteredData: AggregatedData[];
   filteredDailyData: AggregatedData[];
   className?: string;
+  placement: string;
 };
 
 function convertToCSV(data: AggregatedData[]): string {
@@ -27,11 +29,12 @@ export function DownloadCSVButton({
   filteredData,
   filteredDailyData,
   className,
+  placement,
 }: DownloadCSVButtonProps) {
   const handleDownloadCSV = (data: AggregatedData[]) => {
     const csv = convertToCSV(data);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    saveAs(blob, "fukui-terminal-data.csv");
+    saveAs(blob, `${placement}-data.csv`);
   };
 
   const disabled = !(
@@ -44,10 +47,12 @@ export function DownloadCSVButton({
 
   return (
     <button
-      className={`h-9 px-3 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed ${className ?? ""}`}
+      className={cn(
+        "h-9 px-3 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed",
+        className,
+      )}
       onClick={() => handleDownloadCSV(dataToDownload)}
       disabled={disabled}
-      aria-label="CSV をダウンロード"
     >
       <span className="flex items-center gap-1">
         <DownloadIcon size={16} />
