@@ -108,6 +108,7 @@ function App() {
         />
         <div className="flex flex-row items-center gap-2">
           <Checkbox
+            id="terms"
             checked={compareMode}
             onCheckedChange={(v) => setCompareMode(!!v)}
             className="bg-white border-black hover:bg-gray-100"
