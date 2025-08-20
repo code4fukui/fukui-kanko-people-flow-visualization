@@ -35,7 +35,44 @@ export function PeriodGraphPanel({
           startMonth={period.startMonth}
           endMonth={period.endMonth}
           onChange={(start, end) => {
-            setPeriod((prev) => ({ ...prev, startMonth: start, endMonth: end }));
+            setPeriod((prev) => {
+              const next = { ...prev, startMonth: start, endMonth: end };
+
+              // startMonth → startDate (1日)
+              if (start) {
+                const startYear = start.getFullYear();
+                const startMonth = start.getMonth() + 1;
+                // データが12月20日から始まるため、12月の場合は20日、それ以外は1日から
+                const day = startMonth === 12 ? 20 : 1;
+                next.startDate = new Date(
+                  `${startYear}-${String(startMonth).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
+                );
+                next.startDate.setHours(0, 0, 0, 0);
+              }
+
+              // endMonth → endDate（月末日）
+              if (end) {
+                const endYear = end.getFullYear();
+                const endMonth = end.getMonth() + 1;
+                const now = new Date();
+                const isCurrentMonth =
+                  endYear === now.getFullYear() && endMonth === now.getMonth() + 1;
+
+                if (isCurrentMonth) {
+                  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+                  yesterday.setHours(0, 0, 0, 0);
+                  next.endDate = yesterday;
+                } else {
+                  const lastDay = new Date(endYear, endMonth, 0).getDate(); // mは1-12でOK（翌月0日=当月末）
+                  next.endDate = new Date(
+                    `${endYear}-${String(endMonth).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`,
+                  );
+                  next.endDate.setHours(0, 0, 0, 0);
+                }
+              }
+
+              return next;
+            });
           }}
         />
       )}

@@ -25,8 +25,10 @@ function App() {
   const [period, setPeriod] = useState<Period>(() => {
     const end = new Date();
     end.setDate(end.getDate() - 1); // 今日の前日を設定
+    end.setHours(0, 0, 0, 0);
     const start = new Date(end);
     start.setMonth(end.getMonth() - 3); // 3ヶ月前を設定
+    start.setHours(0, 0, 0, 0);
     return {
       startDate: start,
       endDate: end,
@@ -95,23 +97,6 @@ function App() {
           type={type}
           onChange={(newType) => {
             setType(newType);
-            // タイプ変更時に値をリセット
-            setPeriod({
-              startDate: undefined,
-              endDate: undefined,
-              startMonth: undefined,
-              endMonth: undefined,
-              startWeekRange: undefined,
-              endWeekRange: undefined,
-            });
-            setComparePeriod({
-              startDate: undefined,
-              endDate: undefined,
-              startMonth: undefined,
-              endMonth: undefined,
-              startWeekRange: undefined,
-              endWeekRange: undefined,
-            });
           }}
         />
         <div className="flex flex-row items-center gap-2">
