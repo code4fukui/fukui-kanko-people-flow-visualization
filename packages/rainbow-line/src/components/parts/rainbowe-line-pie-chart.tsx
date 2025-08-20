@@ -5,7 +5,14 @@ import {
   cn,
   type ObjectClassAttribute,
 } from "@fukui-kanko/shared";
-import { ChartConfig, ChartContainer } from "@fukui-kanko/shared/components/ui";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@fukui-kanko/shared/components/ui";
 import { Cell, Pie, PieChart } from "recharts";
 
 const RADIAN = Math.PI / 180;
@@ -63,8 +70,8 @@ export function RainbowLinePieChart({
   focusedAttribute: ObjectClassAttribute;
   className?: string;
 }) {
+  const list = ATTRIBUTES[focusedAttribute];
   const aggregbatedData = data.map((row) => {
-    const list = ATTRIBUTES[focusedAttribute];
     const newData: Record<string, string | number> = {
       "aggregate from": row["aggregate from"],
     };
@@ -82,30 +89,35 @@ export function RainbowLinePieChart({
       ...newData,
     };
   });
-  const chartData = aggregbatedData.reduce(
-    (acc, row) => {
-      Object.entries(row).forEach(([key, value]) => {
-        if (key === "aggregate from") return; // Skip the date key
-        if (key in acc) {
-          acc[key].value += Number(value);
-        } else {
-          acc[key] = {
-            value: Number(value),
-          };
-        }
-      });
-      return acc;
-    },
-    {} as Record<string, { value: number }>,
-  );
+  const chartData = aggregbatedData
+    .reduce(
+      (acc, row) => {
+        Object.entries(row).forEach(([key, value]) => {
+          if (key === "aggregate from") return; // Skip the date key
+          const index = acc.findIndex((item) => item.name === key);
+          if (index === -1) {
+            acc.push({ value: Number(value), name: key });
+            return;
+          } else {
+            acc[index].value = Number(acc[index].value) + Number(value);
+          }
+        });
+        return acc;
+      },
+      [] as Record<string, string | number>[],
+    )
+    .sort((a, b) => {
+      if (typeof a.value === "number" && typeof b.value === "number") {
+        return b.value - a.value; // Sort by value in descending order
+      }
+      return 0; // If not numbers, keep original order
+    });
   const chartConfig: ChartConfig = {};
-  Object.keys(chartData).forEach((key) => {
+  Object.keys(list).forEach((key) => {
     chartConfig[key] = {
       label: attributeValueText(focusedAttribute, key),
     };
   });
-
-  console.log(chartData, chartConfig);
 
   return (
     <div
@@ -117,11 +129,30 @@ export function RainbowLinePieChart({
       <div className="flex flex-col gap-y-4 w-full min-w-full grow overflow-auto">
         <ChartContainer config={chartConfig} className="h-full w-full min-h-0">
           <PieChart>
-            <Pie dataKey="value" data={Object.entries(chartData)}>
-              {Object.entries(chartData).map(([k, v]) => (
+            <Pie
+              dataKey="value"
+              isAnimationActive={false}
+              data={chartData}
+              cx="50%"
+              cy="50%"
+              startAngle={90}
+              endAngle={-270}
+              fill="#8884d8"
+              labelLine={false}
+              label={(props) => CustomizedLabel({ ...props, focusedAttribute })}
+            >
+              {Object.entries(chartData).map(([k]) => (
                 <Cell key={k} fill={`#${Math.floor(Math.random() * 16777215).toString(16)}`} />
               ))}
             </Pie>
+            <ChartTooltip
+              cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
+              content={<ChartTooltipContent className="bg-white" />}
+              wrapperStyle={{ zIndex: "var(--tooltip-z-index)" }}
+            />
+            {Object.keys(chartData).length <= 10 ? (
+              <ChartLegend content={<ChartLegendContent />} />
+            ) : undefined}
           </PieChart>
         </ChartContainer>
       </div>
