@@ -46,3 +46,31 @@ export const HOVER_CLEAR_DELAY_MS = 100;
 export function getLegendKey(dataKey: string, instanceSuffix: string) {
   return [dataKey, instanceSuffix].join("::");
 }
+
+/**
+ * 指定日を含む週の範囲（from/to）を返す。
+ */
+export function getWeekRange(date: Date) {
+  const minDate = getMinDate();
+  const maxDate = getMaxDate();
+  let startDay = new Date(date);
+  let endDay: Date;
+
+  startDay.setDate(date.getDate() - startDay.getDay());
+  if (startDay < minDate) {
+    startDay = new Date(minDate);
+  }
+
+  if (startDay.getTime() === minDate.getTime()) {
+    // データのある最初の週は7日周期にできないため、特別に終了日を設定
+    endDay = new Date(FIRST_WEEK_END_DATE);
+  } else {
+    endDay = new Date(startDay);
+    endDay.setDate(startDay.getDate() + 6);
+    // 最新データ日を超えないようにする
+    if (endDay > maxDate) {
+      endDay = new Date(maxDate);
+    }
+  }
+  return { from: startDay, to: endDay };
+}

@@ -6,7 +6,7 @@ import {
   RangeSelector,
   StatsSummary,
 } from "@fukui-kanko/shared/components/parts";
-import { cn } from "@fukui-kanko/shared/utils";
+import { cn, getWeekRange } from "@fukui-kanko/shared/utils";
 
 type PeriodGraphPanelProps = {
   type: keyof typeof GRAPH_VIEW_TYPES;
@@ -48,6 +48,7 @@ export function PeriodGraphPanel({
                   `${startYear}-${String(startMonth).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
                 );
                 next.startDate.setHours(0, 0, 0, 0);
+                next.startWeekRange = getWeekRange(next.startDate);
               }
 
               // endMonth → endDate（月末日）
@@ -69,6 +70,7 @@ export function PeriodGraphPanel({
                   );
                   next.endDate.setHours(0, 0, 0, 0);
                 }
+                next.endWeekRange = getWeekRange(next.endDate);
               }
 
               return next;
