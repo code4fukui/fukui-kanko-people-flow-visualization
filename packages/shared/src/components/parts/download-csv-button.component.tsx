@@ -72,7 +72,7 @@ export function DownloadCSVButton({
   return (
     <Button
       className={cn(
-        "h-9 px-3  text-black border-black rounded disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed",
+        "h-9 px-3  text-black rounded disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed",
         className,
       )}
       variant="outline"
