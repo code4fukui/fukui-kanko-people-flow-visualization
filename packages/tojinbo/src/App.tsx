@@ -3,7 +3,7 @@ import { PeriodGraphPanel, TypeSelect } from "@fukui-kanko/shared/components/par
 import { Checkbox, Label } from "@fukui-kanko/shared/components/ui";
 import { useDailyDataEffect, useFilteredData } from "@fukui-kanko/shared/hooks";
 import { AggregatedData, GRAPH_VIEW_TYPES, Period } from "@fukui-kanko/shared/types";
-import { getRawData, getWeekRange } from "@fukui-kanko/shared/utils";
+import { createInitialPeriod, getRawData } from "@fukui-kanko/shared/utils";
 
 function App() {
   const placement = "tojinbo-shotaro";
@@ -17,34 +17,12 @@ function App() {
   const [compareIsLoading, setCompareIsLoading] = useState(false);
 
   // 本期間の状態
-  const [period, setPeriod] = useState<Period>(() => {
-    const end = new Date();
-    end.setDate(end.getDate() - 1); // 今日の前日を設定
-    end.setHours(0, 0, 0, 0);
-    const start = new Date(end);
-    start.setMonth(end.getMonth() - 3); // 3ヶ月前を設定
-    start.setHours(0, 0, 0, 0);
-    return {
-      startDate: start,
-      endDate: end,
-      startMonth: new Date(start.getFullYear(), start.getMonth(), 1),
-      endMonth: new Date(end.getFullYear(), end.getMonth(), 1),
-      startWeekRange: getWeekRange(start),
-      endWeekRange: getWeekRange(end),
-    };
-  });
+  const [period, setPeriod] = useState<Period>(createInitialPeriod);
   const [filteredData, setFilteredData] = useState<AggregatedData[]>([]);
   const [filteredDailyData, setFilteredDailyData] = useState<AggregatedData[]>([]);
 
   // 比較期間の状態
-  const [comparePeriod, setComparePeriod] = useState<Period>({
-    startDate: undefined,
-    endDate: undefined,
-    startMonth: undefined,
-    endMonth: undefined,
-    startWeekRange: undefined,
-    endWeekRange: undefined,
-  });
+  const [comparePeriod, setComparePeriod] = useState<Period>(createInitialPeriod);
   const [compareFilteredData, setCompareFilteredData] = useState<AggregatedData[]>([]);
   const [compareFilteredDailyData, setCompareFilteredDailyData] = useState<AggregatedData[]>([]);
 

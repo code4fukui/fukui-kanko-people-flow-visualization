@@ -1,3 +1,4 @@
+import { Period } from "@fukui-kanko/shared/types";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -73,4 +74,24 @@ export function getWeekRange(date: Date) {
     }
   }
   return { from: startDay, to: endDay };
+}
+
+/**
+ * 画面初期表示用の期間（Period）を生成する。
+ */
+export function createInitialPeriod(): Period {
+  const end = new Date();
+  end.setDate(end.getDate() - 1); // 今日の前日を設定
+  end.setHours(0, 0, 0, 0);
+  const start = new Date(end);
+  start.setMonth(end.getMonth() - 3); // 3ヶ月前を設定
+  start.setHours(0, 0, 0, 0);
+  return {
+    startDate: start,
+    endDate: end,
+    startMonth: new Date(start.getFullYear(), start.getMonth(), 1),
+    endMonth: new Date(end.getFullYear(), end.getMonth(), 1),
+    startWeekRange: getWeekRange(start),
+    endWeekRange: getWeekRange(end),
+  };
 }
