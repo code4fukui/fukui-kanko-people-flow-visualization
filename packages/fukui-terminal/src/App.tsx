@@ -11,6 +11,8 @@ import { PeriodGraphPanel, TypeSelect } from "@fukui-kanko/shared/components/par
 import { Checkbox, Label } from "@fukui-kanko/shared/components/ui";
 
 function App() {
+  const placement = "fukui-station-east-entrance";
+
   const [type, setType] = useState<keyof typeof GRAPH_VIEW_TYPES>("month");
   const [csvData, setCsvData] = useState<AggregatedData[]>([]);
   const [csvDailyData, setCsvDailyData] = useState<AggregatedData[]>([]);
@@ -48,7 +50,7 @@ function App() {
       try {
         const rawData = await getRawData({
           objectClass: "Person",
-          placement: "fukui-station-east-entrance",
+          placement,
           aggregateRange: "full",
         });
         setCsvData(rawData);
@@ -75,10 +77,10 @@ function App() {
   );
 
   // 本期間の時間別データを取得・更新
-  useDailyDataEffect(type, period, setCsvDailyData, setIsLoading);
+  useDailyDataEffect(placement, type, period, setCsvDailyData, setIsLoading);
 
   // 比較期間の時間別データを取得・更新
-  useDailyDataEffect(type, comparePeriod, setCompareCsvDailyData, setCompareIsLoading);
+  useDailyDataEffect(placement, type, comparePeriod, setCompareCsvDailyData, setCompareIsLoading);
 
   return (
     <div className="h-full w-full max-w-full text-center flex flex-col items-center gap-2 mt-3">
@@ -108,6 +110,7 @@ function App() {
         />
         <div className="flex flex-row items-center gap-2">
           <Checkbox
+            id="terms"
             checked={compareMode}
             onCheckedChange={(v) => setCompareMode(!!v)}
             className="bg-white border-black hover:bg-gray-100"

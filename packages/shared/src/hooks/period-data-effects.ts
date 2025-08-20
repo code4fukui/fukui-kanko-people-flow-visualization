@@ -5,6 +5,7 @@ import {
   getRawData,
   GRAPH_VIEW_TYPES,
   Period,
+  Placement,
 } from "@fukui-kanko/shared";
 
 /**
@@ -39,6 +40,7 @@ export function useFilteredData(
  * 時間別データを取得・更新するフック
  */
 export function useDailyDataEffect(
+  placement: Placement,
   type: keyof typeof GRAPH_VIEW_TYPES,
   period: Period,
   setDailyData: (data: AggregatedData[]) => void,
@@ -61,7 +63,7 @@ export function useDailyDataEffect(
           // 1時間ごとに取得
           const rawData = await getRawData({
             objectClass: "Person",
-            placement: "fukui-station-east-entrance",
+            placement,
             aggregateRange: "daily", // 1時間毎のデータはdailyに含まれています
             date: new Date(current),
           });
