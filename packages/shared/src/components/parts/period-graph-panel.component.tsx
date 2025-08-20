@@ -18,6 +18,7 @@ type PeriodGraphPanelProps = {
   filteredData: AggregatedData[];
   filteredDailyData: AggregatedData[];
   className?: string;
+  placement: string;
 };
 
 export function PeriodGraphPanel({
@@ -29,6 +30,7 @@ export function PeriodGraphPanel({
   filteredData,
   filteredDailyData,
   className,
+  placement,
 }: PeriodGraphPanelProps) {
   return (
     <div className={cn("w-full min-w-0 flex flex-col items-center", className)}>
@@ -69,7 +71,7 @@ export function PeriodGraphPanel({
             isCompareMode={isCompareMode}
             filteredData={filteredData}
             filteredDailyData={filteredDailyData}
-            placement="fukui-station-east-entrance"
+            placement={placement}
           />
         </div>
       </div>
