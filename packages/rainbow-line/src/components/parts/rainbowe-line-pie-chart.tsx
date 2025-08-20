@@ -8,6 +8,52 @@ import {
 import { ChartConfig, ChartContainer } from "@fukui-kanko/shared/components/ui";
 import { Cell, Pie, PieChart } from "recharts";
 
+const RADIAN = Math.PI / 180;
+const CustomizedLabel = (props: {
+  cx: number;
+  cy: number;
+  midAngle: number;
+  innerRadius: number;
+  outerRadius: number;
+  percent: number;
+  index: number;
+  name: string;
+  focusedAttribute: ObjectClassAttribute;
+}) => {
+  const radius = props.innerRadius + (props.outerRadius - props.innerRadius) * 0.7;
+  const x = props.cx + radius * Math.cos(-props.midAngle * RADIAN);
+  const y = props.cy + radius * Math.sin(-props.midAngle * RADIAN);
+
+  return props.percent > 0.05 ? (
+    <g>
+      <text
+        x={x}
+        y={y - 10}
+        fill="white"
+        textAnchor="middle"
+        dominantBaseline="central"
+        className="font-bold drop-shadow"
+      >
+        {props.percent > 0.05 ? `${(props.percent * 100).toFixed(1)}%` : undefined}
+      </text>
+      <text
+        x={x}
+        y={y + 10}
+        fill="white"
+        textAnchor="middle"
+        dominantBaseline="central"
+        className="font-bold drop-shadow"
+      >
+        {
+          ATTRIBUTES[props.focusedAttribute][
+            props.name as keyof (typeof ATTRIBUTES)[ObjectClassAttribute]
+          ]
+        }
+      </text>
+    </g>
+  ) : undefined;
+};
+
 export function RainbowLinePieChart({
   data,
   focusedAttribute,
