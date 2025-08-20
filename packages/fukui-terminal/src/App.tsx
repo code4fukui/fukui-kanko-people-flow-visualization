@@ -13,7 +13,7 @@ import { Checkbox, Label } from "@fukui-kanko/shared/components/ui";
 function App() {
   const placement = "fukui-station-east-entrance";
 
-  const [type, setType] = useState<keyof typeof GRAPH_VIEW_TYPES>("month");
+  const [type, setType] = useState<keyof typeof GRAPH_VIEW_TYPES>("day");
   const [csvData, setCsvData] = useState<AggregatedData[]>([]);
   const [csvDailyData, setCsvDailyData] = useState<AggregatedData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,13 +22,19 @@ function App() {
   const [compareIsLoading, setCompareIsLoading] = useState(false);
 
   // 本期間の状態
-  const [period, setPeriod] = useState<Period>({
-    startDate: undefined,
-    endDate: undefined,
-    startMonth: undefined,
-    endMonth: undefined,
-    startWeekRange: undefined,
-    endWeekRange: undefined,
+  const [period, setPeriod] = useState<Period>(() => {
+    const end = new Date();
+    end.setDate(end.getDate() - 1); // 今日の前日を設定
+    const start = new Date(end);
+    start.setMonth(end.getMonth() - 3); // 3ヶ月前を設定
+    return {
+      startDate: start,
+      endDate: end,
+      startMonth: undefined,
+      endMonth: undefined,
+      startWeekRange: undefined,
+      endWeekRange: undefined,
+    };
   });
   const [filteredData, setFilteredData] = useState<AggregatedData[]>([]);
   const [filteredDailyData, setFilteredDailyData] = useState<AggregatedData[]>([]);
