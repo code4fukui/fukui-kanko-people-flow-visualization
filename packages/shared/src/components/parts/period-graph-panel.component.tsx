@@ -82,8 +82,26 @@ export function PeriodGraphPanel({
           type="week"
           start={period.startWeekRange}
           end={period.endWeekRange}
-          setStart={(range) => setPeriod((prev) => ({ ...prev, startWeekRange: range }))}
-          setEnd={(range) => setPeriod((prev) => ({ ...prev, endWeekRange: range }))}
+          setStart={(range) =>
+            setPeriod((prev) => {
+              const next = { ...prev, startWeekRange: range };
+              if (range) {
+                next.startDate = range.from;
+                next.startMonth = new Date(range.from.getFullYear(), range.from.getMonth(), 1);
+              }
+              return next;
+            })
+          }
+          setEnd={(range) =>
+            setPeriod((prev) => {
+              const next = { ...prev, endWeekRange: range };
+              if (range) {
+                next.endDate = range.to;
+                next.endMonth = new Date(range.to.getFullYear(), range.to.getMonth(), 1);
+              }
+              return next;
+            })
+          }
         />
       )}
 
