@@ -16,7 +16,7 @@ export function formatDate(date: Date, delimiter: "-" | "/" = "-") {
  * アプリケーション内で利用可能なデータの最小日付を返す
  */
 export function getMinDate(): Date {
-  const date = new Date("2024-10-17");
+  const date = new Date("2024-12-20");
   date.setHours(0, 0, 0, 0);
   return date;
 }
@@ -33,7 +33,7 @@ export function getMaxDate(): Date {
 /**
  * データのある最初の週の終了日
  */
-export const FIRST_WEEK_END_DATE = new Date("2024-10-19");
+export const FIRST_WEEK_END_DATE = new Date("2024-12-21");
 
 /**
  * グラフ凡例のホバー解除時に適用する遅延時間（ミリ秒）。

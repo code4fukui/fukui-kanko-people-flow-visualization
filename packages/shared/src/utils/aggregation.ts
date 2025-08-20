@@ -15,7 +15,12 @@ function filterByRange(data: AggregatedData[], from: Date, to: Date) {
  * 指定した期間内のデータを月単位で集計
  */
 export function aggregateMonthly(data: AggregatedData[], start: Date, end: Date): AggregatedData[] {
-  const filtered = filterByRange(data, start, end);
+  // 12月の場合のみ開始日を12月20日に変更
+  let actualStart = start;
+  if (start.getMonth() === 11) {
+    actualStart = new Date(start.getFullYear(), 11, 20);
+  }
+  const filtered = filterByRange(data, actualStart, end);
   const monthlyMap = new Map<
     string,
     AggregatedData & {
