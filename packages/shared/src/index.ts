@@ -12,3 +12,6 @@ export * from "./types";
 
 // 共有定数
 export * from "./constants";
+
+// 共有集計reducer
+export * from "./reducer/";
