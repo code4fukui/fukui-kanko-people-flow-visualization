@@ -56,7 +56,10 @@ export function DownloadCSVButton({
   const handleDownloadCSV = (data: AggregatedData[]) => {
     const csv = convertToCSV(data, type);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    saveAs(blob, `${placement}-data.csv`);
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    const dateStr = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+    saveAs(blob, `${placement}-data-${dateStr}.csv`);
   };
 
   const dataToDownload = type === "hour" ? filteredDailyData : filteredData;
