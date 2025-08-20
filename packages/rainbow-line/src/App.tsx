@@ -7,6 +7,7 @@ import {
   GRAPH_VIEW_TYPES,
   Placement,
   PREFECTURES,
+  reducePlacement,
   REGIONS_PREFECTURES,
   useInitialization,
 } from "@fukui-kanko/shared";
@@ -56,7 +57,6 @@ function App() {
   });
 
   useEffect(() => {
-    const processedAggregatedFrom = new Set<string>();
     const processed = data
       // 駐車場のフィルタが設定されていれば適用
       .filter((row) => {
@@ -66,50 +66,17 @@ function App() {
         }
       })
       // 同じ時点から集計している行が第一駐車場と第二駐車場で2つある場合があるので、これを合計値に変更する
-      .reduce((acc, row, _index, array) => {
-        if (processedAggregatedFrom.has(row["aggregate from"])) return acc; // すでに同じ時点のデータがある場合はスキップ
-        processedAggregatedFrom.add(row["aggregate from"]);
-        // 集計の開始時点を取得
-        const aggregatedFrom = row["aggregate from"];
-
-        // 同じ時点のデータを取得
-        const sameDayData = array.filter((r) => r["aggregate from"] === aggregatedFrom);
-
-        // 同じ時点のデータが1つだけの場合は集計せず追加
-        if (sameDayData.length === 1)
-          acc.push({
-            ...row,
-            placement: filters["parkingLot"] === "all" ? "rainbow-line-all" : row.placement,
-          });
-        // 同じ時点のデータが2つ以上ある場合は合計を計算
-        else {
-          const sum = sameDayData.reduce((sum, r) => {
-            Object.entries(r).forEach(([k, v]) => {
-              if (
-                k === "aggregate from" ||
-                k === "aggregate to" ||
-                k === "placement" ||
-                k === "object class"
-              ) {
-                // 数値データでないものはそのまま反映
-                sum[k as keyof RainbowLineAggregatedData] = v;
-              } else {
-                // 数値データは合計を計算
-                sum[k as keyof RainbowLineAggregatedData] = (
-                  (k in sum ? Number(`${sum[k]}`) : 0) +
-                  (typeof v === "number" ? v : !isNaN(Number(v)) ? Number(v) : 0)
-                ).toString();
-              }
-            });
-            return sum;
-          }, {} as RainbowLineAggregatedData);
-          acc.push({
-            ...sum,
-            placement: filters["parkingLot"] === "all" ? "rainbow-line-all" : row.placement,
-          });
-        }
-        return acc;
-      }, [] as RainbowLineAggregatedData[])
+      .reduce(
+        (result, current, index, parent) =>
+          reducePlacement(
+            filters["parkingLot"] as
+              | "rainbow-line-parking-lot-1-gate"
+              | "rainbow-line-parking-lot-2-gate"
+              | "all",
+            [result as AggregatedData[], current, index, parent],
+          ),
+        [] as RainbowLineAggregatedData[],
+      )
       .map((row) => {
         let filteredRow = {} as RainbowLineAggregatedData;
         // フィルター（カラム名からフィルターにマッチするかどうかを判別する関数）
