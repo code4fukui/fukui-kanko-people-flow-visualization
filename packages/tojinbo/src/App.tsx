@@ -1,14 +1,9 @@
 import { useEffect, useState } from "react";
-import {
-  AggregatedData,
-  getRawData,
-  GRAPH_VIEW_TYPES,
-  Period,
-  useDailyDataEffect,
-  useFilteredData,
-} from "@fukui-kanko/shared";
 import { PeriodGraphPanel, TypeSelect } from "@fukui-kanko/shared/components/parts";
 import { Checkbox, Label } from "@fukui-kanko/shared/components/ui";
+import { useDailyDataEffect, useFilteredData } from "@fukui-kanko/shared/hooks";
+import { AggregatedData, GRAPH_VIEW_TYPES, Period } from "@fukui-kanko/shared/types";
+import { getRawData, getWeekRange } from "@fukui-kanko/shared/utils";
 
 function App() {
   const placement = "tojinbo-shotaro";
@@ -25,15 +20,17 @@ function App() {
   const [period, setPeriod] = useState<Period>(() => {
     const end = new Date();
     end.setDate(end.getDate() - 1); // 今日の前日を設定
+    end.setHours(0, 0, 0, 0);
     const start = new Date(end);
     start.setMonth(end.getMonth() - 3); // 3ヶ月前を設定
+    start.setHours(0, 0, 0, 0);
     return {
       startDate: start,
       endDate: end,
-      startMonth: undefined,
-      endMonth: undefined,
-      startWeekRange: undefined,
-      endWeekRange: undefined,
+      startMonth: new Date(start.getFullYear(), start.getMonth(), 1),
+      endMonth: new Date(end.getFullYear(), end.getMonth(), 1),
+      startWeekRange: getWeekRange(start),
+      endWeekRange: getWeekRange(end),
     };
   });
   const [filteredData, setFilteredData] = useState<AggregatedData[]>([]);

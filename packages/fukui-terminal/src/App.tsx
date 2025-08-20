@@ -1,14 +1,9 @@
 import { useEffect, useState } from "react";
-import {
-  AggregatedData,
-  getRawData,
-  GRAPH_VIEW_TYPES,
-  Period,
-  useDailyDataEffect,
-  useFilteredData,
-} from "@fukui-kanko/shared";
 import { PeriodGraphPanel, TypeSelect } from "@fukui-kanko/shared/components/parts";
 import { Checkbox, Label } from "@fukui-kanko/shared/components/ui";
+import { useDailyDataEffect, useFilteredData } from "@fukui-kanko/shared/hooks";
+import { AggregatedData, GRAPH_VIEW_TYPES, Period } from "@fukui-kanko/shared/types";
+import { getRawData, getWeekRange } from "@fukui-kanko/shared/utils";
 
 function App() {
   const placement = "fukui-station-east-entrance";
@@ -32,10 +27,10 @@ function App() {
     return {
       startDate: start,
       endDate: end,
-      startMonth: undefined,
-      endMonth: undefined,
-      startWeekRange: undefined,
-      endWeekRange: undefined,
+      startMonth: new Date(start.getFullYear(), start.getMonth(), 1),
+      endMonth: new Date(end.getFullYear(), end.getMonth(), 1),
+      startWeekRange: getWeekRange(start),
+      endWeekRange: getWeekRange(end),
     };
   });
   const [filteredData, setFilteredData] = useState<AggregatedData[]>([]);
