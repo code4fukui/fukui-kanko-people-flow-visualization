@@ -1,4 +1,5 @@
 import { AggregatedData, GRAPH_VIEW_TYPES, Period } from "@fukui-kanko/shared";
+import { Button } from "@fukui-kanko/shared/components/ui";
 import { cn } from "@fukui-kanko/shared/utils";
 import { DownloadIcon } from "@primer/octicons-react";
 import { saveAs } from "file-saver";
@@ -69,11 +70,12 @@ export function DownloadCSVButton({
   const disabled = !(hasSelectedRange && hasData);
 
   return (
-    <button
+    <Button
       className={cn(
-        "h-9 px-3 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed",
+        "h-9 px-3  text-black border-black rounded disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed",
         className,
       )}
+      variant="outline"
       onClick={() => handleDownloadCSV(dataToDownload)}
       disabled={disabled}
     >
@@ -81,6 +83,6 @@ export function DownloadCSVButton({
         <DownloadIcon size={16} />
         {!isCompareMode && <span className="hidden sm:inline">CSV</span>}
       </span>
-    </button>
+    </Button>
   );
 }
