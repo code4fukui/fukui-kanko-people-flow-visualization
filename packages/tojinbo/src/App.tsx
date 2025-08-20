@@ -95,23 +95,6 @@ function App() {
           type={type}
           onChange={(newType) => {
             setType(newType);
-            // タイプ変更時に値をリセット
-            setPeriod({
-              startDate: undefined,
-              endDate: undefined,
-              startMonth: undefined,
-              endMonth: undefined,
-              startWeekRange: undefined,
-              endWeekRange: undefined,
-            });
-            setComparePeriod({
-              startDate: undefined,
-              endDate: undefined,
-              startMonth: undefined,
-              endMonth: undefined,
-              startWeekRange: undefined,
-              endWeekRange: undefined,
-            });
           }}
         />
         <div className="flex flex-row items-center gap-2">
