@@ -38,7 +38,6 @@ export function PeriodGraphPanel({
             setPeriod((prev) => {
               const next = { ...prev, startMonth: start, endMonth: end };
 
-              // startMonth → startDate (1日)
               if (start) {
                 const startYear = start.getFullYear();
                 const startMonth = start.getMonth() + 1;
@@ -51,7 +50,6 @@ export function PeriodGraphPanel({
                 next.startWeekRange = getWeekRange(next.startDate);
               }
 
-              // endMonth → endDate（月末日）
               if (end) {
                 const endYear = end.getFullYear();
                 const endMonth = end.getMonth() + 1;
@@ -64,7 +62,7 @@ export function PeriodGraphPanel({
                   yesterday.setHours(0, 0, 0, 0);
                   next.endDate = yesterday;
                 } else {
-                  const lastDay = new Date(endYear, endMonth, 0).getDate(); // mは1-12でOK（翌月0日=当月末）
+                  const lastDay = new Date(endYear, endMonth, 0).getDate();
                   next.endDate = new Date(
                     `${endYear}-${String(endMonth).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`,
                   );
@@ -94,8 +92,30 @@ export function PeriodGraphPanel({
           type="date"
           start={period.startDate}
           end={period.endDate}
-          setStart={(date) => setPeriod((prev) => ({ ...prev, startDate: date }))}
-          setEnd={(date) => setPeriod((prev) => ({ ...prev, endDate: date }))}
+          setStart={(date) =>
+            setPeriod((prev) => {
+              const next = { ...prev, startDate: date };
+              if (date) {
+                const year = date.getFullYear();
+                const month = date.getMonth() + 1;
+                next.startMonth = new Date(year, month - 1, 1);
+                next.startWeekRange = getWeekRange(date);
+              }
+              return next;
+            })
+          }
+          setEnd={(date) =>
+            setPeriod((prev) => {
+              const next = { ...prev, endDate: date };
+              if (date) {
+                const year = date.getFullYear();
+                const month = date.getMonth() + 1;
+                next.endMonth = new Date(year, month - 1, 1);
+                next.endWeekRange = getWeekRange(date);
+              }
+              return next;
+            })
+          }
         />
       )}
 
