@@ -22,15 +22,24 @@ function convertToCSV(data: AggregatedData[], viewType: keyof typeof GRAPH_VIEW_
     "dayOfWeek",
     "holidayName",
   ];
+  const dailyHeaderNames = ["集計期間", "検出回数", "曜日", "祝日名"];
+
   const periodHeaders: readonly (keyof AggregatedData)[] = [
     "aggregateFrom",
     "totalCount",
     "weekdayTotal",
     "weekendTotal",
   ];
+  const periodHeaderNames = [
+    "集計期間",
+    "検出回数",
+    "検出回数（平日合計）",
+    "検出回数（土日祝合計）",
+  ];
 
   const headers = isDailyOrHourly ? dailyHeaders : periodHeaders;
-  if (data.length === 0) return headers.join(",") + "\n";
+  const headerNames = isDailyOrHourly ? dailyHeaderNames : periodHeaderNames;
+  if (data.length === 0) return headerNames.join(",") + "\n";
   const rows = data.map((row) =>
     headers
       .map((h) => {
@@ -40,7 +49,7 @@ function convertToCSV(data: AggregatedData[], viewType: keyof typeof GRAPH_VIEW_
       })
       .join(","),
   );
-  return [headers.join(","), ...rows].join("\n");
+  return [headerNames.join(","), ...rows].join("\n");
 }
 
 export function DownloadCSVButton({
