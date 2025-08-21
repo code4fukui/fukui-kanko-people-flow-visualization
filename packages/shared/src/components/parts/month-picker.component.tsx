@@ -30,7 +30,15 @@ export function MonthPicker({
   selected,
   minDate = getMinDate(),
 }: MonthPickerProps) {
-  const [year, setYear] = React.useState(new Date().getFullYear());
+  const [year, setYear] = React.useState(
+    selected ? selected.getFullYear() : new Date().getFullYear(),
+  );
+
+  React.useEffect(() => {
+    if (selected) {
+      setYear(selected.getFullYear());
+    }
+  }, [selected]);
 
   const selectedMonth =
     selected && selected.getFullYear() === year ? selected.getMonth() : undefined;
