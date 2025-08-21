@@ -77,7 +77,13 @@ function App() {
             id="terms"
             checked={compareMode}
             onCheckedChange={(v) => setCompareMode(!!v)}
-            className="bg-white border-black hover:bg-gray-100"
+            className="
+            bg-white 
+            border-[#6eba2c] 
+            hover:bg-gray-100 
+            data-[state=checked]:bg-[#6eba2c]
+            data-[state=checked]:border-[#6eba2c]
+            data-[state=checked]:text-white"
           />
           <Label htmlFor="terms" className="text-base">
             2期間比較
