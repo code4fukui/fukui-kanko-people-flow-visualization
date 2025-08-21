@@ -100,10 +100,13 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                 mode="range"
                 selected={start}
                 defaultMonth={start?.from}
+                startMonth={getMinDate()}
+                endMonth={getMaxDate()}
                 captionLayout="dropdown"
                 classNames={{
                   dropdowns:
                     "w-full flex flex-row-reverse items-center text-sm font-medium justify-center h-(--cell-size) gap-1.5",
+                  week: "grid grid-cols-7 mt-2",
                 }}
                 disabled={(date) => !isValidDate(date)}
                 onSelect={(date) => {
@@ -116,10 +119,13 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                 mode="single"
                 selected={start}
                 defaultMonth={start}
+                startMonth={getMinDate()}
+                endMonth={getMaxDate()}
                 captionLayout="dropdown"
                 classNames={{
                   dropdowns:
                     "w-full flex flex-row-reverse items-center text-sm font-medium justify-center h-(--cell-size) gap-1.5",
+                  week: "grid grid-cols-7 mt-2",
                 }}
                 disabled={(date) => !isValidDate(date)}
                 onSelect={(date) => {
@@ -160,10 +166,13 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                 mode="range"
                 selected={end}
                 defaultMonth={end?.from}
+                startMonth={start?.from ?? getMinDate()}
+                endMonth={getMaxDate()}
                 captionLayout="dropdown"
                 classNames={{
                   dropdowns:
                     "w-full flex flex-row-reverse items-center text-sm font-medium justify-center h-(--cell-size) gap-1.5",
+                  week: "grid grid-cols-7 mt-2",
                 }}
                 disabled={(date) => !isValidDate(date, start?.from)}
                 onSelect={(date) => {
@@ -176,10 +185,13 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                 mode="single"
                 selected={end}
                 defaultMonth={end}
+                startMonth={start ?? getMinDate()}
+                endMonth={getMaxDate()}
                 captionLayout="dropdown"
                 classNames={{
                   dropdowns:
                     "w-full flex flex-row-reverse items-center text-sm font-medium justify-center h-(--cell-size) gap-1.5",
+                  week: "grid grid-cols-7 mt-2",
                 }}
                 disabled={(date) => !isValidDate(date, start)}
                 onSelect={(date) => {
