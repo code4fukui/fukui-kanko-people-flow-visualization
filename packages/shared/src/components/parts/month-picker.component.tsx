@@ -30,15 +30,22 @@ export function MonthPicker({
   selected,
   minDate = getMinDate(),
 }: MonthPickerProps) {
-  const [year, setYear] = React.useState(
-    selected ? selected.getFullYear() : new Date().getFullYear(),
-  );
+  // 範囲の年を算出
+  const MAX_DATE = getMaxDate();
+  const minYear = minDate.getFullYear();
+  const maxYear = MAX_DATE.getFullYear();
+
+  const [year, setYear] = React.useState(() => {
+    const y = selected ? selected.getFullYear() : new Date().getFullYear();
+    return Math.min(maxYear, Math.max(minYear, y));
+  });
 
   React.useEffect(() => {
-    if (selected) {
-      setYear(selected.getFullYear());
-    }
-  }, [selected]);
+    setYear((prev) => {
+      const target = selected ? selected.getFullYear() : prev;
+      return Math.min(maxYear, Math.max(minYear, target));
+    });
+  }, [selected, minYear, maxYear]);
 
   const selectedMonth =
     selected && selected.getFullYear() === year ? selected.getMonth() : undefined;
@@ -49,16 +56,24 @@ export function MonthPicker({
     }
   };
 
-  const MAX_DATE = getMaxDate();
-
   return (
     <div className={cn("p-4 w-fit", className)}>
       <div className="flex items-center justify-between mb-4">
-        <Button variant="ghost" size="icon" onClick={() => setYear((y) => y - 1)}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setYear((y) => Math.max(minYear, y - 1))}
+          disabled={year <= minYear}
+        >
           &lt;
         </Button>
         <span className="font-semibold">{year}年</span>
-        <Button variant="ghost" size="icon" onClick={() => setYear((y) => y + 1)}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setYear((y) => Math.min(maxYear, y + 1))}
+          disabled={year >= maxYear}
+        >
           &gt;
         </Button>
       </div>
@@ -66,16 +81,20 @@ export function MonthPicker({
         {months.map((m, i) => {
           // 選択できる範囲を制限
           const isDisabled =
-            year < minDate.getFullYear() ||
-            year > MAX_DATE.getFullYear() ||
-            (year === minDate.getFullYear() && i < minDate.getMonth()) ||
-            (year === MAX_DATE.getFullYear() && i > MAX_DATE.getMonth());
+            year < minYear ||
+            year > maxYear ||
+            (year === minYear && i < minDate.getMonth()) ||
+            (year === maxYear && i > MAX_DATE.getMonth());
           return (
             <Button
               key={m}
               variant={selectedMonth === i ? "default" : "outline"}
               onClick={() => handleMonthClick(i)}
-              className={cn("w-16")}
+              className={cn(
+                "w-16",
+                isDisabled && "disabled:opacity-30",
+                selectedMonth === i && "bg-[#6eba2c] text-white",
+              )}
               disabled={isDisabled}
             >
               {m}
