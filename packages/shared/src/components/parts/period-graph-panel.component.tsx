@@ -34,7 +34,7 @@ export function PeriodGraphPanel({
 }: PeriodGraphPanelProps) {
   return (
     <div className={cn("w-full min-w-0 flex flex-col items-center", className)}>
-      <div className="flex gap-2 pl-[5.25rem]">
+      <div className={cn("flex gap-2", { "ml-[5.25rem]": !isCompareMode })}>
         {type === "month" && (
           <MonthRangePicker
             startMonth={period.startMonth}
