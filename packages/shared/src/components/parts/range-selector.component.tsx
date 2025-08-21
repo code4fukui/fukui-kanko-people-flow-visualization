@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
+import { DayButton } from "react-day-picker";
 import {
   Button,
   Calendar,
@@ -7,7 +8,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@fukui-kanko/shared/components/ui";
-import { formatDate, getMaxDate, getMinDate, getWeekRange } from "@fukui-kanko/shared/utils";
+import { cn, formatDate, getMaxDate, getMinDate, getWeekRange } from "@fukui-kanko/shared/utils";
 import { CalendarIcon } from "@primer/octicons-react";
 import { ja } from "date-fns/locale";
 
@@ -28,6 +29,51 @@ type RangeSelectorProps =
       setStart: (date: Date | undefined) => void;
       setEnd: (date: Date | undefined) => void;
     };
+
+const CustomDayButton = forwardRef<HTMLButtonElement, React.ComponentProps<typeof DayButton>>(
+  ({ className, day, modifiers, ...props }, ref) => {
+    useEffect(() => {
+      if (modifiers?.focused && ref && typeof ref !== "function") {
+        (ref as React.RefObject<HTMLButtonElement>).current?.focus();
+      }
+    }, [modifiers?.focused, ref]);
+
+    return (
+      <Button
+        ref={ref}
+        variant="ghost"
+        size="icon"
+        data-day={day.date.toLocaleDateString()}
+        data-selected-single={
+          modifiers?.selected &&
+          !modifiers?.range_start &&
+          !modifiers?.range_end &&
+          !modifiers?.range_middle
+        }
+        data-range-start={modifiers?.range_start}
+        data-range-end={modifiers?.range_end}
+        data-range-middle={modifiers?.range_middle}
+        className={cn(
+          // 選択色の上書き（ここを変更）
+          "data-[selected-single=true]:bg-[#6eba2c] data-[selected-single=true]:text-white",
+          "data-[range-start=true]:bg-[#6eba2c] data-[range-start=true]:text-white",
+          "data-[range-end=true]:bg-[#6eba2c] data-[range-end=true]:text-white",
+          // フォーカスやサイズなどの共通スタイル
+          "data-[range-middle=true]:bg-accent data-[range-middle=true]:text-accent-foreground",
+          "group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-ring/50",
+          "flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal",
+          "group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px]",
+          "data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-middle=true]:rounded-none",
+          "data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md",
+          "[&>span]:text-xs [&>span]:opacity-70",
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);
+CustomDayButton.displayName = "CustomDayButton";
 
 /**
  * 日付が選択可能な期間内かどうかを判定する
@@ -108,6 +154,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                     "w-full flex flex-row-reverse items-center text-sm font-medium justify-center h-(--cell-size) gap-1.5",
                   week: "grid grid-cols-7 mt-2",
                 }}
+                components={{ DayButton: (props) => <CustomDayButton {...props} /> }}
                 disabled={(date) => !isValidDate(date)}
                 onSelect={(date) => {
                   handleWeekRangeSelect(date, start, setStart, () => setOpenStart(false));
@@ -127,6 +174,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                     "w-full flex flex-row-reverse items-center text-sm font-medium justify-center h-(--cell-size) gap-1.5",
                   week: "grid grid-cols-7 mt-2",
                 }}
+                components={{ DayButton: (props) => <CustomDayButton {...props} /> }}
                 disabled={(date) => !isValidDate(date)}
                 onSelect={(date) => {
                   setStart(date);
@@ -174,6 +222,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                     "w-full flex flex-row-reverse items-center text-sm font-medium justify-center h-(--cell-size) gap-1.5",
                   week: "grid grid-cols-7 mt-2",
                 }}
+                components={{ DayButton: (props) => <CustomDayButton {...props} /> }}
                 disabled={(date) => !isValidDate(date, start?.from)}
                 onSelect={(date) => {
                   handleWeekRangeSelect(date, end, setEnd, () => setOpenEnd(false));
@@ -193,6 +242,7 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
                     "w-full flex flex-row-reverse items-center text-sm font-medium justify-center h-(--cell-size) gap-1.5",
                   week: "grid grid-cols-7 mt-2",
                 }}
+                components={{ DayButton: (props) => <CustomDayButton {...props} /> }}
                 disabled={(date) => !isValidDate(date, start)}
                 onSelect={(date) => {
                   setEnd(date);
