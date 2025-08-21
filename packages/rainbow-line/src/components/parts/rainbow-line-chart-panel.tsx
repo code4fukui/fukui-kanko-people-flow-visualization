@@ -1,39 +1,39 @@
-import { useEffect, useState } from "react";
-import { RangeSelector } from "@fukui-kanko/shared/components/parts";
-import { AggregatedData } from "@fukui-kanko/shared/types";
-import { cn, getMaxDate } from "@fukui-kanko/shared/utils";
+import { MonthRangePicker, RangeSelector } from "@fukui-kanko/shared/components/parts";
+import { AggregatedData, GRAPH_VIEW_TYPES, Period } from "@fukui-kanko/shared/types";
+import { cn } from "@fukui-kanko/shared/utils";
 import RainbowLineStackedBarChart from "./rainbow-line-stacked-bar-chart";
 import { RainbowLinePieChart } from "./rainbowe-line-pie-chart";
 
 export function RainbowLineChartPanel({
+  type,
+  period,
+  setPeriod,
   data,
   className,
 }: {
+  type: keyof typeof GRAPH_VIEW_TYPES;
+  period: Period;
+  setPeriod: React.Dispatch<React.SetStateAction<Period>>;
   data: AggregatedData[];
   className?: string;
 }) {
-  const [graphRange, setGraphRange] = useState<{
-    from: Date | undefined;
-    to: Date | undefined;
-  }>({
-    from: new Date("2024-12-20"),
-    to: getMaxDate(),
+  const dataInRange = data.filter((row) => {
+    const aggregatedFrom = new Date(row["aggregate from"]);
+    return (
+      aggregatedFrom >=
+        (type === "week"
+          ? period.startWeekRange?.from || new Date(0)
+          : type === "month"
+            ? period.startMonth || new Date(0)
+            : period.startDate || new Date(0)) &&
+      aggregatedFrom <
+        (type === "week"
+          ? period.endWeekRange?.to || new Date(0)
+          : type === "month"
+            ? period.endMonth || new Date(0)
+            : period.endDate || new Date(0))
+    );
   });
-  const [dataInRange, setDataInRange] = useState<AggregatedData[]>([]);
-
-  useEffect(
-    () =>
-      setDataInRange(
-        data.filter((row) => {
-          const aggregatedFrom = new Date(row["aggregate from"]);
-          return (
-            aggregatedFrom >= (graphRange.from || new Date(0)) &&
-            aggregatedFrom < (graphRange.to || new Date())
-          );
-        }),
-      ),
-    [data, graphRange],
-  );
 
   return (
     <div
@@ -42,13 +42,35 @@ export function RainbowLineChartPanel({
         className,
       )}
     >
-      <RangeSelector
-        type={"date"}
-        start={graphRange.from}
-        end={graphRange.to}
-        setStart={(d) => setGraphRange({ ...graphRange, from: d })}
-        setEnd={(d) => setGraphRange({ ...graphRange, to: d })}
-      ></RangeSelector>
+      {type === "month" && (
+        <MonthRangePicker
+          startMonth={period.startMonth}
+          endMonth={period.endMonth}
+          onChange={(start, end) => {
+            setPeriod((prev) => ({ ...prev, startMonth: start, endMonth: end }));
+          }}
+        />
+      )}
+
+      {type === "week" && (
+        <RangeSelector
+          type="week"
+          start={period.startWeekRange}
+          end={period.endWeekRange}
+          setStart={(range) => setPeriod((prev) => ({ ...prev, startWeekRange: range }))}
+          setEnd={(range) => setPeriod((prev) => ({ ...prev, endWeekRange: range }))}
+        />
+      )}
+
+      {(type === "day" || type === "hour") && (
+        <RangeSelector
+          type="date"
+          start={period.startDate}
+          end={period.endDate}
+          setStart={(date) => setPeriod((prev) => ({ ...prev, startDate: date }))}
+          setEnd={(date) => setPeriod((prev) => ({ ...prev, endDate: date }))}
+        />
+      )}
 
       <div className="flex flex-col gap-y-4 w-full min-w-full grow overflow-auto">
         <RainbowLineStackedBarChart
