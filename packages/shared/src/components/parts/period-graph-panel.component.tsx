@@ -48,6 +48,9 @@ export function PeriodGraphPanel({
                 );
                 next.startDate.setHours(0, 0, 0, 0);
                 next.startWeekRange = getWeekRange(next.startDate);
+              } else {
+                next.startDate = undefined;
+                next.startWeekRange = undefined;
               }
 
               if (end) {
@@ -69,6 +72,9 @@ export function PeriodGraphPanel({
                   next.endDate.setHours(0, 0, 0, 0);
                 }
                 next.endWeekRange = getWeekRange(next.endDate);
+              } else {
+                next.endDate = undefined;
+                next.endWeekRange = undefined;
               }
 
               return next;
@@ -88,6 +94,9 @@ export function PeriodGraphPanel({
               if (range) {
                 next.startDate = range.from;
                 next.startMonth = new Date(range.from.getFullYear(), range.from.getMonth(), 1);
+              } else {
+                next.startDate = undefined;
+                next.startMonth = undefined;
               }
               return next;
             })
@@ -98,6 +107,9 @@ export function PeriodGraphPanel({
               if (range) {
                 next.endDate = range.to;
                 next.endMonth = new Date(range.to.getFullYear(), range.to.getMonth(), 1);
+              } else {
+                next.endDate = undefined;
+                next.endMonth = undefined;
               }
               return next;
             })
@@ -118,6 +130,9 @@ export function PeriodGraphPanel({
                 const month = date.getMonth() + 1;
                 next.startMonth = new Date(year, month - 1, 1);
                 next.startWeekRange = getWeekRange(date);
+              } else {
+                next.startMonth = undefined;
+                next.startWeekRange = undefined;
               }
               return next;
             })
@@ -130,6 +145,9 @@ export function PeriodGraphPanel({
                 const month = date.getMonth() + 1;
                 next.endMonth = new Date(year, month - 1, 1);
                 next.endWeekRange = getWeekRange(date);
+              } else {
+                next.endMonth = undefined;
+                next.endWeekRange = undefined;
               }
               return next;
             })
