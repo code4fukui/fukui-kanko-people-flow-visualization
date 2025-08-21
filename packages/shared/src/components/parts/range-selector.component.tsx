@@ -9,6 +9,7 @@ import {
 } from "@fukui-kanko/shared/components/ui";
 import { formatDate, getMaxDate, getMinDate, getWeekRange } from "@fukui-kanko/shared/utils";
 import { CalendarIcon } from "@primer/octicons-react";
+import { ja } from "date-fns/locale";
 
 type WeekRange = { from: Date; to: Date } | undefined;
 
@@ -95,10 +96,15 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
           <PopoverContent className="w-auto overflow-hidden p-0" align="start">
             {type === "week" ? (
               <Calendar
+                locale={ja}
                 mode="range"
                 selected={start}
                 defaultMonth={start?.from}
                 captionLayout="dropdown"
+                classNames={{
+                  dropdowns:
+                    "w-full flex flex-row-reverse items-center text-sm font-medium justify-center h-(--cell-size) gap-1.5",
+                }}
                 disabled={(date) => !isValidDate(date)}
                 onSelect={(date) => {
                   handleWeekRangeSelect(date, start, setStart, () => setOpenStart(false));
@@ -106,10 +112,15 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
               />
             ) : (
               <Calendar
+                locale={ja}
                 mode="single"
                 selected={start}
                 defaultMonth={start}
                 captionLayout="dropdown"
+                classNames={{
+                  dropdowns:
+                    "w-full flex flex-row-reverse items-center text-sm font-medium justify-center h-(--cell-size) gap-1.5",
+                }}
                 disabled={(date) => !isValidDate(date)}
                 onSelect={(date) => {
                   setStart(date);
@@ -145,10 +156,15 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
           <PopoverContent className="w-auto overflow-hidden p-0" align="start">
             {type === "week" ? (
               <Calendar
+                locale={ja}
                 mode="range"
                 selected={end}
                 defaultMonth={end?.from}
                 captionLayout="dropdown"
+                classNames={{
+                  dropdowns:
+                    "w-full flex flex-row-reverse items-center text-sm font-medium justify-center h-(--cell-size) gap-1.5",
+                }}
                 disabled={(date) => !isValidDate(date, start?.from)}
                 onSelect={(date) => {
                   handleWeekRangeSelect(date, end, setEnd, () => setOpenEnd(false));
@@ -156,10 +172,15 @@ export const RangeSelector = ({ type, start, end, setStart, setEnd }: RangeSelec
               />
             ) : (
               <Calendar
+                locale={ja}
                 mode="single"
                 selected={end}
                 defaultMonth={end}
                 captionLayout="dropdown"
+                classNames={{
+                  dropdowns:
+                    "w-full flex flex-row-reverse items-center text-sm font-medium justify-center h-(--cell-size) gap-1.5",
+                }}
                 disabled={(date) => !isValidDate(date, start)}
                 onSelect={(date) => {
                   setEnd(date);
