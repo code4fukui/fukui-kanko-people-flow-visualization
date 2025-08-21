@@ -96,7 +96,7 @@ const Graph: React.FC<GraphProps> = ({
   xKey = "aggregateFrom",
   yKey = "totalCount",
   type,
-  className,
+  _className,
 }) => {
   const instanceId = useId();
   const tickRenderer = useCallback(
