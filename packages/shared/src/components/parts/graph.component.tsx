@@ -18,7 +18,7 @@ type GraphProps = {
   type: keyof typeof GRAPH_VIEW_TYPES;
 };
 
-type XAxisTickProps = {
+export type XAxisTickProps = {
   x: number;
   y: number;
   payload: { value: string };
@@ -29,7 +29,7 @@ const chartConfig = {
   totalCount: { label: "人物検出回数" },
 };
 
-function renderTick(props: XAxisTickProps, data: AggregatedData[], xKey: string) {
+export function renderTick(props: XAxisTickProps, data: AggregatedData[], xKey: string) {
   const d = data.find((row) => row[xKey] === props.payload.value);
   return (
     <CustomizedXAxisTick
@@ -40,7 +40,7 @@ function renderTick(props: XAxisTickProps, data: AggregatedData[], xKey: string)
   );
 }
 
-const CustomizedXAxisTick = ({
+export const CustomizedXAxisTick = ({
   x,
   y,
   payload,
@@ -95,6 +95,10 @@ const Graph: React.FC<GraphProps> = ({
   xKey = "aggregateFrom",
   yKey = "totalCount",
   type,
+<<<<<<< HEAD
+=======
+  _className,
+>>>>>>> e58bafc (👍️レインボーラインのページに積み上げ棒グラフを実装)
 }) => {
   const instanceId = useId();
   const tickRenderer = useCallback(
