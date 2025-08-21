@@ -8,8 +8,7 @@ type DownloadCSVButtonProps = {
   type: keyof typeof GRAPH_VIEW_TYPES;
   period: Period;
   isCompareMode: boolean;
-  filteredData: AggregatedData[];
-  filteredDailyData: AggregatedData[];
+  data: AggregatedData[];
   className?: string;
   placement: string;
 };
@@ -48,8 +47,7 @@ export function DownloadCSVButton({
   type,
   period,
   isCompareMode,
-  filteredData,
-  filteredDailyData,
+  data,
   className,
   placement,
 }: DownloadCSVButtonProps) {
@@ -62,13 +60,11 @@ export function DownloadCSVButton({
     saveAs(blob, `${placement}-data-${dateStr}.csv`);
   };
 
-  const dataToDownload = type === "hour" ? filteredDailyData : filteredData;
-
   const hasSelectedRange =
     (period.startMonth && period.endMonth) ||
     (period.startWeekRange && period.endWeekRange) ||
     (period.startDate && period.endDate);
-  const hasData = Array.isArray(dataToDownload) && dataToDownload.length > 0;
+  const hasData = Array.isArray(data) && data.length > 0;
 
   const disabled = !(hasSelectedRange && hasData);
 
@@ -79,7 +75,7 @@ export function DownloadCSVButton({
         className,
       )}
       variant="outline"
-      onClick={() => handleDownloadCSV(dataToDownload)}
+      onClick={() => handleDownloadCSV(data)}
       disabled={disabled}
     >
       <span className="flex items-center gap-1">

@@ -69,8 +69,7 @@ export function PeriodGraphPanel({
             type={type}
             period={period}
             isCompareMode={isCompareMode}
-            filteredData={filteredData}
-            filteredDailyData={filteredDailyData}
+            data={type === "hour" ? filteredDailyData : filteredData}
             placement={placement}
           />
         </div>
