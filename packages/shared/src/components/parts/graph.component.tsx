@@ -18,7 +18,7 @@ type GraphProps = {
   type: keyof typeof GRAPH_VIEW_TYPES;
 };
 
-type XAxisTickProps = {
+export type XAxisTickProps = {
   x: number;
   y: number;
   payload: { value: string };
@@ -29,7 +29,7 @@ const chartConfig = {
   totalCount: { label: "人物検出回数" },
 };
 
-function renderTick(props: XAxisTickProps, data: AggregatedData[], xKey: string) {
+export function renderTick(props: XAxisTickProps, data: AggregatedData[], xKey: string) {
   const d = data.find((row) => row[xKey] === props.payload.value);
   return (
     <CustomizedXAxisTick
@@ -40,7 +40,7 @@ function renderTick(props: XAxisTickProps, data: AggregatedData[], xKey: string)
   );
 }
 
-const CustomizedXAxisTick = ({
+export const CustomizedXAxisTick = ({
   x,
   y,
   payload,
@@ -95,7 +95,7 @@ const Graph: React.FC<GraphProps> = ({
   xKey = "aggregateFrom",
   yKey = "totalCount",
   type,
-  className,
+  _className,
 }) => {
   const tickRenderer = useCallback(
     (props: XAxisTickProps) => renderTick(props, data, xKey),
