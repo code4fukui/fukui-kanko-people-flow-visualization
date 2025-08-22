@@ -1,5 +1,6 @@
+import { RAINBOW_LINE_LOTS } from "@/constants/parking-lots";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { formatDate, WEEK_DAYS } from "@fukui-kanko/shared";
+import { cn, formatDate, WEEK_DAYS } from "@fukui-kanko/shared";
 import { renderTick, XAxisTickProps } from "@fukui-kanko/shared/components/parts";
 import {
   ChartContainer,
@@ -12,6 +13,7 @@ import {
   ATTRIBUTES,
   GRAPH_VIEW_TYPES,
   ObjectClassAttribute,
+  PLACEMENTS,
 } from "@fukui-kanko/shared/types";
 import * as holidayJP from "@holiday-jp/holiday_jp";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
@@ -21,7 +23,7 @@ import { Bar, BarChart, XAxis, YAxis } from "recharts";
  */
 function aggregateDaily(
   data: AggregatedData[],
-  focusedAttribute: ObjectClassAttribute,
+  focusedAttribute: ObjectClassAttribute | "placement",
 ): AggregatedData[] {
   // 祝日の取得範囲
   const aggregateFromValues = data.map((row) => new Date(row[AGGREGATE_FROM_KEY]));
@@ -37,6 +39,7 @@ function aggregateDaily(
 
   return data.map((row) => {
     const date = new Date(row[AGGREGATE_FROM_KEY]);
+    const totalCount = Number(row["total count"]) || 0;
     const dayKey = formatDate(date, "-");
     const dayOfWeek = WEEK_DAYS[date.getDay()];
     const holidayName = holidayMap.get(dayKey) ?? "";
@@ -47,9 +50,18 @@ function aggregateDaily(
       aggregateTo: dayKey,
       dayOfWeek,
       holidayName,
+      "total count": totalCount,
+      ...Object.values(RAINBOW_LINE_LOTS).reduce(
+        (result, value) => {
+          result[value] = Number(row[`${value}`]);
+          return result;
+        },
+        {} as Record<string, number>,
+      ),
     };
 
-    const list = ATTRIBUTES[focusedAttribute];
+    const list =
+      focusedAttribute === "placement" ? RAINBOW_LINE_LOTS : ATTRIBUTES[focusedAttribute];
     Object.keys(list).forEach((listitem) => {
       data[list[listitem as keyof typeof list]] = Object.keys(row)
         // TODO: 厳密でないフィルタなので、もっと壊れづらいものを考える
@@ -64,12 +76,20 @@ function aggregateDaily(
 // chartConfigの定義
 const chartConfig = {
   totalCount: { label: "検出回数" },
+  ...Object.entries(RAINBOW_LINE_LOTS).reduce(
+    (result, [key, value]) => {
+      result[value] = { label: PLACEMENTS[key as keyof typeof PLACEMENTS].text };
+      return result;
+    },
+    {} as Record<string, Record<string, string>>,
+  ),
 };
 
 type RainbowLineStackedBarChartProps = {
   data: AggregatedData[];
-  focusedAttribute: ObjectClassAttribute;
+  focusedAttribute: ObjectClassAttribute | "placement";
   type: keyof typeof GRAPH_VIEW_TYPES;
+  className?: string;
 };
 
 /**
@@ -79,6 +99,7 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
   data,
   focusedAttribute,
   type,
+  className,
 }) => {
   const [chartData, setChartData] = useState<AggregatedData[]>([]);
 
@@ -106,11 +127,15 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
   const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
 
   return (
-    <ChartContainer config={chartConfig} className="h-full w-full">
+    <ChartContainer config={chartConfig} className={cn("h-full w-full", className)}>
       <BarChart data={chartData} margin={{ top: 10, right: 40, left: 20, bottom: 10 }}>
-        {Object.values(ATTRIBUTES[focusedAttribute]).map((key, idx) => {
+        {(focusedAttribute === "placement"
+          ? Object.values(RAINBOW_LINE_LOTS)
+          : Object.values(ATTRIBUTES[focusedAttribute])
+        ).map((key, idx) => {
           return (
             <Bar
+              isAnimationActive={false}
               key={key}
               dataKey={key}
               stackId="a"

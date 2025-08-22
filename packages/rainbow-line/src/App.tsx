@@ -18,6 +18,7 @@ import { Checkbox, Label } from "@fukui-kanko/shared/components/ui";
 import { FiltersSample } from "./components/parts/filters";
 import { Header } from "./components/parts/header";
 import { RainbowLineChartPanel } from "./components/parts/rainbow-line-chart-panel";
+import { RAINBOW_LINE_LOTS } from "./constants/parking-lots";
 import { FILTER_ATTRIBUTES } from "./interfaces/filter-attributes";
 
 type RainbowLineAggregatedData = AggregatedDataBase<Placement | "rainbow-line-all"> &
@@ -137,6 +138,13 @@ function App() {
           "aggregate to": row["aggregate to"],
           "total count": Number(
             Object.values(filteredRow).reduce((sum, v) => Number(sum) + Number(v), 0),
+          ),
+          ...Object.values(RAINBOW_LINE_LOTS).reduce(
+            (result, value) => {
+              result[value] = Number(row[`${value}`]);
+              return result;
+            },
+            {} as Record<string, number>,
           ),
         };
         return filteredRow;

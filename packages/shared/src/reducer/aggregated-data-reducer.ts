@@ -25,7 +25,7 @@ export const reducePlacement: (
     });
   } else {
     // 同じ時点のデータが2つ以上ある場合は合計を計算
-    const sum = sameDayData.reduce((sum, row) => {
+    const sum = sameDayData.reduce((sum, row, index) => {
       Object.entries(row).forEach(([key, value]) => {
         if (
           key === "aggregate from" ||
@@ -41,6 +41,10 @@ export const reducePlacement: (
             (key in sum ? Number(`${sum[key]}`) : 0) +
             (typeof value === "number" ? value : !isNaN(Number(value)) ? Number(value) : 0)
           ).toString();
+          // 元データも別で保存しておく
+          if (key === "total count") {
+            sum[`${sameDayData[index].placement} total count`] = value;
+          }
         }
       });
       return sum;
@@ -91,7 +95,9 @@ export const reduceAggregateRange: (
   aggregateRange.to.setTime(aggregateRange.from.getTime() + timebox);
 
   const index = result.findIndex(
-    (row) => row["aggregate from"] === getDateTimeString(aggregateRange.from),
+    (row) =>
+      row["aggregate from"] === getDateTimeString(aggregateRange.from) &&
+      row["placement"] === current.placement,
   );
   if (index !== -1) {
     result[index] = Object.keys(result[index]).reduce((newData, key) => {
