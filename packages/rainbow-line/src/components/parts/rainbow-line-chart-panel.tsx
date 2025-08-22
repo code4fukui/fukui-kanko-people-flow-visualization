@@ -72,22 +72,32 @@ export function RainbowLineChartPanel({
         />
       )}
 
-      <div className="grid grid-cols-2 grid-rows-1 gap-y-4 w-full min-w-full grow  pt-4 overflow-auto max-h-full">
-        <h3 className="w-full h-10 col-span-2 text-xl text-center font-bold">車両分類別</h3>
-        <RainbowLineStackedBarChart
-          data={dataInRange}
-          focusedAttribute="carCategories"
-          type={"day"}
-        />
-        <RainbowLinePieChart data={dataInRange} focusedAttribute="carCategories" />
-        <h3 className="w-full h-10 text-xl col-span-2 text-center font-bold">都道府県別</h3>
-        <RainbowLineStackedBarChart
-          data={dataInRange}
-          focusedAttribute="prefectures"
-          type={"day"}
-        />
-        <RainbowLinePieChart data={dataInRange} focusedAttribute="prefectures" />
-      </div>
+      {!data ||
+      data.length === 0 ||
+      ((type === "hour" || type === "day") && (!period.startDate || !period.endDate)) ||
+      (type === "week" && (!period.startWeekRange || !period.endWeekRange)) ||
+      (type === "month" && (!period.startMonth || !period.endMonth)) ? (
+        <div className="flex items-center justify-center w-full h-full text-gray-500">
+          <p className="text-lg">表示したい期間を設定してください。</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 grid-rows-1 gap-y-4 w-full min-w-full grow  pt-4 overflow-auto max-h-full">
+          <h3 className="w-full h-10 col-span-2 text-xl text-center font-bold">車両分類別</h3>
+          <RainbowLineStackedBarChart
+            data={dataInRange}
+            focusedAttribute="carCategories"
+            type={"day"}
+          />
+          <RainbowLinePieChart data={dataInRange} focusedAttribute="carCategories" />
+          <h3 className="w-full h-10 text-xl col-span-2 text-center font-bold">都道府県別</h3>
+          <RainbowLineStackedBarChart
+            data={dataInRange}
+            focusedAttribute="prefectures"
+            type={"day"}
+          />
+          <RainbowLinePieChart data={dataInRange} focusedAttribute="prefectures" />
+        </div>
+      )}
     </div>
   );
 }
