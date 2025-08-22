@@ -16,7 +16,6 @@ export const reducePlacement: (
   // 同じ時点のデータを取得
   const sameDayData = parent.filter((row) => row["aggregate from"] === current["aggregate from"]);
 
-  // console.log(current, sameDayData);
   // 同じ時点のデータが1つだけの場合は集計せず追加
   if (sameDayData.length === 1) {
     result.push({
