@@ -13,6 +13,11 @@ export type ClickableLegendProps = {
   onHoverKeyChange?: (key?: string) => void;
 };
 
+/**
+ * ホバー状態を発火するまでの遅延時間（ミリ秒）
+ */
+const HOVER_DWELL_MS = 50;
+
 export const ClickableLegend: React.FC<ClickableLegendProps> = React.memo(
   ({
     payload = [],
@@ -25,20 +30,21 @@ export const ClickableLegend: React.FC<ClickableLegendProps> = React.memo(
     onHoverKeyChange,
   }) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
-
-    const HOVER_DWELL_MS = 50;
     const hoverTimerRef = useRef<number | undefined>(undefined);
 
     const setHover = (key?: string) => {
       onHoverKeyChange?.(key);
     };
 
+    // ホバータイマーをクリアする
     const clearHoverTimer = () => {
       if (hoverTimerRef.current !== undefined) {
         window.clearTimeout(hoverTimerRef.current);
         hoverTimerRef.current = undefined;
       }
     };
+
+    // ホバー状態を遅延してセットする
     const delayedHover = (key: string) => {
       clearHoverTimer();
       hoverTimerRef.current = window.setTimeout(() => {
@@ -46,6 +52,8 @@ export const ClickableLegend: React.FC<ClickableLegendProps> = React.memo(
         hoverTimerRef.current = undefined;
       }, HOVER_DWELL_MS);
     };
+
+    // ホバー状態を解除する
     const cancelHover = () => {
       clearHoverTimer();
       setHover(undefined);
