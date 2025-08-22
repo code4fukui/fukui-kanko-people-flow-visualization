@@ -7,6 +7,7 @@ import {
   StatsSummary,
 } from "@fukui-kanko/shared/components/parts";
 import { cn, getWeekRange } from "@fukui-kanko/shared/utils";
+import { DownloadCSVButton } from "./download-csv-button.component";
 
 type PeriodGraphPanelProps = {
   type: keyof typeof GRAPH_VIEW_TYPES;
@@ -17,7 +18,9 @@ type PeriodGraphPanelProps = {
   filteredData: AggregatedData[];
   filteredDailyData: AggregatedData[];
   className?: string;
+  placement: string;
 };
+
 export function PeriodGraphPanel({
   type,
   period,
@@ -27,134 +30,149 @@ export function PeriodGraphPanel({
   filteredData,
   filteredDailyData,
   className,
+  placement,
 }: PeriodGraphPanelProps) {
   return (
     <div className={cn("w-full min-w-0 flex flex-col items-center", className)}>
-      {type === "month" && (
-        <MonthRangePicker
-          startMonth={period.startMonth}
-          endMonth={period.endMonth}
-          onChange={(start, end) => {
-            setPeriod((prev) => {
-              const next = { ...prev, startMonth: start, endMonth: end };
+      <div className={cn("flex gap-2", { "ml-[5.25rem]": !isCompareMode })}>
+        {type === "month" && (
+          <MonthRangePicker
+            startMonth={period.startMonth}
+            endMonth={period.endMonth}
+            onChange={(start, end) => {
+              setPeriod((prev) => {
+                const next = { ...prev, startMonth: start, endMonth: end };
 
-              if (start) {
-                const startYear = start.getFullYear();
-                const startMonth = start.getMonth() + 1;
-                // データが12月20日から始まるため、12月の場合は20日、それ以外は1日から
-                const day = startMonth === 12 ? 20 : 1;
-                next.startDate = new Date(
-                  `${startYear}-${String(startMonth).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
-                );
-                next.startDate.setHours(0, 0, 0, 0);
-                next.startWeekRange = getWeekRange(next.startDate);
-              } else {
-                next.startDate = undefined;
-                next.startWeekRange = undefined;
-              }
-
-              if (end) {
-                const endYear = end.getFullYear();
-                const endMonth = end.getMonth() + 1;
-                const now = new Date();
-                const isCurrentMonth =
-                  endYear === now.getFullYear() && endMonth === now.getMonth() + 1;
-
-                if (isCurrentMonth) {
-                  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-                  yesterday.setHours(0, 0, 0, 0);
-                  next.endDate = yesterday;
-                } else {
-                  const lastDay = new Date(endYear, endMonth, 0).getDate();
-                  next.endDate = new Date(
-                    `${endYear}-${String(endMonth).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`,
+                if (start) {
+                  const startYear = start.getFullYear();
+                  const startMonth = start.getMonth() + 1;
+                  // データが12月20日から始まるため、12月の場合は20日、それ以外は1日から
+                  const day = startMonth === 12 ? 20 : 1;
+                  next.startDate = new Date(
+                    `${startYear}-${String(startMonth).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
                   );
-                  next.endDate.setHours(0, 0, 0, 0);
+                  next.startDate.setHours(0, 0, 0, 0);
+                  next.startWeekRange = getWeekRange(next.startDate);
+                } else {
+                  next.startDate = undefined;
+                  next.startWeekRange = undefined;
                 }
-                next.endWeekRange = getWeekRange(next.endDate);
-              } else {
-                next.endDate = undefined;
-                next.endWeekRange = undefined;
-              }
 
-              return next;
-            });
-          }}
-        />
-      )}
+                if (end) {
+                  const endYear = end.getFullYear();
+                  const endMonth = end.getMonth() + 1;
+                  const now = new Date();
+                  const isCurrentMonth =
+                    endYear === now.getFullYear() && endMonth === now.getMonth() + 1;
 
-      {type === "week" && (
-        <RangeSelector
-          type="week"
-          start={period.startWeekRange}
-          end={period.endWeekRange}
-          setStart={(range) =>
-            setPeriod((prev) => {
-              const next = { ...prev, startWeekRange: range };
-              if (range) {
-                next.startDate = range.from;
-                next.startMonth = new Date(range.from.getFullYear(), range.from.getMonth(), 1);
-              } else {
-                next.startDate = undefined;
-                next.startMonth = undefined;
-              }
-              return next;
-            })
-          }
-          setEnd={(range) =>
-            setPeriod((prev) => {
-              const next = { ...prev, endWeekRange: range };
-              if (range) {
-                next.endDate = range.to;
-                next.endMonth = new Date(range.to.getFullYear(), range.to.getMonth(), 1);
-              } else {
-                next.endDate = undefined;
-                next.endMonth = undefined;
-              }
-              return next;
-            })
-          }
-        />
-      )}
+                  if (isCurrentMonth) {
+                    const yesterday = new Date(
+                      now.getFullYear(),
+                      now.getMonth(),
+                      now.getDate() - 1,
+                    );
+                    yesterday.setHours(0, 0, 0, 0);
+                    next.endDate = yesterday;
+                  } else {
+                    const lastDay = new Date(endYear, endMonth, 0).getDate();
+                    next.endDate = new Date(
+                      `${endYear}-${String(endMonth).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`,
+                    );
+                    next.endDate.setHours(0, 0, 0, 0);
+                  }
+                  next.endWeekRange = getWeekRange(next.endDate);
+                } else {
+                  next.endDate = undefined;
+                  next.endWeekRange = undefined;
+                }
 
-      {(type === "day" || type === "hour") && (
-        <RangeSelector
-          type="date"
-          start={period.startDate}
-          end={period.endDate}
-          setStart={(date) =>
-            setPeriod((prev) => {
-              const next = { ...prev, startDate: date };
-              if (date) {
-                const year = date.getFullYear();
-                const month = date.getMonth() + 1;
-                next.startMonth = new Date(year, month - 1, 1);
-                next.startWeekRange = getWeekRange(date);
-              } else {
-                next.startMonth = undefined;
-                next.startWeekRange = undefined;
-              }
-              return next;
-            })
-          }
-          setEnd={(date) =>
-            setPeriod((prev) => {
-              const next = { ...prev, endDate: date };
-              if (date) {
-                const year = date.getFullYear();
-                const month = date.getMonth() + 1;
-                next.endMonth = new Date(year, month - 1, 1);
-                next.endWeekRange = getWeekRange(date);
-              } else {
-                next.endMonth = undefined;
-                next.endWeekRange = undefined;
-              }
-              return next;
-            })
-          }
-        />
-      )}
+                return next;
+              });
+            }}
+          />
+        )}
 
+        {type === "week" && (
+          <RangeSelector
+            type="week"
+            start={period.startWeekRange}
+            end={period.endWeekRange}
+            setStart={(range) =>
+              setPeriod((prev) => {
+                const next = { ...prev, startWeekRange: range };
+                if (range) {
+                  next.startDate = range.from;
+                  next.startMonth = new Date(range.from.getFullYear(), range.from.getMonth(), 1);
+                } else {
+                  next.startDate = undefined;
+                  next.startMonth = undefined;
+                }
+                return next;
+              })
+            }
+            setEnd={(range) =>
+              setPeriod((prev) => {
+                const next = { ...prev, endWeekRange: range };
+                if (range) {
+                  next.endDate = range.to;
+                  next.endMonth = new Date(range.to.getFullYear(), range.to.getMonth(), 1);
+                } else {
+                  next.endDate = undefined;
+                  next.endMonth = undefined;
+                }
+                return next;
+              })
+            }
+          />
+        )}
+
+        {(type === "day" || type === "hour") && (
+          <RangeSelector
+            type="date"
+            start={period.startDate}
+            end={period.endDate}
+            setStart={(date) =>
+              setPeriod((prev) => {
+                const next = { ...prev, startDate: date };
+                if (date) {
+                  const year = date.getFullYear();
+                  const month = date.getMonth() + 1;
+                  next.startMonth = new Date(year, month - 1, 1);
+                  next.startWeekRange = getWeekRange(date);
+                } else {
+                  next.startMonth = undefined;
+                  next.startWeekRange = undefined;
+                }
+                return next;
+              })
+            }
+            setEnd={(date) =>
+              setPeriod((prev) => {
+                const next = { ...prev, endDate: date };
+                if (date) {
+                  const year = date.getFullYear();
+                  const month = date.getMonth() + 1;
+                  next.endMonth = new Date(year, month - 1, 1);
+                  next.endWeekRange = getWeekRange(date);
+                } else {
+                  next.endMonth = undefined;
+                  next.endWeekRange = undefined;
+                }
+                return next;
+              })
+            }
+          />
+        )}
+        <div className="flex items-end">
+          <DownloadCSVButton
+            type={type}
+            period={period}
+            isCompareMode={isCompareMode}
+            data={type === "hour" ? filteredDailyData : filteredData}
+            placement={placement}
+          />
+        </div>
+      </div>
       <div className="w-full flex flex-col items-center justify-end min-h-[40vh]">
         <div
           className={`${
