@@ -80,7 +80,7 @@ jobs:
           cp -r packages/landing-page/dist/* deploy/
 
           mkdir -p deploy/data
-          find ./data -mindepth 1 -maxdepth 1 ! -name '.*' -exec cp -r {} ./deploy/data/
+          find ./data -mindepth 1 -maxdepth 1 ! -name '.*' -exec cp -r {} ./deploy/data/;
         env:
           PAGES: true
       - name: Upload artifact
