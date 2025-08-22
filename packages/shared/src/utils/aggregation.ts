@@ -15,12 +15,19 @@ function filterByRange(data: AggregatedData[], from: Date, to: Date) {
  * 指定した期間内のデータを月単位で集計
  */
 export function aggregateMonthly(data: AggregatedData[], start: Date, end: Date): AggregatedData[] {
-  const filtered = filterByRange(data, start, end);
+  // 12月の場合のみ開始日を12月20日に変更
+  let actualStart = start;
+  if (start.getMonth() === 11) {
+    actualStart = new Date(start.getFullYear(), 11, 20);
+  }
+  const filtered = filterByRange(data, actualStart, end);
   const monthlyMap = new Map<
     string,
     AggregatedData & {
       weekdayTotal?: number;
       weekendTotal?: number;
+      weekdayDays?: number;
+      weekendDays?: number;
     }
   >();
   filtered.forEach((row) => {
@@ -38,6 +45,8 @@ export function aggregateMonthly(data: AggregatedData[], start: Date, end: Date)
         totalCount: Number(row[TOTAL_COUNT_KEY]),
         weekdayTotal: !isWeekendOrHoliday ? Number(row[TOTAL_COUNT_KEY]) : 0,
         weekendTotal: isWeekendOrHoliday ? Number(row[TOTAL_COUNT_KEY]) : 0,
+        weekdayDays: !isWeekendOrHoliday ? 1 : 0,
+        weekendDays: isWeekendOrHoliday ? 1 : 0,
       });
     } else {
       const prev = monthlyMap.get(monthKey)!;
@@ -48,6 +57,8 @@ export function aggregateMonthly(data: AggregatedData[], start: Date, end: Date)
           (prev.weekdayTotal ?? 0) + (!isWeekendOrHoliday ? Number(row[TOTAL_COUNT_KEY]) : 0),
         weekendTotal:
           (prev.weekendTotal ?? 0) + (isWeekendOrHoliday ? Number(row[TOTAL_COUNT_KEY]) : 0),
+        weekdayDays: (prev.weekdayDays ?? 0) + (!isWeekendOrHoliday ? 1 : 0),
+        weekendDays: (prev.weekendDays ?? 0) + (isWeekendOrHoliday ? 1 : 0),
       });
     }
   });
@@ -87,6 +98,8 @@ export function aggregateWeekly(
     const total = weekRows.reduce((sum, row) => sum + Number(row[TOTAL_COUNT_KEY]), 0);
     let weekdayTotal = 0;
     let weekendTotal = 0;
+    let weekdayDays = 0;
+    let weekendDays = 0;
     weekRows.forEach((row) => {
       const date = new Date(row[AGGREGATE_FROM_KEY]);
       const dayOfWeek = date.getDay();
@@ -95,8 +108,10 @@ export function aggregateWeekly(
       const isWeekendOrHoliday = isWeekend || isHoliday;
       if (isWeekendOrHoliday) {
         weekendTotal += Number(row[TOTAL_COUNT_KEY]);
+        weekendDays += 1;
       } else {
         weekdayTotal += Number(row[TOTAL_COUNT_KEY]);
+        weekdayDays += 1;
       }
     });
 
@@ -107,6 +122,8 @@ export function aggregateWeekly(
       totalCount: total,
       weekdayTotal,
       weekendTotal,
+      weekdayDays,
+      weekendDays,
     });
   }
   return weeklyAggregated;

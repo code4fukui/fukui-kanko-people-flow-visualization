@@ -1,13 +1,13 @@
 import { AggregatedData, GRAPH_VIEW_TYPES, Period } from "@fukui-kanko/shared";
 import {
+  DownloadCSVButton,
   Graph,
   LoadingSpinner,
   MonthRangePicker,
   RangeSelector,
   StatsSummary,
 } from "@fukui-kanko/shared/components/parts";
-import { cn } from "@fukui-kanko/shared/utils";
-import { DownloadCSVButton } from "./download-csv-button.component";
+import { cn, getWeekRange } from "@fukui-kanko/shared/utils";
 
 type PeriodGraphPanelProps = {
   type: keyof typeof GRAPH_VIEW_TYPES;
@@ -40,7 +40,54 @@ export function PeriodGraphPanel({
             startMonth={period.startMonth}
             endMonth={period.endMonth}
             onChange={(start, end) => {
-              setPeriod((prev) => ({ ...prev, startMonth: start, endMonth: end }));
+              setPeriod((prev) => {
+                const next = { ...prev, startMonth: start, endMonth: end };
+
+                if (start) {
+                  const startYear = start.getFullYear();
+                  const startMonth = start.getMonth() + 1;
+                  // データが12月20日から始まるため、12月の場合は20日、それ以外は1日から
+                  const day = startMonth === 12 ? 20 : 1;
+                  next.startDate = new Date(
+                    `${startYear}-${String(startMonth).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
+                  );
+                  next.startDate.setHours(0, 0, 0, 0);
+                  next.startWeekRange = getWeekRange(next.startDate);
+                } else {
+                  next.startDate = undefined;
+                  next.startWeekRange = undefined;
+                }
+
+                if (end) {
+                  const endYear = end.getFullYear();
+                  const endMonth = end.getMonth() + 1;
+                  const now = new Date();
+                  const isCurrentMonth =
+                    endYear === now.getFullYear() && endMonth === now.getMonth() + 1;
+
+                  if (isCurrentMonth) {
+                    const yesterday = new Date(
+                      now.getFullYear(),
+                      now.getMonth(),
+                      now.getDate() - 1,
+                    );
+                    yesterday.setHours(0, 0, 0, 0);
+                    next.endDate = yesterday;
+                  } else {
+                    const lastDay = new Date(endYear, endMonth, 0).getDate();
+                    next.endDate = new Date(
+                      `${endYear}-${String(endMonth).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`,
+                    );
+                    next.endDate.setHours(0, 0, 0, 0);
+                  }
+                  next.endWeekRange = getWeekRange(next.endDate);
+                } else {
+                  next.endDate = undefined;
+                  next.endWeekRange = undefined;
+                }
+
+                return next;
+              });
             }}
           />
         )}
@@ -50,8 +97,32 @@ export function PeriodGraphPanel({
             type="week"
             start={period.startWeekRange}
             end={period.endWeekRange}
-            setStart={(range) => setPeriod((prev) => ({ ...prev, startWeekRange: range }))}
-            setEnd={(range) => setPeriod((prev) => ({ ...prev, endWeekRange: range }))}
+            setStart={(range) =>
+              setPeriod((prev) => {
+                const next = { ...prev, startWeekRange: range };
+                if (range) {
+                  next.startDate = range.from;
+                  next.startMonth = new Date(range.from.getFullYear(), range.from.getMonth(), 1);
+                } else {
+                  next.startDate = undefined;
+                  next.startMonth = undefined;
+                }
+                return next;
+              })
+            }
+            setEnd={(range) =>
+              setPeriod((prev) => {
+                const next = { ...prev, endWeekRange: range };
+                if (range) {
+                  next.endDate = range.to;
+                  next.endMonth = new Date(range.to.getFullYear(), range.to.getMonth(), 1);
+                } else {
+                  next.endDate = undefined;
+                  next.endMonth = undefined;
+                }
+                return next;
+              })
+            }
           />
         )}
 
@@ -60,8 +131,36 @@ export function PeriodGraphPanel({
             type="date"
             start={period.startDate}
             end={period.endDate}
-            setStart={(date) => setPeriod((prev) => ({ ...prev, startDate: date }))}
-            setEnd={(date) => setPeriod((prev) => ({ ...prev, endDate: date }))}
+            setStart={(date) =>
+              setPeriod((prev) => {
+                const next = { ...prev, startDate: date };
+                if (date) {
+                  const year = date.getFullYear();
+                  const month = date.getMonth() + 1;
+                  next.startMonth = new Date(year, month - 1, 1);
+                  next.startWeekRange = getWeekRange(date);
+                } else {
+                  next.startMonth = undefined;
+                  next.startWeekRange = undefined;
+                }
+                return next;
+              })
+            }
+            setEnd={(date) =>
+              setPeriod((prev) => {
+                const next = { ...prev, endDate: date };
+                if (date) {
+                  const year = date.getFullYear();
+                  const month = date.getMonth() + 1;
+                  next.endMonth = new Date(year, month - 1, 1);
+                  next.endWeekRange = getWeekRange(date);
+                } else {
+                  next.endMonth = undefined;
+                  next.endWeekRange = undefined;
+                }
+                return next;
+              })
+            }
           />
         )}
         <div className="flex items-end">

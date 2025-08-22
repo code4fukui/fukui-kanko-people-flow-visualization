@@ -56,7 +56,12 @@ export function MonthRangePicker({ startMonth, endMonth, onChange }: MonthRangeP
             <MonthPicker
               selected={startMonth}
               onChange={(date) => {
-                onChange(date, endMonth);
+                const isSame =
+                  startMonth &&
+                  date &&
+                  startMonth.getFullYear() === date.getFullYear() &&
+                  startMonth.getMonth() === date.getMonth();
+                onChange(isSame ? undefined : date, endMonth);
                 setOpenStartMonth(false);
               }}
             />
@@ -88,7 +93,12 @@ export function MonthRangePicker({ startMonth, endMonth, onChange }: MonthRangeP
             <MonthPicker
               selected={endMonth}
               onChange={(date) => {
-                onChange(startMonth, date);
+                const isSame =
+                  endMonth &&
+                  date &&
+                  endMonth.getFullYear() === date.getFullYear() &&
+                  endMonth.getMonth() === date.getMonth();
+                onChange(startMonth, isSame ? undefined : date);
                 setOpenEndMonth(false);
               }}
               minDate={startMonth}

@@ -1,19 +1,14 @@
 import { useEffect, useState } from "react";
-import {
-  AggregatedData,
-  getRawData,
-  GRAPH_VIEW_TYPES,
-  Period,
-  useDailyDataEffect,
-  useFilteredData,
-} from "@fukui-kanko/shared";
 import { PeriodGraphPanel, TypeSelect } from "@fukui-kanko/shared/components/parts";
 import { Checkbox, Label } from "@fukui-kanko/shared/components/ui";
+import { useDailyDataEffect, useFilteredData } from "@fukui-kanko/shared/hooks";
+import { AggregatedData, GRAPH_VIEW_TYPES, Period } from "@fukui-kanko/shared/types";
+import { createInitialPeriod, getRawData } from "@fukui-kanko/shared/utils";
 
 function App() {
   const placement = "tojinbo-shotaro";
 
-  const [type, setType] = useState<keyof typeof GRAPH_VIEW_TYPES>("month");
+  const [type, setType] = useState<keyof typeof GRAPH_VIEW_TYPES>("day");
   const [csvData, setCsvData] = useState<AggregatedData[]>([]);
   const [csvDailyData, setCsvDailyData] = useState<AggregatedData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,26 +17,12 @@ function App() {
   const [compareIsLoading, setCompareIsLoading] = useState(false);
 
   // 本期間の状態
-  const [period, setPeriod] = useState<Period>({
-    startDate: undefined,
-    endDate: undefined,
-    startMonth: undefined,
-    endMonth: undefined,
-    startWeekRange: undefined,
-    endWeekRange: undefined,
-  });
+  const [period, setPeriod] = useState<Period>(createInitialPeriod);
   const [filteredData, setFilteredData] = useState<AggregatedData[]>([]);
   const [filteredDailyData, setFilteredDailyData] = useState<AggregatedData[]>([]);
 
   // 比較期間の状態
-  const [comparePeriod, setComparePeriod] = useState<Period>({
-    startDate: undefined,
-    endDate: undefined,
-    startMonth: undefined,
-    endMonth: undefined,
-    startWeekRange: undefined,
-    endWeekRange: undefined,
-  });
+  const [comparePeriod, setComparePeriod] = useState<Period>(createInitialPeriod);
   const [compareFilteredData, setCompareFilteredData] = useState<AggregatedData[]>([]);
   const [compareFilteredDailyData, setCompareFilteredDailyData] = useState<AggregatedData[]>([]);
 
@@ -89,23 +70,6 @@ function App() {
           type={type}
           onChange={(newType) => {
             setType(newType);
-            // タイプ変更時に値をリセット
-            setPeriod({
-              startDate: undefined,
-              endDate: undefined,
-              startMonth: undefined,
-              endMonth: undefined,
-              startWeekRange: undefined,
-              endWeekRange: undefined,
-            });
-            setComparePeriod({
-              startDate: undefined,
-              endDate: undefined,
-              startMonth: undefined,
-              endMonth: undefined,
-              startWeekRange: undefined,
-              endWeekRange: undefined,
-            });
           }}
         />
         <div className="flex flex-row items-center gap-2">
@@ -113,7 +77,13 @@ function App() {
             id="terms"
             checked={compareMode}
             onCheckedChange={(v) => setCompareMode(!!v)}
-            className="bg-white border-black hover:bg-gray-100"
+            className="
+            bg-white 
+            border-[#6eba2c] 
+            hover:bg-gray-100 
+            data-[state=checked]:bg-[#6eba2c]
+            data-[state=checked]:border-[#6eba2c]
+            data-[state=checked]:text-white"
           />
           <Label htmlFor="terms" className="text-base">
             2期間比較

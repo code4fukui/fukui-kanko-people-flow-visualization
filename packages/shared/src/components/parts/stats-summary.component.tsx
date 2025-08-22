@@ -30,10 +30,11 @@ function getWeekdayAverages(data: AggregatedData[], type: keyof typeof GRAPH_VIE
     // 月・週集計はweekdayTotal, weekendTotalを使う
     const weekdaySum = data.reduce((acc, cur) => acc + Number(cur["weekdayTotal"] ?? 0), 0);
     const weekendSum = data.reduce((acc, cur) => acc + Number(cur["weekendTotal"] ?? 0), 0);
-    const count = data.length;
+    const weekdayDays = data.reduce((acc, cur) => acc + Number(cur["weekdayDays"] ?? 0), 0);
+    const weekendDays = data.reduce((acc, cur) => acc + Number(cur["weekendDays"] ?? 0), 0);
     return {
-      weekdayAvg: count > 0 ? weekdaySum / count : 0,
-      weekendAvg: count > 0 ? weekendSum / count : 0,
+      weekdayAvg: weekdayDays > 0 ? weekdaySum / weekdayDays : 0,
+      weekendAvg: weekendDays > 0 ? weekendSum / weekendDays : 0,
     };
   }
   if (type === "day") {
@@ -67,7 +68,10 @@ export const StatsSummary: React.FC<StatsSummaryProps> = ({ type, data }) => {
   };
 
   // 最大値（グラフ幅用）
-  const maxAvg = Math.max(statsData.avg, statsData.weekdayAvg, statsData.weekendAvg, 1);
+  const maxAvg =
+    type === "month" || type === "week"
+      ? Math.max(statsData.weekdayAvg, statsData.weekendAvg, 1)
+      : Math.max(statsData.avg, statsData.weekdayAvg, statsData.weekendAvg, 1);
 
   return (
     <div className="flex justify-center">
@@ -99,7 +103,7 @@ export const StatsSummary: React.FC<StatsSummaryProps> = ({ type, data }) => {
               />
               <AverageBar
                 color="bg-green-500"
-                label={type === "day" ? "平日平均" : "平日合計の平均"}
+                label="平日平均"
                 value={statsData.weekdayAvg}
                 max={maxAvg}
                 valueColor="text-green-700"
@@ -107,7 +111,7 @@ export const StatsSummary: React.FC<StatsSummaryProps> = ({ type, data }) => {
               />
               <AverageBar
                 color="bg-orange-500"
-                label={type === "day" ? "土日祝平均" : "土日祝合計の平均"}
+                label="土日祝平均"
                 value={statsData.weekendAvg}
                 max={maxAvg}
                 valueColor="text-orange-700"

@@ -13,6 +13,11 @@ export type ClickableLegendProps = {
   onHoverKeyChange?: (key?: string) => void;
 };
 
+/**
+ * ホバー状態を発火するまでの遅延時間（ミリ秒）
+ */
+const HOVER_DWELL_MS = 50;
+
 export const ClickableLegend: React.FC<ClickableLegendProps> = React.memo(
   ({
     payload = [],
@@ -25,9 +30,33 @@ export const ClickableLegend: React.FC<ClickableLegendProps> = React.memo(
     onHoverKeyChange,
   }) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
+    const hoverTimerRef = useRef<number | undefined>(undefined);
 
     const setHover = (key?: string) => {
       onHoverKeyChange?.(key);
+    };
+
+    // ホバータイマーをクリアする
+    const clearHoverTimer = () => {
+      if (hoverTimerRef.current !== undefined) {
+        window.clearTimeout(hoverTimerRef.current);
+        hoverTimerRef.current = undefined;
+      }
+    };
+
+    // ホバー状態を遅延してセットする
+    const delayedHover = (key: string) => {
+      clearHoverTimer();
+      hoverTimerRef.current = window.setTimeout(() => {
+        setHover(key);
+        hoverTimerRef.current = undefined;
+      }, HOVER_DWELL_MS);
+    };
+
+    // ホバー状態を解除する
+    const cancelHover = () => {
+      clearHoverTimer();
+      setHover(undefined);
     };
 
     // 再マウント時にスクロール位置を復元（描画前に反映）
@@ -46,6 +75,8 @@ export const ClickableLegend: React.FC<ClickableLegendProps> = React.memo(
         ref={containerRef}
         className="flex flex-wrap items-center justify-center gap-4 max-h-[4.5rem] overflow-y-auto"
         onScroll={handleScroll}
+        onPointerLeave={cancelHover}
+        onPointerCancel={cancelHover}
       >
         {payload.map((entry) => {
           const key = getLegendKey(String(entry.dataKey), instanceSuffix);
@@ -63,10 +94,10 @@ export const ClickableLegend: React.FC<ClickableLegendProps> = React.memo(
                   onScrollPersist?.(containerRef.current?.scrollTop ?? 0);
                   onToggle(key);
                 }}
-                onMouseEnter={() => setHover(key)}
-                onMouseLeave={() => setHover(undefined)}
+                onPointerEnter={() => delayedHover(key)}
+                onPointerLeave={cancelHover}
                 onFocus={() => setHover(key)}
-                onBlur={() => setHover(undefined)}
+                onBlur={cancelHover}
                 className={cn(
                   "flex items-center gap-1.5 cursor-pointer",
                   (isHidden || isDimmedByHover) && "opacity-40",
