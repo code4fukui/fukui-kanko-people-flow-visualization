@@ -1,5 +1,6 @@
 import { AggregatedData, GRAPH_VIEW_TYPES, Period } from "@fukui-kanko/shared";
 import {
+  DownloadCSVButton,
   Graph,
   LoadingSpinner,
   MonthRangePicker,
@@ -7,7 +8,6 @@ import {
   StatsSummary,
 } from "@fukui-kanko/shared/components/parts";
 import { cn, getWeekRange } from "@fukui-kanko/shared/utils";
-import { DownloadCSVButton } from "./download-csv-button.component";
 
 type PeriodGraphPanelProps = {
   type: keyof typeof GRAPH_VIEW_TYPES;
