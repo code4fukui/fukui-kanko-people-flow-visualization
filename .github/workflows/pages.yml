@@ -68,7 +68,7 @@ jobs:
         if: env.IS_ORIGINAL_REPO == 'true' && env.IS_MAIN_BRANCH == 'true'
         run: |
           date
-          PAGES=true pnpm build
+          pnpm build
 
           mkdir -p deploy
 
@@ -83,6 +83,7 @@ jobs:
           find ./data -mindepth 1 -maxdepth 1 ! -name '.*' -exec cp -r {} ./deploy/data/ \;
         env:
           PAGES: true
+          PAGES_ROOT: "https://${{ github.repository_owner }}.github.io/${{ github.repository }}/"
       - name: Upload artifact
         if: env.IS_ORIGINAL_REPO == 'true' && env.IS_MAIN_BRANCH == 'true'
         uses: actions/upload-pages-artifact@v3
