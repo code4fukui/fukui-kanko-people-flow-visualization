@@ -67,7 +67,7 @@ jobs:
         if: env.IS_ORIGINAL_REPO == 'true' && env.IS_MAIN_BRANCH == 'true'
         run: |
           date
-          pnpm build
+          PAGES=true pnpm build
 
           mkdir -p deploy
 
@@ -77,6 +77,9 @@ jobs:
           cp -r packages/rainbow-line/dist deploy/rainbow-line
 
           cp -r packages/landing-page/dist/* deploy/
+
+          mkdir -p deploy/data
+          find ./data -mindepth 1 -maxdepth 1 ! -name '.*' -exec cp -r {} ./dist/"$STAGE_NAME"/data/ \;
         env:
           PAGES: true
       - name: Upload artifact
