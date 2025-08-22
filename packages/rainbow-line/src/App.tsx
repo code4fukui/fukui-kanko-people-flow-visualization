@@ -14,6 +14,7 @@ import { TypeSelect } from "@fukui-kanko/shared/components/parts";
 import { Checkbox, Label } from "@fukui-kanko/shared/components/ui";
 import { FiltersSample } from "./components/parts/filters";
 import { HeaderPlaceHolder } from "./components/parts/ph-header";
+import { RainbowLineChartPanel } from "./components/parts/rainbow-line-chart-panel";
 import { FILTER_ATTRIBUTES } from "./interfaces/filter-attributes";
 
 type RainbowLineAggregatedData = AggregatedDataBase<Placement | "rainbow-line-all"> &
@@ -148,7 +149,7 @@ function App() {
   }, [data, filters]);
 
   return (
-    <div className="flex flex-col w-full h-full min-h-[100dvh] p-4">
+    <div className="flex flex-col w-full h-[100dvh] p-4 overflow-hidden">
       <HeaderPlaceHolder title="レインボーライン" />
       <div className="grid grid-cols-[1fr_auto] grid-rows-2 w-fit mx-auto place-content-center gap-4 pt-4">
         <FiltersSample
@@ -169,16 +170,9 @@ function App() {
           </Label>
         </div>
       </div>
-      <div className="grid place-content-center w-full h-full min-h-full">
-        <span>{JSON.stringify(filters)}</span>
-        <span>{JSON.stringify(type)}</span>
-        <span>{JSON.stringify(compareMode)}</span>
-        <span>
-          合計:{" "}
-          {JSON.stringify(
-            processedData.reduce((sum, v) => (sum += Number(`${v["total count"]}`)), 0),
-          )}
-        </span>
+      <div className="flex items-center gap-x-4 grow w-full h-full max-h-full py-4">
+        <RainbowLineChartPanel data={processedData as AggregatedData[]} />
+        {compareMode && <RainbowLineChartPanel data={processedData as AggregatedData[]} />}
       </div>
     </div>
   );
