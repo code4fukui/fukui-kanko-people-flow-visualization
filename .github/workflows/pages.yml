@@ -58,6 +58,7 @@ jobs:
           REGION: ${{ secrets.REGION }}
           INTERNAL_ORIGIN: ${{ secrets.INTERNAL_ORIGIN }}
           STAGE: "${{ github.repository_owner }}-fkpfv-${{ github.event.number }}"
+          PAGES_ROOT: "https://${{ github.repository_owner }}.github.io/${{ github.repository }}/"
 
       # Fork元リポジトリのmainブランチではPagesにデプロイする
       - name: Setup Pages
@@ -79,7 +80,7 @@ jobs:
           cp -r packages/landing-page/dist/* deploy/
 
           mkdir -p deploy/data
-          find ./data -mindepth 1 -maxdepth 1 ! -name '.*' -exec cp -r {} ./dist/"$STAGE_NAME"/data/ \;
+          find ./data -mindepth 1 -maxdepth 1 ! -name '.*' -exec cp -r {} ./deploy/data/
         env:
           PAGES: true
       - name: Upload artifact
