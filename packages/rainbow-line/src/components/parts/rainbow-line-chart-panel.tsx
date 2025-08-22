@@ -72,7 +72,7 @@ export function RainbowLineChartPanel({
         />
       )}
 
-      <div className="flex flex-col gap-y-4 w-full min-w-full grow overflow-auto max-h-full">
+      <div className="grid grid-cols-2 gap-y-4 w-full min-w-full grow overflow-auto max-h-full">
         <RainbowLineStackedBarChart
           data={dataInRange}
           focusedAttribute="carCategories"
