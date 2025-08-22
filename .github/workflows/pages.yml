@@ -67,7 +67,7 @@ jobs:
         if: env.IS_ORIGINAL_REPO == 'true' && env.IS_MAIN_BRANCH == 'true'
         run: |
           date
-          pnpm build
+          PAGES=true pnpm build
 
           mkdir -p deploy
 
