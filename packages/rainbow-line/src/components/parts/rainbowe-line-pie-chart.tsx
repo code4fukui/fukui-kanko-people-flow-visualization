@@ -119,6 +119,8 @@ export function RainbowLinePieChart({
     };
   });
 
+  const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
+
   return (
     <div
       className={cn(
@@ -141,8 +143,8 @@ export function RainbowLinePieChart({
               labelLine={false}
               label={(props) => CustomizedLabel({ ...props, focusedAttribute })}
             >
-              {Object.entries(chartData).map(([k]) => (
-                <Cell key={k} fill={`#${Math.floor(Math.random() * 16777215).toString(16)}`} />
+              {Object.entries(chartData).map(([k], i) => (
+                <Cell key={k} fill={colors[i % colors.length]} />
               ))}
             </Pie>
             <ChartTooltip

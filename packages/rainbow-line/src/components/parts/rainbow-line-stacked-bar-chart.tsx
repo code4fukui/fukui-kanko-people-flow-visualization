@@ -106,7 +106,7 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
   const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
 
   return (
-    <ChartContainer config={chartConfig} className="h-80 w-full">
+    <ChartContainer config={chartConfig} className="h-full w-full">
       <BarChart data={chartData} margin={{ top: 10, right: 40, left: 20, bottom: 10 }}>
         {Object.values(ATTRIBUTES[focusedAttribute]).map((key, idx) => {
           return (

@@ -16,7 +16,7 @@ import {
 import { TypeSelect } from "@fukui-kanko/shared/components/parts";
 import { Checkbox, Label } from "@fukui-kanko/shared/components/ui";
 import { FiltersSample } from "./components/parts/filters";
-import { HeaderPlaceHolder } from "./components/parts/ph-header";
+import { Header } from "./components/parts/header";
 import { RainbowLineChartPanel } from "./components/parts/rainbow-line-chart-panel";
 import { FILTER_ATTRIBUTES } from "./interfaces/filter-attributes";
 
@@ -146,7 +146,7 @@ function App() {
 
   return (
     <div className="flex flex-col w-full h-[100dvh] p-4 overflow-hidden">
-      <HeaderPlaceHolder title="レインボーライン" />
+      <Header title="レインボーライン駐車場 入込車両データ" />
       <div className="grid grid-cols-[1fr_auto] grid-rows-2 w-fit mx-auto place-content-center gap-4 pt-4">
         <FiltersSample
           className="w-fit row-span-2"
@@ -166,7 +166,7 @@ function App() {
           </Label>
         </div>
       </div>
-      <div className="flex items-center gap-x-4 grow w-full h-full max-h-full py-4">
+      <div className="flex items-center gap-x-4 grow w-full h-full overflow-hidden py-4">
         <RainbowLineChartPanel
           type={type}
           period={period}
