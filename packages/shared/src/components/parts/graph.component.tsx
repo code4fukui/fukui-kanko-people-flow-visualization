@@ -86,7 +86,7 @@ const weekdayColors: Record<(typeof WEEK_DAYS)[number], string> = {
   火: "#FF9800",
   水: "#00BCD4",
   木: "#4CAF50",
-  金: "#FFEB3B",
+  金: "#FFD600",
   土: "#2196F3",
 };
 
