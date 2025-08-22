@@ -30,10 +30,11 @@ function getWeekdayAverages(data: AggregatedData[], type: keyof typeof GRAPH_VIE
     // 月・週集計はweekdayTotal, weekendTotalを使う
     const weekdaySum = data.reduce((acc, cur) => acc + Number(cur["weekdayTotal"] ?? 0), 0);
     const weekendSum = data.reduce((acc, cur) => acc + Number(cur["weekendTotal"] ?? 0), 0);
-    const count = data.length;
+    const weekdayDays = data.reduce((acc, cur) => acc + Number(cur["weekdayDays"] ?? 0), 0);
+    const weekendDays = data.reduce((acc, cur) => acc + Number(cur["weekendDays"] ?? 0), 0);
     return {
-      weekdayAvg: count > 0 ? weekdaySum / count : 0,
-      weekendAvg: count > 0 ? weekendSum / count : 0,
+      weekdayAvg: weekdayDays > 0 ? weekdaySum / weekdayDays : 0,
+      weekendAvg: weekendDays > 0 ? weekendSum / weekendDays : 0,
     };
   }
   if (type === "day") {

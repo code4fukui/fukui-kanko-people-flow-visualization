@@ -26,6 +26,8 @@ export function aggregateMonthly(data: AggregatedData[], start: Date, end: Date)
     AggregatedData & {
       weekdayTotal?: number;
       weekendTotal?: number;
+      weekdayDays?: number;
+      weekendDays?: number;
     }
   >();
   filtered.forEach((row) => {
@@ -43,6 +45,8 @@ export function aggregateMonthly(data: AggregatedData[], start: Date, end: Date)
         totalCount: Number(row[TOTAL_COUNT_KEY]),
         weekdayTotal: !isWeekendOrHoliday ? Number(row[TOTAL_COUNT_KEY]) : 0,
         weekendTotal: isWeekendOrHoliday ? Number(row[TOTAL_COUNT_KEY]) : 0,
+        weekdayDays: !isWeekendOrHoliday ? 1 : 0,
+        weekendDays: isWeekendOrHoliday ? 1 : 0,
       });
     } else {
       const prev = monthlyMap.get(monthKey)!;
@@ -53,6 +57,8 @@ export function aggregateMonthly(data: AggregatedData[], start: Date, end: Date)
           (prev.weekdayTotal ?? 0) + (!isWeekendOrHoliday ? Number(row[TOTAL_COUNT_KEY]) : 0),
         weekendTotal:
           (prev.weekendTotal ?? 0) + (isWeekendOrHoliday ? Number(row[TOTAL_COUNT_KEY]) : 0),
+        weekdayDays: (prev.weekdayDays ?? 0) + (!isWeekendOrHoliday ? 1 : 0),
+        weekendDays: (prev.weekendDays ?? 0) + (isWeekendOrHoliday ? 1 : 0),
       });
     }
   });
@@ -92,6 +98,8 @@ export function aggregateWeekly(
     const total = weekRows.reduce((sum, row) => sum + Number(row[TOTAL_COUNT_KEY]), 0);
     let weekdayTotal = 0;
     let weekendTotal = 0;
+    let weekdayDays = 0;
+    let weekendDays = 0;
     weekRows.forEach((row) => {
       const date = new Date(row[AGGREGATE_FROM_KEY]);
       const dayOfWeek = date.getDay();
@@ -100,8 +108,10 @@ export function aggregateWeekly(
       const isWeekendOrHoliday = isWeekend || isHoliday;
       if (isWeekendOrHoliday) {
         weekendTotal += Number(row[TOTAL_COUNT_KEY]);
+        weekendDays += 1;
       } else {
         weekdayTotal += Number(row[TOTAL_COUNT_KEY]);
+        weekdayDays += 1;
       }
     });
 
@@ -112,6 +122,8 @@ export function aggregateWeekly(
       totalCount: total,
       weekdayTotal,
       weekendTotal,
+      weekdayDays,
+      weekendDays,
     });
   }
   return weeklyAggregated;
