@@ -166,7 +166,7 @@ function App() {
           </Label>
         </div>
       </div>
-      <div className="flex items-center gap-x-4 grow w-full h-full max-h-full py-4">
+      <div className="flex items-center gap-x-4 grow w-full h-full overflow-hidden py-4">
         <RainbowLineChartPanel
           type={type}
           period={period}
