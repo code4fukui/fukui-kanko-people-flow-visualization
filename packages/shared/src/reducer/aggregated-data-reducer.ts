@@ -1,7 +1,7 @@
 import { AggregatedData, Placement } from "../types";
 
 // データ収集場所が異なるデータが含まれているArrayに対して、
-// どちらかの場所を選択されていなければデータの集会開始時点が同じ行を合計する
+// どちらかの場所を選択されていなければデータの集計開始時点が同じ行を合計する
 export const reducePlacement: (
   selected: Exclude<Placement, "fukui-station-east-entrance" | "tojinbo-shotaro"> | "all",
   props: Parameters<Parameters<typeof Array.prototype.reduce<AggregatedData[]>>[0]>,
