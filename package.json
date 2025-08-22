@@ -5,7 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c",
   "scripts": {
-    "submodule": "git submodule update --init --force --depth=1 --recursive && cp -R data/people-flow-data/full/* packages/whole/public",
+    "submodule": "git submodule update --remote --init --force --depth=1 --recursive && cp -R data/people-flow-data/full/* packages/whole/public",
     "serve:data": "pnpm dlx http-server data -p 4000 --cors",
     "dev:landing": "LOCAL='true' concurrently --names \"landing,data\" --prefix-colors \"blue,brightGreen\" \"pnpm --filter landing-page dev\" \"pnpm serve:data\"",
     "dev:whole": "LOCAL='true' concurrently --names \"whole,data\" --prefix-colors \"green,brightGreen\" \"pnpm --filter whole dev\" \"pnpm serve:data\"",
