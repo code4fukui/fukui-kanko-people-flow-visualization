@@ -7,6 +7,7 @@ import {
   StatsSummary,
 } from "@fukui-kanko/shared/components/parts";
 import { cn } from "@fukui-kanko/shared/utils";
+import { DownloadCSVButton } from "./download-csv-button.component";
 
 type PeriodGraphPanelProps = {
   type: keyof typeof GRAPH_VIEW_TYPES;
@@ -17,7 +18,9 @@ type PeriodGraphPanelProps = {
   filteredData: AggregatedData[];
   filteredDailyData: AggregatedData[];
   className?: string;
+  placement: string;
 };
+
 export function PeriodGraphPanel({
   type,
   period,
@@ -27,39 +30,50 @@ export function PeriodGraphPanel({
   filteredData,
   filteredDailyData,
   className,
+  placement,
 }: PeriodGraphPanelProps) {
   return (
     <div className={cn("w-full min-w-0 flex flex-col items-center", className)}>
-      {type === "month" && (
-        <MonthRangePicker
-          startMonth={period.startMonth}
-          endMonth={period.endMonth}
-          onChange={(start, end) => {
-            setPeriod((prev) => ({ ...prev, startMonth: start, endMonth: end }));
-          }}
-        />
-      )}
+      <div className={cn("flex gap-2", { "ml-[5.25rem]": !isCompareMode })}>
+        {type === "month" && (
+          <MonthRangePicker
+            startMonth={period.startMonth}
+            endMonth={period.endMonth}
+            onChange={(start, end) => {
+              setPeriod((prev) => ({ ...prev, startMonth: start, endMonth: end }));
+            }}
+          />
+        )}
 
-      {type === "week" && (
-        <RangeSelector
-          type="week"
-          start={period.startWeekRange}
-          end={period.endWeekRange}
-          setStart={(range) => setPeriod((prev) => ({ ...prev, startWeekRange: range }))}
-          setEnd={(range) => setPeriod((prev) => ({ ...prev, endWeekRange: range }))}
-        />
-      )}
+        {type === "week" && (
+          <RangeSelector
+            type="week"
+            start={period.startWeekRange}
+            end={period.endWeekRange}
+            setStart={(range) => setPeriod((prev) => ({ ...prev, startWeekRange: range }))}
+            setEnd={(range) => setPeriod((prev) => ({ ...prev, endWeekRange: range }))}
+          />
+        )}
 
-      {(type === "day" || type === "hour") && (
-        <RangeSelector
-          type="date"
-          start={period.startDate}
-          end={period.endDate}
-          setStart={(date) => setPeriod((prev) => ({ ...prev, startDate: date }))}
-          setEnd={(date) => setPeriod((prev) => ({ ...prev, endDate: date }))}
-        />
-      )}
-
+        {(type === "day" || type === "hour") && (
+          <RangeSelector
+            type="date"
+            start={period.startDate}
+            end={period.endDate}
+            setStart={(date) => setPeriod((prev) => ({ ...prev, startDate: date }))}
+            setEnd={(date) => setPeriod((prev) => ({ ...prev, endDate: date }))}
+          />
+        )}
+        <div className="flex items-end">
+          <DownloadCSVButton
+            type={type}
+            period={period}
+            isCompareMode={isCompareMode}
+            data={type === "hour" ? filteredDailyData : filteredData}
+            placement={placement}
+          />
+        </div>
+      </div>
       <div className="w-full flex flex-col items-center justify-end min-h-[40vh]">
         <div
           className={`${

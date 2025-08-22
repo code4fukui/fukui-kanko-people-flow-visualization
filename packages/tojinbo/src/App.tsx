@@ -129,6 +129,7 @@ function App() {
           isLoading={isLoading}
           filteredData={filteredData}
           filteredDailyData={filteredDailyData}
+          placement={placement}
         />
         {compareMode && (
           <PeriodGraphPanel
@@ -139,6 +140,7 @@ function App() {
             isLoading={compareIsLoading}
             filteredData={compareFilteredData}
             filteredDailyData={compareFilteredDailyData}
+            placement={placement}
           />
         )}
       </div>

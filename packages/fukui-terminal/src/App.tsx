@@ -120,7 +120,7 @@ function App() {
           </Label>
         </div>
       </div>
-      <div className="flex flex-col sm:flex-row w-full gap-8 justify-center">
+      <div className="flex flex-col md:flex-row w-full gap-4 justify-center">
         <PeriodGraphPanel
           type={type}
           period={period}
@@ -129,6 +129,7 @@ function App() {
           isLoading={isLoading}
           filteredData={filteredData}
           filteredDailyData={filteredDailyData}
+          placement={placement}
         />
         {compareMode && (
           <PeriodGraphPanel
@@ -139,6 +140,7 @@ function App() {
             isLoading={compareIsLoading}
             filteredData={compareFilteredData}
             filteredDailyData={compareFilteredDailyData}
+            placement={placement}
           />
         )}
       </div>
