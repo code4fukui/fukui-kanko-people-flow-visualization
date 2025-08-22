@@ -1,4 +1,5 @@
-import { AggregatedData, Placement } from "../types";
+import { AggregatedData, GRAPH_VIEW_TYPES, KEYOF_AGGREGATED_DATA_BASE, Placement } from "../types";
+import { getDateTimeString } from "../utils";
 
 // データ収集場所が異なるデータが含まれているArrayに対して、
 // どちらかの場所を選択されていなければデータの集計開始時点が同じ行を合計する
@@ -47,6 +48,77 @@ export const reducePlacement: (
     result.push({
       ...sum,
       placement: selected === "all" ? "rainbow-line-all" : current.placement,
+    });
+  }
+  return result;
+};
+
+export const reduceAggregateRange: (
+  graphViewType: keyof typeof GRAPH_VIEW_TYPES,
+  props: Parameters<Parameters<typeof Array.prototype.reduce<AggregatedData[]>>[0]>,
+) => ReturnType<typeof Array.prototype.reduce<AggregatedData[]>> = (
+  graphViewType,
+  [result, current, _index, _parent],
+) => {
+  const timebox =
+    graphViewType === "hour"
+      ? 1000 * 60 * 60
+      : graphViewType === "day"
+        ? 1000 * 60 * 60 * 24
+        : graphViewType === "week"
+          ? 1000 * 60 * 60 * 24 * 7
+          : graphViewType === "month"
+            ? 1000 * 60 * 60 * 24 * 30
+            : -1; // デフォルト
+  if (timebox === -1) throw new Error(`Unsupported graph view type: ${graphViewType}`);
+
+  const aggregateRange = {
+    from: new Date(current["aggregate from"]),
+    to: new Date(current["aggregate to"]),
+  };
+  if (graphViewType === "hour") {
+    aggregateRange.from.setHours(aggregateRange.from.getHours(), 0, 0, 0);
+  } else if (graphViewType === "day") {
+    aggregateRange.from.setHours(0, 0, 0, 0);
+  } else if (graphViewType === "week") {
+    const dayOfWeek = aggregateRange.from.getDay();
+    aggregateRange.from.setDate(aggregateRange.from.getDate() - dayOfWeek);
+    aggregateRange.from.setHours(0, 0, 0, 0);
+  } else if (graphViewType === "month") {
+    aggregateRange.from.setDate(1);
+    aggregateRange.from.setHours(0, 0, 0, 0);
+  }
+  aggregateRange.to.setTime(aggregateRange.from.getTime() + timebox);
+
+  const index = result.findIndex(
+    (row) => row["aggregate from"] === getDateTimeString(aggregateRange.from),
+  );
+  if (index !== -1) {
+    result[index] = Object.keys(result[index]).reduce((newData, key) => {
+      if (key === "placement" || key === "object class") {
+        // 数値データでないものはそのまま反映
+        newData[key as keyof AggregatedData] = current[key as keyof AggregatedData];
+      } else if (key === "aggregate from") {
+        newData[key as keyof AggregatedData] = getDateTimeString(aggregateRange.from);
+      } else if (key === "aggregate to") {
+        newData[key as keyof AggregatedData] = getDateTimeString(aggregateRange.to);
+      } else {
+        // 数値データは合計を計算
+        newData[key] = Number(newData[key] ?? 0) + Number(current[key] ?? 0);
+      }
+      return newData;
+    }, {} as AggregatedData);
+  } else {
+    result.push({
+      ...Object.entries(current).reduce((newData, [key, value]) => {
+        if (key in KEYOF_AGGREGATED_DATA_BASE) return newData;
+        newData[key] = Number(value ?? 0);
+        return newData;
+      }, {} as AggregatedData),
+      "aggregate from": getDateTimeString(aggregateRange.from),
+      "aggregate to": getDateTimeString(aggregateRange.to),
+      placement: current.placement,
+      "object class": current["object class"],
     });
   }
   return result;

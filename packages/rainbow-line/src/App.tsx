@@ -5,8 +5,10 @@ import {
   CAR_CATEGORIES,
   getRawData,
   GRAPH_VIEW_TYPES,
+  Period,
   Placement,
   PREFECTURES,
+  reduceAggregateRange,
   reducePlacement,
   REGIONS_PREFECTURES,
   useInitialization,
@@ -38,6 +40,28 @@ function App() {
 
   const [data, setData] = useState<AggregatedData[]>([]);
   const [processedData, setProcessedData] = useState<RainbowLineAggregatedData[]>([]);
+
+  // 本期間の状態
+  const [period, setPeriod] = useState<Period>({
+    startDate: undefined,
+    endDate: undefined,
+    startMonth: undefined,
+    endMonth: undefined,
+    startWeekRange: undefined,
+    endWeekRange: undefined,
+  });
+  // const [filteredData, setFilteredData] = useState<AggregatedData[]>([]);
+  // const [filteredDailyData, setFilteredDailyData] = useState<AggregatedData[]>([]);
+
+  // 比較期間の状態
+  const [comparePeriod, setComparePeriod] = useState<Period>({
+    startDate: undefined,
+    endDate: undefined,
+    startMonth: undefined,
+    endMonth: undefined,
+    startWeekRange: undefined,
+    endWeekRange: undefined,
+  });
 
   useInitialization(() => {
     Promise.all([
@@ -77,6 +101,11 @@ function App() {
           ),
         [] as RainbowLineAggregatedData[],
       )
+      .reduce(
+        (result, current, index, parent) =>
+          reduceAggregateRange(type, [result as AggregatedData[], current, index, parent]),
+        [] as RainbowLineAggregatedData[],
+      )
       .map((row) => {
         let filteredRow = {} as RainbowLineAggregatedData;
         // フィルター（カラム名からフィルターにマッチするかどうかを判別する関数）
@@ -113,7 +142,7 @@ function App() {
         return filteredRow;
       });
     setProcessedData(processed);
-  }, [data, filters]);
+  }, [data, filters, type]);
 
   return (
     <div className="flex flex-col w-full h-[100dvh] p-4 overflow-hidden">
@@ -138,8 +167,20 @@ function App() {
         </div>
       </div>
       <div className="flex items-center gap-x-4 grow w-full h-full max-h-full py-4">
-        <RainbowLineChartPanel data={processedData as AggregatedData[]} />
-        {compareMode && <RainbowLineChartPanel data={processedData as AggregatedData[]} />}
+        <RainbowLineChartPanel
+          type={type}
+          period={period}
+          setPeriod={setPeriod}
+          data={processedData as AggregatedData[]}
+        />
+        {compareMode && (
+          <RainbowLineChartPanel
+            type={type}
+            period={comparePeriod}
+            setPeriod={setComparePeriod}
+            data={processedData as AggregatedData[]}
+          />
+        )}
       </div>
     </div>
   );
