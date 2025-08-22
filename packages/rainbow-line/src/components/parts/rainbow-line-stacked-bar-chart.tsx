@@ -101,7 +101,7 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
       .filter((row) => row.dayOfWeek !== undefined && row.dayOfWeek === "日")
       .map((row) => String(row["aggregateFrom"]));
     return ticks;
-  }, [data, type, "aggregateFrom"]);
+  }, [data, type]);
 
   const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
 
