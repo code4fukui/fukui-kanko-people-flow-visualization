@@ -8,7 +8,7 @@ import {
   ChartTooltipContent,
 } from "@fukui-kanko/shared/components/ui";
 import { GRAPH_VIEW_TYPES } from "@fukui-kanko/shared/types";
-import { getLegendKey, HOVER_CLEAR_DELAY_MS, WEEK_DAYS } from "@fukui-kanko/shared/utils";
+import { cn, getLegendKey, HOVER_CLEAR_DELAY_MS, WEEK_DAYS } from "@fukui-kanko/shared/utils";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 type GraphProps = {
@@ -16,9 +16,10 @@ type GraphProps = {
   xKey?: string;
   yKey?: string;
   type: keyof typeof GRAPH_VIEW_TYPES;
+  className?: string;
 };
 
-type XAxisTickProps = {
+export type XAxisTickProps = {
   x: number;
   y: number;
   payload: { value: string };
@@ -29,7 +30,7 @@ const chartConfig = {
   totalCount: { label: "人物検出回数" },
 };
 
-function renderTick(props: XAxisTickProps, data: AggregatedData[], xKey: string) {
+export function renderTick(props: XAxisTickProps, data: AggregatedData[], xKey: string) {
   const d = data.find((row) => row[xKey] === props.payload.value);
   return (
     <CustomizedXAxisTick
@@ -40,7 +41,7 @@ function renderTick(props: XAxisTickProps, data: AggregatedData[], xKey: string)
   );
 }
 
-const CustomizedXAxisTick = ({
+export const CustomizedXAxisTick = ({
   x,
   y,
   payload,
@@ -95,6 +96,7 @@ const Graph: React.FC<GraphProps> = ({
   xKey = "aggregateFrom",
   yKey = "totalCount",
   type,
+  className,
 }) => {
   const instanceId = useId();
   const tickRenderer = useCallback(
@@ -169,7 +171,7 @@ const Graph: React.FC<GraphProps> = ({
     });
 
     return (
-      <ChartContainer config={chartConfig} className="h-full w-full">
+      <ChartContainer config={chartConfig} className={cn("h-full w-full", className)}>
         <LineChart margin={{ top: 10, right: 40 }}>
           {Object.entries(grouped).map(([date, rows]) => {
             const isHoliday = !!rows[0]?.holidayName;

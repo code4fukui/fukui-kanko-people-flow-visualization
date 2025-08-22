@@ -18,7 +18,8 @@
     "recharts": "^2.15.1",
     "tailwindcss": "^4.1.11",
     "tailwindcss-animate": "^1.0.7",
-    "tw-animate-css": "^1.3.5"
+    "tw-animate-css": "^1.3.5",
+    "@holiday-jp/holiday_jp": "^2.4.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.18",
