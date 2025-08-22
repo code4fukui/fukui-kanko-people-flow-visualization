@@ -71,7 +71,7 @@ export function RainbowLinePieChart({
   className?: string;
 }) {
   const list = ATTRIBUTES[focusedAttribute];
-  const aggregbatedData = data.map((row) => {
+  const aggregatedData = data.map((row) => {
     const newData: Record<string, string | number> = {
       "aggregate from": row["aggregate from"],
     };
@@ -89,7 +89,7 @@ export function RainbowLinePieChart({
       ...newData,
     };
   });
-  const chartData = aggregbatedData
+  const chartData = aggregatedData
     .reduce(
       (acc, row) => {
         Object.entries(row).forEach(([key, value]) => {
