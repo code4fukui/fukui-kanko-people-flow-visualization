@@ -58,7 +58,6 @@ jobs:
           REGION: ${{ secrets.REGION }}
           INTERNAL_ORIGIN: ${{ secrets.INTERNAL_ORIGIN }}
           STAGE: "${{ github.repository_owner }}-fkpfv-${{ github.event.number }}"
-          PAGES_ROOT: "https://${{ github.repository_owner }}.github.io/${{ github.repository }}/"
 
       # Fork元リポジトリのmainブランチではPagesにデプロイする
       - name: Setup Pages
@@ -83,7 +82,7 @@ jobs:
           find ./data -mindepth 1 -maxdepth 1 ! -name '.*' -exec cp -r {} ./deploy/data/ \;
         env:
           PAGES: true
-          PAGES_ROOT: "https://${{ github.repository_owner }}.github.io/${{ github.repository }}"
+          PAGES_ROOT: "https://${{ github.repository_owner }}.github.io/fukui-kanko-people-flow-visualization"
       - name: Upload artifact
         if: env.IS_ORIGINAL_REPO == 'true' && env.IS_MAIN_BRANCH == 'true'
         uses: actions/upload-pages-artifact@v3
