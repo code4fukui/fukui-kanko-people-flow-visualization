@@ -99,9 +99,15 @@ function App() {
         [] as RainbowLineAggregatedData[],
       );
     } else if (filters["parkingLot"] === "rainbow-line-parking-lot-1-gate") {
-      return processedDataLot1;
+      return processedDataLot1.map((row) => ({
+        ...row,
+        [`${filters["parkingLot"]} total count`]: row["total count"],
+      }));
     } else {
-      return processedDataLot2;
+      return processedDataLot2.map((row) => ({
+        ...row,
+        [`${filters["parkingLot"]} total count`]: row["total count"],
+      }));
     }
   }, [filters, processedDataLot1, processedDataLot2]);
 
