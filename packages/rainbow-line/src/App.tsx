@@ -25,7 +25,6 @@ type RainbowLineAggregatedData = AggregatedDataBase<Placement | "rainbow-line-al
   Record<string, string | number>;
 
 function App() {
-  const placement = "rainbow-line-parking-lot";
   const [filters, setFilters] = useState<
     Record<
       (typeof FILTER_ATTRIBUTES)[number]["id"],
@@ -182,7 +181,6 @@ function App() {
           setPeriod={setPeriod}
           isCompareMode={compareMode}
           data={processedData as AggregatedData[]}
-          placement={placement}
         />
         {compareMode && (
           <RainbowLineChartPanel
@@ -191,7 +189,6 @@ function App() {
             isCompareMode={compareMode}
             setPeriod={setComparePeriod}
             data={processedData as AggregatedData[]}
-            placement={placement}
           />
         )}
       </div>

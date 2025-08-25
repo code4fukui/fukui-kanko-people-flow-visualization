@@ -15,7 +15,6 @@ export function RainbowLineChartPanel({
   isCompareMode,
   data,
   className,
-  placement,
 }: {
   type: keyof typeof GRAPH_VIEW_TYPES;
   period: Period;
@@ -23,7 +22,6 @@ export function RainbowLineChartPanel({
   isCompareMode: boolean;
   data: AggregatedData[];
   className?: string;
-  placement: string;
 }) {
   const dataInRange = data.filter((row) => {
     const aggregatedFrom = new Date(row["aggregate from"]);
@@ -87,7 +85,7 @@ export function RainbowLineChartPanel({
             period={period}
             isCompareMode={isCompareMode}
             data={dataInRange}
-            placement={placement}
+            placement={"rainbow-line-parking-lot"}
           />
         </div>
       </div>
