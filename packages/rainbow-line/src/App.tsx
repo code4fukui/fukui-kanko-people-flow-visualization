@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   AggregatedData,
   AggregatedDataBase,
   CAR_CATEGORIES,
+  createInitialPeriod,
   getRawData,
   GRAPH_VIEW_TYPES,
   Period,
@@ -39,69 +40,92 @@ function App() {
   const [type, setType] = useState<keyof typeof GRAPH_VIEW_TYPES>("month");
   const [compareMode, setCompareMode] = useState(false);
 
-  const [data, setData] = useState<AggregatedData[]>([]);
-  const [processedData, setProcessedData] = useState<RainbowLineAggregatedData[]>([]);
+  const [dataLot1, setDataLot1] = useState<AggregatedData[]>([]);
+  const [dataLot2, setDataLot2] = useState<AggregatedData[]>([]);
+  const [processedDataLot1, setProcessedDataLot1] = useState<RainbowLineAggregatedData[]>([]);
+  const [processedDataLot2, setProcessedDataLot2] = useState<RainbowLineAggregatedData[]>([]);
 
   // 本期間の状態
-  const [period, setPeriod] = useState<Period>({
-    startDate: undefined,
-    endDate: undefined,
-    startMonth: undefined,
-    endMonth: undefined,
-    startWeekRange: undefined,
-    endWeekRange: undefined,
-  });
-  // const [filteredData, setFilteredData] = useState<AggregatedData[]>([]);
-  // const [filteredDailyData, setFilteredDailyData] = useState<AggregatedData[]>([]);
+  const [period, setPeriod] = useState<Period>(createInitialPeriod());
 
   // 比較期間の状態
-  const [comparePeriod, setComparePeriod] = useState<Period>({
-    startDate: undefined,
-    endDate: undefined,
-    startMonth: undefined,
-    endMonth: undefined,
-    startWeekRange: undefined,
-    endWeekRange: undefined,
+  const [comparePeriod, setComparePeriod] = useState<Period>(createInitialPeriod());
+
+  const compansateProcessedData = (
+    filtered: RainbowLineAggregatedData,
+    raw: RainbowLineAggregatedData,
+  ): RainbowLineAggregatedData => ({
+    ...filtered,
+    placement: raw.placement,
+    "object class": raw["object class"],
+    "aggregate from": raw["aggregate from"],
+    "aggregate to": raw["aggregate to"],
+    "total count": Object.values(filtered).reduce((sum, v) => Number(sum) + Number(v), 0) as number,
+    ...Object.values(RAINBOW_LINE_LOTS).reduce(
+      (result, value) => {
+        result[value] = Number(raw[`${value}`] ?? 0);
+        return result;
+      },
+      {} as Record<string, number>,
+    ),
   });
 
-  useInitialization(() => {
-    Promise.all([
-      getRawData({
-        placement: "rainbow-line-parking-lot-1-gate",
-        objectClass: "LicensePlate",
-        aggregateRange: "full",
-      }),
-      getRawData({
-        placement: "rainbow-line-parking-lot-2-gate",
-        objectClass: "LicensePlate",
-        aggregateRange: "full",
-      }),
-    ]).then(([firstLot, secondLot]) => {
-      setData([...firstLot, ...secondLot]);
-    });
-  });
+  // フィルター（カラム名からフィルターにマッチするかどうかを判別する関数）
+  const judge = useCallback(
+    (key: string) => {
+      let prefectures =
+        filters["region"] === "all"
+          ? Object.keys(PREFECTURES)
+          : REGIONS_PREFECTURES[filters["region"]].prefectures;
+      if (filters["prefecture"] !== "all")
+        prefectures = prefectures.filter((v) => v === filters["prefecture"]);
+      const carCategories =
+        filters["carCategory"] === "all" ? Object.keys(CAR_CATEGORIES) : [filters["carCategory"]];
+      return prefectures.some((v) => key.includes(v)) && carCategories.some((v) => key.includes(v));
+    },
+    [filters],
+  );
 
-  useEffect(() => {
-    const processed = data
-      // 駐車場のフィルタが設定されていれば適用
-      .filter((row) => {
-        if (filters["parkingLot"] === "all") return true;
-        else {
-          return row.placement === filters["parkingLot"];
-        }
-      })
-      // 同じ時点から集計している行が第一駐車場と第二駐車場で2つある場合があるので、これを合計値に変更する
-      .reduce(
+  const getTargetData = useCallback(() => {
+    if (filters["parkingLot"] === "all") {
+      return [...processedDataLot1, ...processedDataLot2].reduce(
         (result, current, index, parent) =>
           reducePlacement(
             filters["parkingLot"] as
-              | "rainbow-line-parking-lot-1-gate"
-              | "rainbow-line-parking-lot-2-gate"
+              | Exclude<Placement, "fukui-station-east-entrance" | "tojinbo-shotaro">
               | "all",
             [result as AggregatedData[], current, index, parent],
           ),
         [] as RainbowLineAggregatedData[],
-      )
+      );
+    } else if (filters["parkingLot"] === "rainbow-line-parking-lot-1-gate") {
+      return processedDataLot1.map((row) => ({
+        ...row,
+        [`${filters["parkingLot"]} total count`]: row["total count"],
+      }));
+    } else {
+      return processedDataLot2.map((row) => ({
+        ...row,
+        [`${filters["parkingLot"]} total count`]: row["total count"],
+      }));
+    }
+  }, [filters, processedDataLot1, processedDataLot2]);
+
+  useInitialization(() => {
+    getRawData({
+      placement: "rainbow-line-parking-lot-1-gate",
+      objectClass: "LicensePlate",
+      aggregateRange: "full",
+    }).then(setDataLot1);
+    getRawData({
+      placement: "rainbow-line-parking-lot-2-gate",
+      objectClass: "LicensePlate",
+      aggregateRange: "full",
+    }).then(setDataLot2);
+  });
+
+  useEffect(() => {
+    const processed = dataLot1
       .reduce(
         (result, current, index, parent) =>
           reduceAggregateRange(type, [result as AggregatedData[], current, index, parent]),
@@ -109,48 +133,36 @@ function App() {
       )
       .map((row) => {
         let filteredRow = {} as RainbowLineAggregatedData;
-        // フィルター（カラム名からフィルターにマッチするかどうかを判別する関数）
-        const judge = (key: string) => {
-          let prefectures =
-            filters["region"] === "all"
-              ? Object.keys(PREFECTURES)
-              : REGIONS_PREFECTURES[filters["region"]].prefectures;
-          if (filters["prefecture"] !== "all")
-            prefectures = prefectures.filter((v) => v === filters["prefecture"]);
-          const carCategories =
-            filters["carCategory"] === "all"
-              ? Object.keys(CAR_CATEGORIES)
-              : [filters["carCategory"]];
-          return (
-            prefectures.some((v) => key.includes(v)) && carCategories.some((v) => key.includes(v))
-          );
-        };
         // フィルターにマッチするカラムのみを抽出
         Object.entries(row).forEach(([key, value]) => {
           if (judge(key)) filteredRow[key] = value;
         });
         // 他に必要なカラムのデータを反映
-        filteredRow = {
-          ...filteredRow,
-          placement: row.placement,
-          "object class": row["object class"],
-          "aggregate from": row["aggregate from"],
-          "aggregate to": row["aggregate to"],
-          "total count": Number(
-            Object.values(filteredRow).reduce((sum, v) => Number(sum) + Number(v), 0),
-          ),
-          ...Object.values(RAINBOW_LINE_LOTS).reduce(
-            (result, value) => {
-              result[value] = Number(row[`${value}`]);
-              return result;
-            },
-            {} as Record<string, number>,
-          ),
-        };
+        filteredRow = compansateProcessedData(filteredRow, row);
         return filteredRow;
       });
-    setProcessedData(processed);
-  }, [data, filters, type]);
+    setProcessedDataLot1(processed);
+  }, [dataLot1, filters, type, judge]);
+
+  useEffect(() => {
+    const processed = dataLot2
+      .reduce(
+        (result, current, index, parent) =>
+          reduceAggregateRange(type, [result as AggregatedData[], current, index, parent]),
+        [] as RainbowLineAggregatedData[],
+      )
+      .map((row) => {
+        let filteredRow = {} as RainbowLineAggregatedData;
+        // フィルターにマッチするカラムのみを抽出
+        Object.entries(row).forEach(([key, value]) => {
+          if (judge(key)) filteredRow[key] = value;
+        });
+        // 他に必要なカラムのデータを反映
+        filteredRow = compansateProcessedData(filteredRow, row);
+        return filteredRow;
+      });
+    setProcessedDataLot2(processed);
+  }, [dataLot2, filters, type, judge]);
 
   return (
     <div className="flex flex-col w-full h-[100dvh] p-4 overflow-hidden">
@@ -179,14 +191,14 @@ function App() {
           type={type}
           period={period}
           setPeriod={setPeriod}
-          data={processedData as AggregatedData[]}
+          data={getTargetData() as AggregatedData[]}
         />
         {compareMode && (
           <RainbowLineChartPanel
             type={type}
             period={comparePeriod}
             setPeriod={setComparePeriod}
-            data={processedData as AggregatedData[]}
+            data={getTargetData() as AggregatedData[]}
           />
         )}
       </div>

@@ -67,7 +67,7 @@ function aggregateDaily(
         // TODO: 厳密でないフィルタなので、もっと壊れづらいものを考える
         .filter((key) => key.startsWith(listitem) || key.endsWith(listitem))
         .map((key) => Number(row[key]))
-        .reduce((sum, current) => (sum += current), 0);
+        .reduce((sum, current) => (sum += Number(current)), 0);
     });
     return data;
   });
@@ -104,8 +104,8 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
   const [chartData, setChartData] = useState<AggregatedData[]>([]);
 
   useEffect(() => {
-    const chartData = aggregateDaily(data, focusedAttribute);
-    setChartData(chartData);
+    const dailyData = aggregateDaily(data, focusedAttribute);
+    setChartData(dailyData);
   }, [data, focusedAttribute, type]);
 
   const tickRenderer = useCallback(
