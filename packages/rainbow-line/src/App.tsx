@@ -59,24 +59,24 @@ function App() {
     startWeekRange: {
       from: (() => {
         const from = new Date(start);
-        start.setDate(start.getDate() - start.getDay());
+        from.setDate(from.getDate() - from.getDay());
         return from;
       })(),
       to: (() => {
         const to = new Date(start);
-        start.setDate(start.getDate() + (6 - start.getDay()));
+        to.setDate(to.getDate() + (6 - to.getDay()));
         return to;
       })(),
     },
     endWeekRange: {
       from: (() => {
         const from = new Date(end);
-        end.setDate(end.getDate() - end.getDay());
+        from.setDate(from.getDate() - from.getDay());
         return from;
       })(),
       to: (() => {
         const to = new Date(end);
-        end.setDate(end.getDate() + (6 - end.getDay()));
+        to.setDate(to.getDate() + (6 - to.getDay()));
         return to;
       })(),
     },
