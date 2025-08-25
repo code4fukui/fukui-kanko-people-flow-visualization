@@ -191,12 +191,14 @@ function App() {
           type={type}
           period={period}
           setPeriod={setPeriod}
+          isCompareMode={compareMode}
           data={getTargetData() as AggregatedData[]}
         />
         {compareMode && (
           <RainbowLineChartPanel
             type={type}
             period={comparePeriod}
+            isCompareMode={compareMode}
             setPeriod={setComparePeriod}
             data={getTargetData() as AggregatedData[]}
           />

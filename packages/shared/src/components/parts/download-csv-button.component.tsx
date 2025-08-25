@@ -52,6 +52,47 @@ function convertToCSV(data: AggregatedData[], viewType: keyof typeof GRAPH_VIEW_
   return [headerNames.join(","), ...rows].join("\n");
 }
 
+function convertToRainbowLineCSV(data: AggregatedData[]): string {
+  const baseOrderedHeaders = [
+    "placement",
+    "aggregate from",
+    "aggregate to",
+    "total count",
+    "rainbow-line-parking-lot-1-gate total count",
+    "rainbow-line-parking-lot-2-gate total count",
+  ];
+
+  const excludeColumns = ["object class"];
+  if ((data[0].placement as string) !== "rainbow-line-all") {
+    excludeColumns.push(
+      "rainbow-line-parking-lot-1-gate total count",
+      "rainbow-line-parking-lot-2-gate total count",
+    );
+  }
+
+  const orderedHeaders = baseOrderedHeaders.filter((col) => !excludeColumns.includes(col));
+
+  const otherHeaders =
+    data.length > 0
+      ? Object.keys(data[0]).filter(
+          (col) => !orderedHeaders.includes(col) && !excludeColumns.includes(col),
+        )
+      : [];
+  const headers = [...orderedHeaders, ...otherHeaders];
+
+  if (data.length === 0) return headers.join(",") + "\n";
+  const rows = data.map((row) =>
+    headers
+      .map((h) => {
+        const value = row[h];
+        const escaped = String(value).replace(/"/g, '""');
+        return `"${escaped}"`;
+      })
+      .join(","),
+  );
+  return [headers.join(","), ...rows].join("\n");
+}
+
 export function DownloadCSVButton({
   type,
   period,
@@ -61,7 +102,9 @@ export function DownloadCSVButton({
   placement,
 }: DownloadCSVButtonProps) {
   const handleDownloadCSV = (data: AggregatedData[]) => {
-    const csv = convertToCSV(data, type);
+    const csv = placement.includes("rainbow-line-parking-lot")
+      ? convertToRainbowLineCSV(data)
+      : convertToCSV(data, type);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const now = new Date();
     const pad = (n: number) => n.toString().padStart(2, "0");
