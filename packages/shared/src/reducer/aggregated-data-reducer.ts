@@ -76,8 +76,8 @@ export const reduceAggregateRange: (
     aggregateRange.to.setHours(aggregateRange.from.getHours() + 1);
   } else if (graphViewType === "day") {
     aggregateRange.from.setHours(0, 0, 0, 0);
-    aggregateRange.to.setHours(0, 0, 0, 0);
     aggregateRange.to = new Date(aggregateRange.from);
+    aggregateRange.to.setHours(0, 0, 0, 0);
     aggregateRange.to.setDate(aggregateRange.from.getDate() + 1);
   } else if (graphViewType === "week") {
     const dayOfWeek = aggregateRange.from.getDay();
