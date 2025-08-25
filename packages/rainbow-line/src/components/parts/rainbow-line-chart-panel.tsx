@@ -3,6 +3,7 @@ import {
   Graph,
   MonthRangePicker,
   RangeSelector,
+  StatsSummary,
 } from "@fukui-kanko/shared/components/parts";
 import { AggregatedData, GRAPH_VIEW_TYPES, Period } from "@fukui-kanko/shared/types";
 import { aggregateHourly, cn } from "@fukui-kanko/shared/utils";
@@ -117,6 +118,9 @@ export function RainbowLineChartPanel({
               className="col-span-2 min-h-[calc(100dvh-500px)] h-full"
             />
           )}
+          <div className="col-span-2">
+            <StatsSummary type={type} data={dataInRange} />
+          </div>
           <h3 className="w-full h-10 col-span-2 text-xl text-center font-bold">車両分類別</h3>
           <RainbowLineStackedBarChart
             data={dataInRange}
