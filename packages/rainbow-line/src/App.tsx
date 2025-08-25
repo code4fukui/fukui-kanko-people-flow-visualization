@@ -3,6 +3,7 @@ import {
   AggregatedData,
   AggregatedDataBase,
   CAR_CATEGORIES,
+  createInitialPeriod,
   getRawData,
   GRAPH_VIEW_TYPES,
   Period,
@@ -45,52 +46,10 @@ function App() {
   const [processedDataLot2, setProcessedDataLot2] = useState<RainbowLineAggregatedData[]>([]);
 
   // 本期間の状態
-  const start = (() => {
-    const date = new Date();
-    date.setMonth(date.getMonth() - 3);
-    return date;
-  })();
-  const end = new Date();
-  const [period, setPeriod] = useState<Period>({
-    startDate: start,
-    endDate: end,
-    startMonth: start,
-    endMonth: end,
-    startWeekRange: {
-      from: (() => {
-        const from = new Date(start);
-        from.setDate(from.getDate() - from.getDay());
-        return from;
-      })(),
-      to: (() => {
-        const to = new Date(start);
-        to.setDate(to.getDate() + (6 - to.getDay()));
-        return to;
-      })(),
-    },
-    endWeekRange: {
-      from: (() => {
-        const from = new Date(end);
-        from.setDate(from.getDate() - from.getDay());
-        return from;
-      })(),
-      to: (() => {
-        const to = new Date(end);
-        to.setDate(to.getDate() + (6 - to.getDay()));
-        return to;
-      })(),
-    },
-  });
+  const [period, setPeriod] = useState<Period>(createInitialPeriod());
 
   // 比較期間の状態
-  const [comparePeriod, setComparePeriod] = useState<Period>({
-    startDate: undefined,
-    endDate: undefined,
-    startMonth: undefined,
-    endMonth: undefined,
-    startWeekRange: undefined,
-    endWeekRange: undefined,
-  });
+  const [comparePeriod, setComparePeriod] = useState<Period>(createInitialPeriod());
 
   const compansateProcessedData = (
     filtered: RainbowLineAggregatedData,
