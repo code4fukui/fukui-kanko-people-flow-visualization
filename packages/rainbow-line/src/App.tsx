@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   AggregatedData,
   AggregatedDataBase,
@@ -90,6 +90,22 @@ function App() {
     endWeekRange: undefined,
   });
 
+  // フィルター（カラム名からフィルターにマッチするかどうかを判別する関数）
+  const judge = useCallback(
+    (key: string) => {
+      let prefectures =
+        filters["region"] === "all"
+          ? Object.keys(PREFECTURES)
+          : REGIONS_PREFECTURES[filters["region"]].prefectures;
+      if (filters["prefecture"] !== "all")
+        prefectures = prefectures.filter((v) => v === filters["prefecture"]);
+      const carCategories =
+        filters["carCategory"] === "all" ? Object.keys(CAR_CATEGORIES) : [filters["carCategory"]];
+      return prefectures.some((v) => key.includes(v)) && carCategories.some((v) => key.includes(v));
+    },
+    [filters],
+  );
+
   useInitialization(() => {
     Promise.all([
       getRawData({
@@ -135,22 +151,6 @@ function App() {
       )
       .map((row) => {
         let filteredRow = {} as RainbowLineAggregatedData;
-        // フィルター（カラム名からフィルターにマッチするかどうかを判別する関数）
-        const judge = (key: string) => {
-          let prefectures =
-            filters["region"] === "all"
-              ? Object.keys(PREFECTURES)
-              : REGIONS_PREFECTURES[filters["region"]].prefectures;
-          if (filters["prefecture"] !== "all")
-            prefectures = prefectures.filter((v) => v === filters["prefecture"]);
-          const carCategories =
-            filters["carCategory"] === "all"
-              ? Object.keys(CAR_CATEGORIES)
-              : [filters["carCategory"]];
-          return (
-            prefectures.some((v) => key.includes(v)) && carCategories.some((v) => key.includes(v))
-          );
-        };
         // フィルターにマッチするカラムのみを抽出
         Object.entries(row).forEach(([key, value]) => {
           if (judge(key)) filteredRow[key] = value;
@@ -176,7 +176,7 @@ function App() {
         return filteredRow;
       });
     setProcessedData(processed);
-  }, [data, filters, type]);
+  }, [data, filters, type, judge]);
 
   return (
     <div className="flex flex-col w-full h-[100dvh] p-4 overflow-hidden">
