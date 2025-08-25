@@ -72,16 +72,19 @@ export const reduceAggregateRange: (
   };
   if (graphViewType === "hour") {
     aggregateRange.from.setHours(aggregateRange.from.getHours(), 0, 0, 0);
-    aggregateRange.to.setHours(aggregateRange.from.getHours() + 1, 0, 0, 0);
+    aggregateRange.to = new Date(aggregateRange.from);
+    aggregateRange.to.setHours(aggregateRange.from.getHours() + 1);
   } else if (graphViewType === "day") {
     aggregateRange.from.setHours(0, 0, 0, 0);
     aggregateRange.to.setHours(0, 0, 0, 0);
+    aggregateRange.to = new Date(aggregateRange.from);
     aggregateRange.to.setDate(aggregateRange.from.getDate() + 1);
   } else if (graphViewType === "week") {
     const dayOfWeek = aggregateRange.from.getDay();
     aggregateRange.from.setDate(aggregateRange.from.getDate() - dayOfWeek);
     aggregateRange.from.setHours(0, 0, 0, 0);
-    aggregateRange.to.setDate(aggregateRange.to.getDate() + 6 - dayOfWeek);
+    aggregateRange.to = new Date(aggregateRange.from);
+    aggregateRange.to.setDate(aggregateRange.from.getDate() + 7);
     aggregateRange.to.setHours(0, 0, 0, 0);
   } else if (graphViewType === "month") {
     aggregateRange.from.setDate(1);
@@ -107,7 +110,7 @@ export const reduceAggregateRange: (
         newData[key as keyof AggregatedData] = getDateTimeString(aggregateRange.to);
       } else {
         // 数値データは合計を計算
-        newData[key] = Number(newData[key] ?? 0) + Number(current[key] ?? 0);
+        newData[key] = Number(result[index][key] ?? 0) + Number(current[key] ?? 0);
       }
       return newData;
     }, {} as AggregatedData);
