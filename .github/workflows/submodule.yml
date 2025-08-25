@@ -41,9 +41,8 @@ jobs:
           token: ${{ secrets.WORKFLOW_TOKEN }}
       - name: Update submodules
         run: |
-          git submodule update --remote --init
-          mkdir -p public
-          cp -R data/people-flow-data/full/* public
+          git submodule update --remote --init --force --depth 1 --recursive
+          cp -R data/people-flow-data/full/* packages/whole/public
           git diff
           git add .
           git config --local user.email "actions@github.com"
