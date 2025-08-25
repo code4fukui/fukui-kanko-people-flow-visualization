@@ -22,6 +22,7 @@ export const reducePlacement: (
     result.push({
       ...current,
       placement: selected === "all" ? "rainbow-line-all" : current.placement,
+      [`${current.placement} total count`]: Number(current["total count"]),
     });
   } else {
     // 同じ時点のデータが2つ以上ある場合は合計を計算
@@ -43,9 +44,7 @@ export const reducePlacement: (
           ).toString();
           // total countは元データも別で保存しておく
           if (key === "total count") {
-            sum[`${row.placement} total count`] = (
-              !isNaN(Number(value)) ? Number(value) : 0
-            ).toString();
+            sum[`${row.placement} total count`] = Number(value ?? 0).toString();
           }
         }
       });
