@@ -43,16 +43,42 @@ function App() {
   const [processedData, setProcessedData] = useState<RainbowLineAggregatedData[]>([]);
 
   // 本期間の状態
+  const start = (() => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - 3);
+    return date;
+  })();
+  const end = new Date();
   const [period, setPeriod] = useState<Period>({
-    startDate: undefined,
-    endDate: undefined,
-    startMonth: undefined,
-    endMonth: undefined,
-    startWeekRange: undefined,
-    endWeekRange: undefined,
+    startDate: start,
+    endDate: end,
+    startMonth: start,
+    endMonth: end,
+    startWeekRange: {
+      from: (() => {
+        const from = new Date(start);
+        start.setDate(start.getDate() - start.getDay());
+        return from;
+      })(),
+      to: (() => {
+        const to = new Date(start);
+        start.setDate(start.getDate() + (6 - start.getDay()));
+        return to;
+      })(),
+    },
+    endWeekRange: {
+      from: (() => {
+        const from = new Date(end);
+        end.setDate(end.getDate() - end.getDay());
+        return from;
+      })(),
+      to: (() => {
+        const to = new Date(end);
+        end.setDate(end.getDate() + (6 - end.getDay()));
+        return to;
+      })(),
+    },
   });
-  // const [filteredData, setFilteredData] = useState<AggregatedData[]>([]);
-  // const [filteredDailyData, setFilteredDailyData] = useState<AggregatedData[]>([]);
 
   // 比較期間の状態
   const [comparePeriod, setComparePeriod] = useState<Period>({
