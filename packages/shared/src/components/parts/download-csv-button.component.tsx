@@ -52,6 +52,22 @@ function convertToCSV(data: AggregatedData[], viewType: keyof typeof GRAPH_VIEW_
   return [headerNames.join(","), ...rows].join("\n");
 }
 
+function convertToRainbowLineCSV(data: AggregatedData[]): string {
+  if (data.length === 0) return "";
+
+  const headers = Object.keys(data[0]);
+  const rows = data.map((row) =>
+    headers
+      .map((h) => {
+        const value = row[h];
+        const escaped = String(value).replace(/"/g, '""');
+        return `"${escaped}"`;
+      })
+      .join(","),
+  );
+  return [headers.join(","), ...rows].join("\n");
+}
+
 export function DownloadCSVButton({
   type,
   period,
@@ -61,7 +77,10 @@ export function DownloadCSVButton({
   placement,
 }: DownloadCSVButtonProps) {
   const handleDownloadCSV = (data: AggregatedData[]) => {
-    const csv = convertToCSV(data, type);
+    const csv =
+      placement === "rainbow-line-parking-lot"
+        ? convertToRainbowLineCSV(data)
+        : convertToCSV(data, type);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const now = new Date();
     const pad = (n: number) => n.toString().padStart(2, "0");
