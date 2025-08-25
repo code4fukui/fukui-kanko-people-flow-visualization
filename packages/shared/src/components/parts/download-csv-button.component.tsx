@@ -55,6 +55,15 @@ function convertToCSV(data: AggregatedData[], viewType: keyof typeof GRAPH_VIEW_
 function convertToRainbowLineCSV(data: AggregatedData[]): string {
   if (data.length === 0) return "";
 
+  const baseOrderedHeaders = [
+    "placement",
+    "aggregate from",
+    "aggregate to",
+    "total count",
+    "rainbow-line-parking-lot-1-gate total count",
+    "rainbow-line-parking-lot-2-gate total count",
+  ];
+
   const excludeColumns = ["object class"];
   if ((data[0].placement as string) !== "rainbow-line-all") {
     excludeColumns.push(
@@ -63,7 +72,12 @@ function convertToRainbowLineCSV(data: AggregatedData[]): string {
     );
   }
 
-  const headers = Object.keys(data[0]).filter((col) => !excludeColumns.includes(col));
+  const orderedHeaders = baseOrderedHeaders.filter((col) => !excludeColumns.includes(col));
+
+  const otherHeaders = Object.keys(data[0]).filter(
+    (col) => !orderedHeaders.includes(col) && !excludeColumns.includes(col),
+  );
+  const headers = [...orderedHeaders, ...otherHeaders];
 
   const rows = data.map((row) =>
     headers
