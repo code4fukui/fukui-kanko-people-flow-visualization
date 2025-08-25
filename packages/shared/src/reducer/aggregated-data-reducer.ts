@@ -22,10 +22,11 @@ export const reducePlacement: (
     result.push({
       ...current,
       placement: selected === "all" ? "rainbow-line-all" : current.placement,
+      [`${current.placement} total count`]: Number(current["total count"]),
     });
   } else {
     // 同じ時点のデータが2つ以上ある場合は合計を計算
-    const sum = sameDayData.reduce((sum, row, index) => {
+    const sum = sameDayData.reduce((sum, row) => {
       Object.entries(row).forEach(([key, value]) => {
         if (
           key === "aggregate from" ||
@@ -41,9 +42,9 @@ export const reducePlacement: (
             (key in sum ? Number(`${sum[key]}`) : 0) +
             (typeof value === "number" ? value : !isNaN(Number(value)) ? Number(value) : 0)
           ).toString();
-          // 元データも別で保存しておく
+          // total countは元データも別で保存しておく
           if (key === "total count") {
-            sum[`${sameDayData[index].placement} total count`] = value;
+            sum[`${row.placement} total count`] = Number(value ?? 0).toString();
           }
         }
       });
@@ -64,36 +65,34 @@ export const reduceAggregateRange: (
   graphViewType,
   [result, current, _index, _parent],
 ) => {
-  const timebox =
-    graphViewType === "hour"
-      ? 1000 * 60 * 60
-      : graphViewType === "day"
-        ? 1000 * 60 * 60 * 24
-        : graphViewType === "week"
-          ? 1000 * 60 * 60 * 24 * 7
-          : graphViewType === "month"
-            ? 1000 * 60 * 60 * 24 * 30
-            : -1; // デフォルト
-  if (timebox === -1) throw new Error(`Unsupported graph view type: ${graphViewType}`);
-
   const aggregateRange = {
     from: new Date(current["aggregate from"]),
     to: new Date(current["aggregate to"]),
   };
   if (graphViewType === "hour") {
     aggregateRange.from.setHours(aggregateRange.from.getHours(), 0, 0, 0);
+    aggregateRange.to = new Date(aggregateRange.from);
+    aggregateRange.to.setHours(aggregateRange.from.getHours() + 1);
   } else if (graphViewType === "day") {
     aggregateRange.from.setHours(0, 0, 0, 0);
+    aggregateRange.to = new Date(aggregateRange.from);
+    aggregateRange.to.setHours(0, 0, 0, 0);
+    aggregateRange.to.setDate(aggregateRange.from.getDate() + 1);
   } else if (graphViewType === "week") {
     const dayOfWeek = aggregateRange.from.getDay();
     aggregateRange.from.setDate(aggregateRange.from.getDate() - dayOfWeek);
     aggregateRange.from.setHours(0, 0, 0, 0);
+    aggregateRange.to = new Date(aggregateRange.from);
+    aggregateRange.to.setDate(aggregateRange.from.getDate() + 7);
+    aggregateRange.to.setHours(0, 0, 0, 0);
   } else if (graphViewType === "month") {
     aggregateRange.from.setDate(1);
     aggregateRange.from.setHours(0, 0, 0, 0);
+    aggregateRange.to = new Date(aggregateRange.from);
+    aggregateRange.to.setMonth(aggregateRange.from.getMonth() + 1);
   }
-  aggregateRange.to.setTime(aggregateRange.from.getTime() + timebox);
 
+  // すでに同じ集計期間のデータがある場合は合計を計算
   const index = result.findIndex(
     (row) =>
       row["aggregate from"] === getDateTimeString(aggregateRange.from) &&
@@ -110,7 +109,7 @@ export const reduceAggregateRange: (
         newData[key as keyof AggregatedData] = getDateTimeString(aggregateRange.to);
       } else {
         // 数値データは合計を計算
-        newData[key] = Number(newData[key] ?? 0) + Number(current[key] ?? 0);
+        newData[key] = Number(result[index][key] ?? 0) + Number(current[key] ?? 0);
       }
       return newData;
     }, {} as AggregatedData);
@@ -125,6 +124,7 @@ export const reduceAggregateRange: (
       "aggregate to": getDateTimeString(aggregateRange.to),
       placement: current.placement,
       "object class": current["object class"],
+      "total count": Number(current["total count"]),
     });
   }
   return result;
