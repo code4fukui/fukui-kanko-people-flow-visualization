@@ -55,7 +55,16 @@ function convertToCSV(data: AggregatedData[], viewType: keyof typeof GRAPH_VIEW_
 function convertToRainbowLineCSV(data: AggregatedData[]): string {
   if (data.length === 0) return "";
 
-  const headers = Object.keys(data[0]);
+  const excludeColumns = ["object class"];
+  if ((data[0].placement as string) !== "rainbow-line-all") {
+    excludeColumns.push(
+      "rainbow-line-parking-lot-1-gate total count",
+      "rainbow-line-parking-lot-2-gate total count",
+    );
+  }
+
+  const headers = Object.keys(data[0]).filter((col) => !excludeColumns.includes(col));
+
   const rows = data.map((row) =>
     headers
       .map((h) => {
