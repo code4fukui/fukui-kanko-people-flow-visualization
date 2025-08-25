@@ -23,6 +23,8 @@ jobs:
             echo "continue=true" >> $GITHUB_OUTPUT
           else
             echo "continue=false" >> $GITHUB_OUTPUT
+          fi
+
   # サブモジュールの更新
   update:
     name: Update Submodules
