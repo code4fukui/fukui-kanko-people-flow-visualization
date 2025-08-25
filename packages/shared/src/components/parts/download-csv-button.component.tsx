@@ -102,10 +102,9 @@ export function DownloadCSVButton({
   placement,
 }: DownloadCSVButtonProps) {
   const handleDownloadCSV = (data: AggregatedData[]) => {
-    const csv =
-      placement === "rainbow-line-parking-lot"
-        ? convertToRainbowLineCSV(data)
-        : convertToCSV(data, type);
+    const csv = placement.includes("rainbow-line-parking-lot")
+      ? convertToRainbowLineCSV(data)
+      : convertToCSV(data, type);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const now = new Date();
     const pad = (n: number) => n.toString().padStart(2, "0");
