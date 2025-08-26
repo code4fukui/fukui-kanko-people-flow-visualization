@@ -61,6 +61,15 @@ function App() {
   // 比較期間の状態
   const [comparePeriod, setComparePeriod] = useState<Period>(createInitialPeriod());
 
+  const [dailyDataLot1Compare, setDailyDataLot1Compare] = useState<AggregatedData[]>([]);
+  const [dailyDataLot2Compare, setDailyDataLot2Compare] = useState<AggregatedData[]>([]);
+  const [processedDailyDataLot1Compare, setProcessedDailyDataLot1Compare] = useState<
+    RainbowLineAggregatedData[]
+  >([]);
+  const [processedDailyDataLot2Compare, setProcessedDailyDataLot2Compare] = useState<
+    RainbowLineAggregatedData[]
+  >([]);
+
   const compansateProcessedData = (
     filtered: RainbowLineAggregatedData,
     raw: RainbowLineAggregatedData,
@@ -129,12 +138,24 @@ function App() {
     return aggregatedParkingLotData(processedDataLot1, processedDataLot2);
   }, [aggregatedParkingLotData, processedDataLot1, processedDataLot2]);
 
-  const getTargetDailyData = useCallback(() => {
-    return aggregatedParkingLotData(processedDailyDataLot1, processedDailyDataLot2);
-  }, [aggregatedParkingLotData, processedDailyDataLot1, processedDailyDataLot2]);
+  const getTargetDailyData = useCallback(
+    (isCompare = false) => {
+      return aggregatedParkingLotData(
+        isCompare ? processedDailyDataLot1Compare : processedDailyDataLot1,
+        isCompare ? processedDailyDataLot2Compare : processedDailyDataLot2,
+      );
+    },
+    [
+      aggregatedParkingLotData,
+      processedDailyDataLot1,
+      processedDailyDataLot2,
+      processedDailyDataLot1Compare,
+      processedDailyDataLot2Compare,
+    ],
+  );
 
   const targetData = useMemo(() => getTargetData(), [getTargetData]);
-  const targetDailyData = useMemo(() => getTargetDailyData(), [getTargetDailyData]);
+  const targetDailyData = useMemo(() => getTargetDailyData(false), [getTargetDailyData]);
   const hasData = useMemo(
     () => targetData.length > 0 && (type !== "hour" || targetDailyData.length > 0),
     [type, targetData, targetDailyData],
@@ -171,6 +192,24 @@ function App() {
     setDailyDataLot2,
   );
 
+  // 比較期間の 1時間ごとのデータ取得（Lot1）
+  useDailyDataEffect(
+    "LicensePlate",
+    "rainbow-line-parking-lot-1-gate",
+    type,
+    comparePeriod,
+    setDailyDataLot1Compare,
+  );
+
+  // 比較期間の 1時間ごとのデータ取得（Lot2）
+  useDailyDataEffect(
+    "LicensePlate",
+    "rainbow-line-parking-lot-2-gate",
+    type,
+    comparePeriod,
+    setDailyDataLot2Compare,
+  );
+
   const processRows = (rows: AggregatedData[]): RainbowLineAggregatedData[] => {
     return (rows as AggregatedData[]).map((row) => {
       const filteredRow = {} as RainbowLineAggregatedData;
@@ -199,6 +238,14 @@ function App() {
   }, [dataLot1, dailyDataLot1, type, judge]);
 
   useEffect(() => {
+    if (type === "hour") {
+      setProcessedDailyDataLot1Compare(processRows(dailyDataLot1Compare));
+    } else {
+      setProcessedDailyDataLot1Compare([]);
+    }
+  }, [dailyDataLot1Compare, type, judge]);
+
+  useEffect(() => {
     const baseRows = dataLot2.reduce<AggregatedData[]>(
       (result, current, index, parent) =>
         reduceAggregateRange(type, [result, current, index, parent]),
@@ -212,6 +259,14 @@ function App() {
       setProcessedDataLot2(processRows(baseRows));
     }
   }, [dataLot2, dailyDataLot2, type, judge]);
+
+  useEffect(() => {
+    if (type === "hour") {
+      setProcessedDailyDataLot2Compare(processRows(dailyDataLot2Compare));
+    } else {
+      setProcessedDailyDataLot2Compare([]);
+    }
+  }, [dailyDataLot2Compare, type, judge]);
 
   return (
     <div className="flex flex-col w-full h-[100dvh] p-4 overflow-hidden">
@@ -243,7 +298,7 @@ function App() {
             setPeriod={setPeriod}
             isCompareMode={compareMode}
             data={getTargetData() as AggregatedData[]}
-            dailyData={getTargetDailyData() as AggregatedData[]}
+            dailyData={getTargetDailyData(false) as AggregatedData[]}
           />
         )}
         {compareMode && hasData && (
@@ -253,7 +308,7 @@ function App() {
             isCompareMode={compareMode}
             setPeriod={setComparePeriod}
             data={getTargetData() as AggregatedData[]}
-            dailyData={getTargetDailyData() as AggregatedData[]}
+            dailyData={getTargetDailyData(true) as AggregatedData[]}
           />
         )}
       </div>
