@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AggregatedData,
   AggregatedDataBase,
@@ -132,6 +132,13 @@ function App() {
     return aggregatedParkingLotData(processedDailyDataLot1, processedDailyDataLot2);
   }, [aggregatedParkingLotData, processedDailyDataLot1, processedDailyDataLot2]);
 
+  const targetData = useMemo(() => getTargetData(), [getTargetData]);
+  const targetDailyData = useMemo(() => getTargetDailyData(), [getTargetDailyData]);
+  const hasData = useMemo(
+    () => targetData.length > 0 && (type !== "hour" || targetDailyData.length > 0),
+    [type, targetData, targetDailyData],
+  );
+
   useInitialization(() => {
     getRawData({
       placement: "rainbow-line-parking-lot-1-gate",
@@ -255,7 +262,7 @@ function App() {
         </div>
       </div>
       <div className="flex items-center gap-x-4 grow w-full h-full overflow-hidden py-4">
-        {(type !== "hour" || processedDataLot1.length > 0) && (
+        {hasData && (
           <RainbowLineChartPanel
             type={type}
             period={period}
@@ -265,7 +272,7 @@ function App() {
             dailyData={getTargetDailyData() as AggregatedData[]}
           />
         )}
-        {compareMode && (type !== "hour" || processedDataLot1.length > 0) && (
+        {compareMode && hasData && (
           <RainbowLineChartPanel
             type={type}
             period={comparePeriod}
