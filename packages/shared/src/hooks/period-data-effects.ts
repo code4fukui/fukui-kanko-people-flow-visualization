@@ -57,25 +57,41 @@ export function useDailyDataEffect(
     const fetchData = async () => {
       if (period.startDate && period.endDate) {
         setIsLoading?.(true);
-        const results: AggregatedData[] = [];
-        const current = new Date(period.startDate);
+
+        const start = new Date(period.startDate);
         const end = new Date(period.endDate);
 
-        while (current <= end) {
-          // 1時間ごとに取得
-          const rawData = await getRawData({
-            objectClass,
-            placement,
-            aggregateRange: "daily", // 1時間毎のデータはdailyに含まれています
-            date: new Date(current),
-          });
-          results.push(...rawData);
-          current.setDate(current.getDate() + 1);
+        // 取得対象日の配列を作成
+        const dates: Date[] = [];
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          dates.push(new Date(d));
         }
 
-        if (isCurrent) {
-          setDailyData(results);
-          setIsLoading?.(false);
+        try {
+          // 各日を並列で取得（順序は dates の順に維持されます）
+          const all = await Promise.all(
+            dates.map((date) =>
+              getRawData({
+                objectClass,
+                placement,
+                aggregateRange: "daily", // 1時間毎のデータはdailyに含まれています
+                date,
+              }),
+            ),
+          );
+          const results = all.flat();
+
+          if (isCurrent) {
+            setDailyData(results);
+          }
+        } catch (e) {
+          if (isCurrent) {
+            // eslint-disable-next-line no-console
+            console.error("データの取得に失敗しました:", e);
+            setDailyData([]);
+          }
+        } finally {
+          if (isCurrent) setIsLoading?.(false);
         }
       }
     };
@@ -83,5 +99,5 @@ export function useDailyDataEffect(
     return () => {
       isCurrent = false;
     };
-  }, [type, period.startDate, period.endDate]);
+  }, [type, period.startDate, period.endDate, objectClass, placement]);
 }
