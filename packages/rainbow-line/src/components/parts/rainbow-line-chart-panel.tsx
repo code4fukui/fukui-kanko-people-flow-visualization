@@ -5,6 +5,7 @@ import {
 } from "@fukui-kanko/shared/components/parts";
 import { AggregatedData, GRAPH_VIEW_TYPES, Period } from "@fukui-kanko/shared/types";
 import { cn } from "@fukui-kanko/shared/utils";
+import { Graph } from "./rainbow-line-line-chart";
 import RainbowLineStackedBarChart from "./rainbow-line-stacked-bar-chart";
 import { RainbowLinePieChart } from "./rainbowe-line-pie-chart";
 
@@ -14,6 +15,7 @@ export function RainbowLineChartPanel({
   setPeriod,
   isCompareMode,
   data,
+  dailyData,
   className,
 }: {
   type: keyof typeof GRAPH_VIEW_TYPES;
@@ -21,6 +23,7 @@ export function RainbowLineChartPanel({
   setPeriod: React.Dispatch<React.SetStateAction<Period>>;
   isCompareMode: boolean;
   data: AggregatedData[];
+  dailyData: AggregatedData[];
   className?: string;
 }) {
   const dataInRange = data.filter((row) => {
@@ -100,12 +103,20 @@ export function RainbowLineChartPanel({
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-y-4 w-full min-w-full grow pt-4 overflow-auto max-h-full">
-          <RainbowLineStackedBarChart
-            data={dataInRange}
-            focusedAttribute="placement"
-            type={type}
-            className="col-span-2 min-h-[calc(100dvh-500px)] h-full"
-          />
+          {type === "hour" ? (
+            <Graph
+              data={dailyData}
+              type={type}
+              className="col-span-2 min-h-[calc(100dvh-500px)] h-full"
+            />
+          ) : (
+            <RainbowLineStackedBarChart
+              data={dataInRange}
+              focusedAttribute="placement"
+              type={type}
+              className="col-span-2 min-h-[calc(100dvh-500px)] h-full"
+            />
+          )}
           <h3 className="w-full h-10 col-span-2 text-xl text-center font-bold">車両分類別</h3>
           <RainbowLineStackedBarChart
             data={dataInRange}
