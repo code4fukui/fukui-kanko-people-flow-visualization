@@ -196,12 +196,7 @@ function App() {
         reduceAggregateRange(type, [result, current, index, parent]),
       [],
     );
-
-    if (type === "hour") {
-      setProcessedDataLot1(processRows(baseRows));
-    } else {
-      setProcessedDataLot1(processRows(baseRows));
-    }
+    setProcessedDataLot1(processRows(baseRows));
   }, [dataLot1, type, judge]);
 
   useEffect(() => {
@@ -210,12 +205,7 @@ function App() {
         reduceAggregateRange(type, [result, current, index, parent]),
       [],
     );
-
-    if (type === "hour") {
-      setProcessedDataLot2(processRows(baseRows));
-    } else {
-      setProcessedDataLot2(processRows(baseRows));
-    }
+    setProcessedDataLot2(processRows(baseRows));
   }, [dataLot2, type, judge]);
 
   return (
