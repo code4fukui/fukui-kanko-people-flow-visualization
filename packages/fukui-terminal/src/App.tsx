@@ -7,6 +7,7 @@ import { createInitialPeriod, getRawData } from "@fukui-kanko/shared/utils";
 
 function App() {
   const placement = "fukui-station-east-entrance";
+  const objectClass = "Person";
 
   const [type, setType] = useState<keyof typeof GRAPH_VIEW_TYPES>("day");
   const [csvData, setCsvData] = useState<AggregatedData[]>([]);
@@ -58,10 +59,17 @@ function App() {
   );
 
   // 本期間の時間別データを取得・更新
-  useDailyDataEffect(placement, type, period, setCsvDailyData, setIsLoading);
+  useDailyDataEffect(objectClass, placement, type, period, setCsvDailyData, setIsLoading);
 
   // 比較期間の時間別データを取得・更新
-  useDailyDataEffect(placement, type, comparePeriod, setCompareCsvDailyData, setCompareIsLoading);
+  useDailyDataEffect(
+    objectClass,
+    placement,
+    type,
+    comparePeriod,
+    setCompareCsvDailyData,
+    setCompareIsLoading,
+  );
 
   return (
     <div className="h-full w-full max-w-full text-center flex flex-col items-center gap-2 mt-3">

@@ -4,6 +4,7 @@ import {
   getFilteredData,
   getRawData,
   GRAPH_VIEW_TYPES,
+  ObjectClass,
   Period,
   Placement,
 } from "@fukui-kanko/shared";
@@ -40,21 +41,22 @@ export function useFilteredData(
  * 時間別データを取得・更新するフック
  */
 export function useDailyDataEffect(
+  objectClass: ObjectClass,
   placement: Placement,
   type: keyof typeof GRAPH_VIEW_TYPES,
   period: Period,
   setDailyData: (data: AggregatedData[]) => void,
-  setIsLoading: (loading: boolean) => void,
+  setIsLoading?: (loading: boolean) => void,
 ) {
   useEffect(() => {
     if (type !== "hour") {
-      setIsLoading(false);
+      setIsLoading?.(false);
       return;
     }
     let isCurrent = true;
     const fetchData = async () => {
       if (period.startDate && period.endDate) {
-        setIsLoading(true);
+        setIsLoading?.(true);
         const results: AggregatedData[] = [];
         const current = new Date(period.startDate);
         const end = new Date(period.endDate);
@@ -62,7 +64,7 @@ export function useDailyDataEffect(
         while (current <= end) {
           // 1時間ごとに取得
           const rawData = await getRawData({
-            objectClass: "Person",
+            objectClass,
             placement,
             aggregateRange: "daily", // 1時間毎のデータはdailyに含まれています
             date: new Date(current),
@@ -73,7 +75,7 @@ export function useDailyDataEffect(
 
         if (isCurrent) {
           setDailyData(results);
-          setIsLoading(false);
+          setIsLoading?.(false);
         }
       }
     };

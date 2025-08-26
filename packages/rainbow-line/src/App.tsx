@@ -12,6 +12,7 @@ import {
   reduceAggregateRange,
   reducePlacement,
   REGIONS_PREFECTURES,
+  useDailyDataEffect,
   useInitialization,
 } from "@fukui-kanko/shared";
 import { TypeSelect } from "@fukui-kanko/shared/components/parts";
@@ -152,50 +153,23 @@ function App() {
     }).then(setDataLot2);
   });
 
-  useEffect(() => {
-    if (type !== "hour") {
-      return;
-    }
-    let isCurrent = true;
-    const fetchData = async () => {
-      if (period.startDate && period.endDate) {
-        const resultsLot1: AggregatedData[] = [];
-        const resultsLot2: AggregatedData[] = [];
-        const current = new Date(period.startDate);
-        const end = new Date(period.endDate);
+  // 1時間ごとのデータ取得（Lot1）
+  useDailyDataEffect(
+    "LicensePlate",
+    "rainbow-line-parking-lot-1-gate",
+    type,
+    period,
+    setDailyDataLot1,
+  );
 
-        while (current <= end) {
-          // 1時間ごとに取得
-          const [rawLot1, rawLot2] = await Promise.all([
-            getRawData({
-              placement: "rainbow-line-parking-lot-1-gate",
-              objectClass: "LicensePlate",
-              aggregateRange: "daily", // 1時間毎のデータはdailyに含まれています
-              date: new Date(current),
-            }),
-            getRawData({
-              placement: "rainbow-line-parking-lot-2-gate",
-              objectClass: "LicensePlate",
-              aggregateRange: "daily",
-              date: new Date(current),
-            }),
-          ]);
-          resultsLot1.push(...rawLot1);
-          resultsLot2.push(...rawLot2);
-          current.setDate(current.getDate() + 1);
-        }
-
-        if (isCurrent) {
-          setDailyDataLot1(resultsLot1);
-          setDailyDataLot2(resultsLot2);
-        }
-      }
-    };
-    fetchData();
-    return () => {
-      isCurrent = false;
-    };
-  }, [type, period.startDate, period.endDate]);
+  // 1時間ごとのデータ取得（Lot2）
+  useDailyDataEffect(
+    "LicensePlate",
+    "rainbow-line-parking-lot-2-gate",
+    type,
+    period,
+    setDailyDataLot2,
+  );
 
   const processRows = (rows: AggregatedData[]): RainbowLineAggregatedData[] => {
     return (rows as AggregatedData[]).map((row) => {
