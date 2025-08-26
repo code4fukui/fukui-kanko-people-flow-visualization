@@ -190,17 +190,8 @@ function App() {
     };
   }, [type, period.startDate, period.endDate]);
 
-  useEffect(() => {
-    const baseRows =
-      type === "hour"
-        ? dailyDataLot1
-        : dataLot1.reduce(
-            (result, current, index, parent) =>
-              reduceAggregateRange(type, [result as AggregatedData[], current, index, parent]),
-            [] as RainbowLineAggregatedData[],
-          );
-
-    const processed = (baseRows as AggregatedData[]).map((row) => {
+  const processRows = (rows: AggregatedData[]): RainbowLineAggregatedData[] => {
+    return (rows as AggregatedData[]).map((row) => {
       const filteredRow = {} as RainbowLineAggregatedData;
       // フィルターにマッチするカラムのみを抽出
       Object.entries(row).forEach(([key, value]) => {
@@ -209,38 +200,35 @@ function App() {
       // 他に必要なカラムのデータを反映
       return compansateProcessedData(filteredRow, row as unknown as RainbowLineAggregatedData);
     });
+  };
+
+  useEffect(() => {
+    const baseRows = dataLot1.reduce<AggregatedData[]>(
+      (result, current, index, parent) =>
+        reduceAggregateRange(type, [result, current, index, parent]),
+      [],
+    );
 
     if (type === "hour") {
-      setProcessedDailyDataLot1(processed);
+      setProcessedDataLot1(processRows(baseRows));
+      setProcessedDailyDataLot1(processRows(dailyDataLot1));
     } else {
-      setProcessedDataLot1(processed);
+      setProcessedDataLot1(processRows(baseRows));
     }
   }, [dataLot1, dailyDataLot1, type, judge]);
 
   useEffect(() => {
-    const baseRows =
-      type === "hour"
-        ? dailyDataLot2
-        : dataLot2.reduce(
-            (result, current, index, parent) =>
-              reduceAggregateRange(type, [result as AggregatedData[], current, index, parent]),
-            [] as RainbowLineAggregatedData[],
-          );
-
-    const processed = (baseRows as AggregatedData[]).map((row) => {
-      const filteredRow = {} as RainbowLineAggregatedData;
-      // フィルターにマッチするカラムのみを抽出
-      Object.entries(row).forEach(([key, value]) => {
-        if (judge(key)) filteredRow[key] = value;
-      });
-      // 他に必要なカラムのデータを反映
-      return compansateProcessedData(filteredRow, row as unknown as RainbowLineAggregatedData);
-    });
+    const baseRows = dataLot2.reduce<AggregatedData[]>(
+      (result, current, index, parent) =>
+        reduceAggregateRange(type, [result, current, index, parent]),
+      [],
+    );
 
     if (type === "hour") {
-      setProcessedDailyDataLot2(processed);
+      setProcessedDataLot2(processRows(baseRows));
+      setProcessedDailyDataLot2(processRows(dailyDataLot2));
     } else {
-      setProcessedDataLot2(processed);
+      setProcessedDataLot2(processRows(baseRows));
     }
   }, [dataLot2, dailyDataLot2, type, judge]);
 
