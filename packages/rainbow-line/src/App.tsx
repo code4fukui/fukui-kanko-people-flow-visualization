@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   AggregatedData,
   AggregatedDataBase,
@@ -41,11 +41,18 @@ function App() {
   const [compareMode, setCompareMode] = useState(false);
 
   const [dataLot1, setDataLot1] = useState<AggregatedData[]>([]);
-  const [dailyDataLot1, setDailyDataLot1] = useState<AggregatedData[]>([]);
   const [dataLot2, setDataLot2] = useState<AggregatedData[]>([]);
-  const [dailyDataLot2, setDailyDataLot2] = useState<AggregatedData[]>([]);
   const [processedDataLot1, setProcessedDataLot1] = useState<RainbowLineAggregatedData[]>([]);
   const [processedDataLot2, setProcessedDataLot2] = useState<RainbowLineAggregatedData[]>([]);
+
+  const [dailyDataLot1, setDailyDataLot1] = useState<AggregatedData[]>([]);
+  const [dailyDataLot2, setDailyDataLot2] = useState<AggregatedData[]>([]);
+  const [processedDailyDataLot1, setProcessedDailyDataLot1] = useState<RainbowLineAggregatedData[]>(
+    [],
+  );
+  const [processedDailyDataLot2, setProcessedDailyDataLot2] = useState<RainbowLineAggregatedData[]>(
+    [],
+  );
 
   // 本期間の状態
   const [period, setPeriod] = useState<Period>(createInitialPeriod());
@@ -88,77 +95,42 @@ function App() {
     [filters],
   );
 
-  const processedDailyDataLot1Memo = useMemo(() => {
-    if (type !== "hour") return [];
-    return dailyDataLot1.map((row) => {
-      const filteredRow = {} as RainbowLineAggregatedData;
-      Object.entries(row).forEach(([key, value]) => {
-        if (judge(key)) filteredRow[key] = value;
-      });
-      return compansateProcessedData(filteredRow, row as unknown as RainbowLineAggregatedData);
-    });
-  }, [type, dailyDataLot1, judge]);
-
-  const processedDailyDataLot2Memo = useMemo(() => {
-    if (type !== "hour") return [];
-    return dailyDataLot2.map((row) => {
-      const filteredRow = {} as RainbowLineAggregatedData;
-      Object.entries(row).forEach(([key, value]) => {
-        if (judge(key)) filteredRow[key] = value;
-      });
-      return compansateProcessedData(filteredRow, row as unknown as RainbowLineAggregatedData);
-    });
-  }, [type, dailyDataLot2, judge]);
+  const aggregatedParkingLotData = useCallback(
+    (lot1: RainbowLineAggregatedData[], lot2: RainbowLineAggregatedData[]) => {
+      const selected = filters["parkingLot"];
+      if (selected === "all") {
+        return [...lot1, ...lot2].reduce(
+          (result, current, index, parent) =>
+            reducePlacement(
+              selected as
+                | Exclude<Placement, "fukui-station-east-entrance" | "tojinbo-shotaro">
+                | "all",
+              [result as AggregatedData[], current, index, parent],
+            ),
+          [] as RainbowLineAggregatedData[],
+        );
+      }
+      if (selected === "rainbow-line-parking-lot-1-gate") {
+        return lot1.map((row) => ({
+          ...row,
+          [`${selected} total count`]: row["total count"],
+        }));
+      }
+      return lot2.map((row) => ({
+        ...row,
+        [`${selected} total count`]: row["total count"],
+      }));
+    },
+    [filters],
+  );
 
   const getTargetData = useCallback(() => {
-    if (filters["parkingLot"] === "all") {
-      return [...processedDataLot1, ...processedDataLot2].reduce(
-        (result, current, index, parent) =>
-          reducePlacement(
-            filters["parkingLot"] as
-              | Exclude<Placement, "fukui-station-east-entrance" | "tojinbo-shotaro">
-              | "all",
-            [result as AggregatedData[], current, index, parent],
-          ),
-        [] as RainbowLineAggregatedData[],
-      );
-    } else if (filters["parkingLot"] === "rainbow-line-parking-lot-1-gate") {
-      return processedDataLot1.map((row) => ({
-        ...row,
-        [`${filters["parkingLot"]} total count`]: row["total count"],
-      }));
-    } else {
-      return processedDataLot2.map((row) => ({
-        ...row,
-        [`${filters["parkingLot"]} total count`]: row["total count"],
-      }));
-    }
-  }, [filters, processedDataLot1, processedDataLot2]);
+    return aggregatedParkingLotData(processedDataLot1, processedDataLot2);
+  }, [aggregatedParkingLotData, processedDataLot1, processedDataLot2]);
 
   const getTargetDailyData = useCallback(() => {
-    if (filters["parkingLot"] === "all") {
-      return [...processedDailyDataLot1Memo, ...processedDailyDataLot2Memo].reduce(
-        (result, current, index, parent) =>
-          reducePlacement(
-            filters["parkingLot"] as
-              | Exclude<Placement, "fukui-station-east-entrance" | "tojinbo-shotaro">
-              | "all",
-            [result as AggregatedData[], current, index, parent],
-          ),
-        [] as RainbowLineAggregatedData[],
-      );
-    } else if (filters["parkingLot"] === "rainbow-line-parking-lot-1-gate") {
-      return processedDailyDataLot1Memo.map((row) => ({
-        ...row,
-        [`${filters["parkingLot"]} total count`]: row["total count"],
-      }));
-    } else {
-      return processedDailyDataLot2Memo.map((row) => ({
-        ...row,
-        [`${filters["parkingLot"]} total count`]: row["total count"],
-      }));
-    }
-  }, [filters, processedDailyDataLot1Memo, processedDailyDataLot2Memo]);
+    return aggregatedParkingLotData(processedDailyDataLot1, processedDailyDataLot2);
+  }, [aggregatedParkingLotData, processedDailyDataLot1, processedDailyDataLot2]);
 
   useInitialization(() => {
     getRawData({
@@ -219,49 +191,58 @@ function App() {
   }, [type, period.startDate, period.endDate]);
 
   useEffect(() => {
-    const processed =
+    const baseRows =
       type === "hour"
         ? dailyDataLot1
-        : dataLot1
-            .reduce(
-              (result, current, index, parent) =>
-                reduceAggregateRange(type, [result as AggregatedData[], current, index, parent]),
-              [] as RainbowLineAggregatedData[],
-            )
-            .map((row) => {
-              let filteredRow = {} as RainbowLineAggregatedData;
-              // フィルターにマッチするカラムのみを抽出
-              Object.entries(row).forEach(([key, value]) => {
-                if (judge(key)) filteredRow[key] = value;
-              });
-              // 他に必要なカラムのデータを反映
-              filteredRow = compansateProcessedData(filteredRow, row);
-              return filteredRow;
-            });
-    if (type !== "hour") {
+        : dataLot1.reduce(
+            (result, current, index, parent) =>
+              reduceAggregateRange(type, [result as AggregatedData[], current, index, parent]),
+            [] as RainbowLineAggregatedData[],
+          );
+
+    const processed = (baseRows as AggregatedData[]).map((row) => {
+      const filteredRow = {} as RainbowLineAggregatedData;
+      // フィルターにマッチするカラムのみを抽出
+      Object.entries(row).forEach(([key, value]) => {
+        if (judge(key)) filteredRow[key] = value;
+      });
+      // 他に必要なカラムのデータを反映
+      return compansateProcessedData(filteredRow, row as unknown as RainbowLineAggregatedData);
+    });
+
+    if (type === "hour") {
+      setProcessedDailyDataLot1(processed);
+    } else {
       setProcessedDataLot1(processed);
     }
-  }, [dataLot1, dailyDataLot1, filters, type, judge]);
+  }, [dataLot1, dailyDataLot1, type, judge]);
 
   useEffect(() => {
-    const processed = dataLot2
-      .reduce(
-        (result, current, index, parent) =>
-          reduceAggregateRange(type, [result as AggregatedData[], current, index, parent]),
-        [] as RainbowLineAggregatedData[],
-      )
-      .map((row) => {
-        let filteredRow = {} as RainbowLineAggregatedData;
-        // フィルターにマッチするカラムのみを抽出
-        Object.entries(row).forEach(([key, value]) => {
-          if (judge(key)) filteredRow[key] = value;
-        });
-        // 他に必要なカラムのデータを反映
-        filteredRow = compansateProcessedData(filteredRow, row);
-        return filteredRow;
+    const baseRows =
+      type === "hour"
+        ? dailyDataLot2
+        : dataLot2.reduce(
+            (result, current, index, parent) =>
+              reduceAggregateRange(type, [result as AggregatedData[], current, index, parent]),
+            [] as RainbowLineAggregatedData[],
+          );
+
+    const processed = (baseRows as AggregatedData[]).map((row) => {
+      const filteredRow = {} as RainbowLineAggregatedData;
+      // フィルターにマッチするカラムのみを抽出
+      Object.entries(row).forEach(([key, value]) => {
+        if (judge(key)) filteredRow[key] = value;
       });
-    setProcessedDataLot2(processed);
-  }, [dataLot2, filters, type, judge]);
+      // 他に必要なカラムのデータを反映
+      return compansateProcessedData(filteredRow, row as unknown as RainbowLineAggregatedData);
+    });
+
+    if (type === "hour") {
+      setProcessedDailyDataLot2(processed);
+    } else {
+      setProcessedDataLot2(processed);
+    }
+  }, [dataLot2, dailyDataLot2, type, judge]);
 
   return (
     <div className="flex flex-col w-full h-[100dvh] p-4 overflow-hidden">
@@ -286,7 +267,7 @@ function App() {
         </div>
       </div>
       <div className="flex items-center gap-x-4 grow w-full h-full overflow-hidden py-4">
-        {(type !== "hour" || processedDailyDataLot1Memo.length > 0) && (
+        {(type !== "hour" || processedDataLot1.length > 0) && (
           <RainbowLineChartPanel
             type={type}
             period={period}
@@ -296,7 +277,7 @@ function App() {
             dailyData={getTargetDailyData() as AggregatedData[]}
           />
         )}
-        {compareMode && (type !== "hour" || processedDailyDataLot1Memo.length > 0) && (
+        {compareMode && (type !== "hour" || processedDataLot1.length > 0) && (
           <RainbowLineChartPanel
             type={type}
             period={comparePeriod}
