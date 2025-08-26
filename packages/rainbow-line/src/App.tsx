@@ -12,8 +12,8 @@ import {
   reduceAggregateRange,
   reducePlacement,
   REGIONS_PREFECTURES,
-  useDailyDataEffect,
   useInitialization,
+  useLotDailyData,
 } from "@fukui-kanko/shared";
 import { TypeSelect } from "@fukui-kanko/shared/components/parts";
 import { Checkbox, Label } from "@fukui-kanko/shared/components/ui";
@@ -46,29 +46,14 @@ function App() {
   const [processedDataLot1, setProcessedDataLot1] = useState<RainbowLineAggregatedData[]>([]);
   const [processedDataLot2, setProcessedDataLot2] = useState<RainbowLineAggregatedData[]>([]);
 
-  const [dailyDataLot1, setDailyDataLot1] = useState<AggregatedData[]>([]);
-  const [dailyDataLot2, setDailyDataLot2] = useState<AggregatedData[]>([]);
-  const [processedDailyDataLot1, setProcessedDailyDataLot1] = useState<RainbowLineAggregatedData[]>(
-    [],
-  );
-  const [processedDailyDataLot2, setProcessedDailyDataLot2] = useState<RainbowLineAggregatedData[]>(
-    [],
-  );
-
   // 本期間の状態
   const [period, setPeriod] = useState<Period>(createInitialPeriod());
 
   // 比較期間の状態
   const [comparePeriod, setComparePeriod] = useState<Period>(createInitialPeriod());
 
-  const [dailyDataLot1Compare, setDailyDataLot1Compare] = useState<AggregatedData[]>([]);
-  const [dailyDataLot2Compare, setDailyDataLot2Compare] = useState<AggregatedData[]>([]);
-  const [processedDailyDataLot1Compare, setProcessedDailyDataLot1Compare] = useState<
-    RainbowLineAggregatedData[]
-  >([]);
-  const [processedDailyDataLot2Compare, setProcessedDailyDataLot2Compare] = useState<
-    RainbowLineAggregatedData[]
-  >([]);
+  const lot1Daily = useLotDailyData("rainbow-line-parking-lot-1-gate", type, period, comparePeriod);
+  const lot2Daily = useLotDailyData("rainbow-line-parking-lot-2-gate", type, period, comparePeriod);
 
   const compansateProcessedData = (
     filtered: RainbowLineAggregatedData,
@@ -138,6 +123,25 @@ function App() {
     return aggregatedParkingLotData(processedDataLot1, processedDataLot2);
   }, [aggregatedParkingLotData, processedDataLot1, processedDataLot2]);
 
+  const processedDailyDataLot1 = useMemo(
+    () => (type === "hour" ? processRows(lot1Daily.main) : []),
+    [type, lot1Daily.main, judge],
+  );
+  const processedDailyDataLot2 = useMemo(
+    () => (type === "hour" ? processRows(lot2Daily.main) : []),
+    [type, lot2Daily.main, judge],
+  );
+
+  // 比較期間の時間データ（加工済）
+  const processedDailyDataLot1Compare = useMemo(
+    () => (type === "hour" ? processRows(lot1Daily.compare) : []),
+    [type, lot1Daily.compare, judge],
+  );
+  const processedDailyDataLot2Compare = useMemo(
+    () => (type === "hour" ? processRows(lot2Daily.compare) : []),
+    [type, lot2Daily.compare, judge],
+  );
+
   const getTargetDailyData = useCallback(
     (isCompare = false) => {
       return aggregatedParkingLotData(
@@ -174,43 +178,7 @@ function App() {
     }).then(setDataLot2);
   });
 
-  // 1時間ごとのデータ取得（Lot1）
-  useDailyDataEffect(
-    "LicensePlate",
-    "rainbow-line-parking-lot-1-gate",
-    type,
-    period,
-    setDailyDataLot1,
-  );
-
-  // 1時間ごとのデータ取得（Lot2）
-  useDailyDataEffect(
-    "LicensePlate",
-    "rainbow-line-parking-lot-2-gate",
-    type,
-    period,
-    setDailyDataLot2,
-  );
-
-  // 比較期間の 1時間ごとのデータ取得（Lot1）
-  useDailyDataEffect(
-    "LicensePlate",
-    "rainbow-line-parking-lot-1-gate",
-    type,
-    comparePeriod,
-    setDailyDataLot1Compare,
-  );
-
-  // 比較期間の 1時間ごとのデータ取得（Lot2）
-  useDailyDataEffect(
-    "LicensePlate",
-    "rainbow-line-parking-lot-2-gate",
-    type,
-    comparePeriod,
-    setDailyDataLot2Compare,
-  );
-
-  const processRows = (rows: AggregatedData[]): RainbowLineAggregatedData[] => {
+  function processRows(rows: AggregatedData[]): RainbowLineAggregatedData[] {
     return (rows as AggregatedData[]).map((row) => {
       const filteredRow = {} as RainbowLineAggregatedData;
       // フィルターにマッチするカラムのみを抽出
@@ -220,7 +188,7 @@ function App() {
       // 他に必要なカラムのデータを反映
       return compansateProcessedData(filteredRow, row as unknown as RainbowLineAggregatedData);
     });
-  };
+  }
 
   useEffect(() => {
     const baseRows = dataLot1.reduce<AggregatedData[]>(
@@ -231,19 +199,10 @@ function App() {
 
     if (type === "hour") {
       setProcessedDataLot1(processRows(baseRows));
-      setProcessedDailyDataLot1(processRows(dailyDataLot1));
     } else {
       setProcessedDataLot1(processRows(baseRows));
     }
-  }, [dataLot1, dailyDataLot1, type, judge]);
-
-  useEffect(() => {
-    if (type === "hour") {
-      setProcessedDailyDataLot1Compare(processRows(dailyDataLot1Compare));
-    } else {
-      setProcessedDailyDataLot1Compare([]);
-    }
-  }, [dailyDataLot1Compare, type, judge]);
+  }, [dataLot1, type, judge]);
 
   useEffect(() => {
     const baseRows = dataLot2.reduce<AggregatedData[]>(
@@ -254,19 +213,10 @@ function App() {
 
     if (type === "hour") {
       setProcessedDataLot2(processRows(baseRows));
-      setProcessedDailyDataLot2(processRows(dailyDataLot2));
     } else {
       setProcessedDataLot2(processRows(baseRows));
     }
-  }, [dataLot2, dailyDataLot2, type, judge]);
-
-  useEffect(() => {
-    if (type === "hour") {
-      setProcessedDailyDataLot2Compare(processRows(dailyDataLot2Compare));
-    } else {
-      setProcessedDailyDataLot2Compare([]);
-    }
-  }, [dailyDataLot2Compare, type, judge]);
+  }, [dataLot2, type, judge]);
 
   return (
     <div className="flex flex-col w-full h-[100dvh] p-4 overflow-hidden">
