@@ -1,11 +1,11 @@
 import {
   DownloadCSVButton,
+  Graph,
   MonthRangePicker,
   RangeSelector,
 } from "@fukui-kanko/shared/components/parts";
 import { AggregatedData, GRAPH_VIEW_TYPES, Period } from "@fukui-kanko/shared/types";
-import { cn } from "@fukui-kanko/shared/utils";
-import { Graph } from "./rainbow-line-line-chart";
+import { aggregateHourly, cn } from "@fukui-kanko/shared/utils";
 import RainbowLineStackedBarChart from "./rainbow-line-stacked-bar-chart";
 import { RainbowLinePieChart } from "./rainbowe-line-pie-chart";
 
@@ -105,7 +105,7 @@ export function RainbowLineChartPanel({
         <div className="grid grid-cols-2 gap-y-4 w-full min-w-full grow pt-4 overflow-auto max-h-full">
           {type === "hour" ? (
             <Graph
-              data={dailyData}
+              data={aggregateHourly(dailyData)}
               type={type}
               className="col-span-2 min-h-[calc(100dvh-500px)] h-full"
             />
