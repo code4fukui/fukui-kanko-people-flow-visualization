@@ -43,13 +43,9 @@ function App() {
   const [dataLot1, setDataLot1] = useState<AggregatedData[]>([]);
   const [dailyDataLot1, setDailyDataLot1] = useState<AggregatedData[]>([]);
   const [dataLot2, setDataLot2] = useState<AggregatedData[]>([]);
-  // const [dailyDataLot2, setDailyDataLot2] = useState<AggregatedData[]>([]);
+  const [dailyDataLot2, setDailyDataLot2] = useState<AggregatedData[]>([]);
   const [processedDataLot1, setProcessedDataLot1] = useState<RainbowLineAggregatedData[]>([]);
-  // const [processedDailyDataLot1, setProcessedDailyDataLot1] = useState<RainbowLineAggregatedData[]>(
-  //   [],
-  // );
   const [processedDataLot2, setProcessedDataLot2] = useState<RainbowLineAggregatedData[]>([]);
-  const [processedDailyDataLot2] = useState<RainbowLineAggregatedData[]>([]);
 
   // 本期間の状態
   const [period, setPeriod] = useState<Period>(createInitialPeriod());
@@ -103,6 +99,17 @@ function App() {
     });
   }, [type, dailyDataLot1, judge]);
 
+  const processedDailyDataLot2Memo = useMemo(() => {
+    if (type !== "hour") return [];
+    return dailyDataLot2.map((row) => {
+      const filteredRow = {} as RainbowLineAggregatedData;
+      Object.entries(row).forEach(([key, value]) => {
+        if (judge(key)) filteredRow[key] = value;
+      });
+      return compansateProcessedData(filteredRow, row as unknown as RainbowLineAggregatedData);
+    });
+  }, [type, dailyDataLot2, judge]);
+
   const getTargetData = useCallback(() => {
     if (filters["parkingLot"] === "all") {
       return [...processedDataLot1, ...processedDataLot2].reduce(
@@ -130,7 +137,7 @@ function App() {
 
   const getTargetDailyData = useCallback(() => {
     if (filters["parkingLot"] === "all") {
-      return [...processedDailyDataLot1Memo, ...processedDailyDataLot2].reduce(
+      return [...processedDailyDataLot1Memo, ...processedDailyDataLot2Memo].reduce(
         (result, current, index, parent) =>
           reducePlacement(
             filters["parkingLot"] as
@@ -146,12 +153,12 @@ function App() {
         [`${filters["parkingLot"]} total count`]: row["total count"],
       }));
     } else {
-      return processedDailyDataLot2.map((row) => ({
+      return processedDailyDataLot2Memo.map((row) => ({
         ...row,
         [`${filters["parkingLot"]} total count`]: row["total count"],
       }));
     }
-  }, [filters, processedDailyDataLot1Memo, processedDailyDataLot2]);
+  }, [filters, processedDailyDataLot1Memo, processedDailyDataLot2Memo]);
 
   useInitialization(() => {
     getRawData({
@@ -173,24 +180,35 @@ function App() {
     let isCurrent = true;
     const fetchData = async () => {
       if (period.startDate && period.endDate) {
-        const results: AggregatedData[] = [];
+        const resultsLot1: AggregatedData[] = [];
+        const resultsLot2: AggregatedData[] = [];
         const current = new Date(period.startDate);
         const end = new Date(period.endDate);
 
         while (current <= end) {
           // 1時間ごとに取得
-          const rawData = await getRawData({
-            placement: "rainbow-line-parking-lot-1-gate",
-            objectClass: "LicensePlate",
-            aggregateRange: "daily", // 1時間毎のデータはdailyに含まれています
-            date: new Date(current),
-          });
-          results.push(...rawData);
+          const [rawLot1, rawLot2] = await Promise.all([
+            getRawData({
+              placement: "rainbow-line-parking-lot-1-gate",
+              objectClass: "LicensePlate",
+              aggregateRange: "daily", // 1時間毎のデータはdailyに含まれています
+              date: new Date(current),
+            }),
+            getRawData({
+              placement: "rainbow-line-parking-lot-2-gate",
+              objectClass: "LicensePlate",
+              aggregateRange: "daily",
+              date: new Date(current),
+            }),
+          ]);
+          resultsLot1.push(...rawLot1);
+          resultsLot2.push(...rawLot2);
           current.setDate(current.getDate() + 1);
         }
 
         if (isCurrent) {
-          setDailyDataLot1(results);
+          setDailyDataLot1(resultsLot1);
+          setDailyDataLot2(resultsLot2);
         }
       }
     };
