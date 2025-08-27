@@ -64,8 +64,13 @@ function aggregateDaily(
       focusedAttribute === "placement" ? RAINBOW_LINE_LOTS : ATTRIBUTES[focusedAttribute];
     Object.keys(list).forEach((listitem) => {
       data[list[listitem as keyof typeof list]] = Object.keys(row)
-        // TODO: 厳密でないフィルタなので、もっと壊れづらいものを考える
-        .filter((key) => key.startsWith(listitem) || key.endsWith(listitem))
+        .filter((key) =>
+          focusedAttribute === "placement"
+            ? key.startsWith(listitem) || key.endsWith(listitem)
+            : focusedAttribute === "prefectures"
+              ? key.startsWith(listitem)
+              : key.endsWith(listitem),
+        )
         .map((key) => Number(row[key]))
         .reduce((sum, current) => (sum += Number(current)), 0);
     });

@@ -78,7 +78,11 @@ export function RainbowLinePieChart({
     Object.keys(list)
       .map((listitem) => ({
         [`${listitem}`]: Object.keys(row)
-          .filter((key) => key.startsWith(listitem) || key.endsWith(listitem))
+          .filter(
+            (key) =>
+              (focusedAttribute === "prefectures" && key.startsWith(listitem)) ||
+              (focusedAttribute === "carCategories" && key.endsWith(listitem)),
+          )
           .map((key) => Number(row[key]))
           .reduce((sum, current) => sum + current, 0),
       }))
