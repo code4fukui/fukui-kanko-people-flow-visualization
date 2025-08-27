@@ -35,17 +35,7 @@ const CustomizedLabel = (props: {
     <g>
       <text
         x={x}
-        y={y - 10}
-        fill="white"
-        textAnchor="middle"
-        dominantBaseline="central"
-        className="font-bold drop-shadow"
-      >
-        {props.percent > 0.05 ? `${(props.percent * 100).toFixed(1)}%` : undefined}
-      </text>
-      <text
-        x={x}
-        y={y + 10}
+        y={y - 8}
         fill="white"
         textAnchor="middle"
         dominantBaseline="central"
@@ -56,6 +46,16 @@ const CustomizedLabel = (props: {
             props.name as keyof (typeof ATTRIBUTES)[ObjectClassAttribute]
           ]
         }
+      </text>
+      <text
+        x={x}
+        y={y + 8}
+        fill="white"
+        textAnchor="middle"
+        dominantBaseline="central"
+        className="font-bold drop-shadow"
+      >
+        {props.percent > 0.05 ? `${(props.percent * 100).toFixed(1)}%` : undefined}
       </text>
     </g>
   ) : undefined;
