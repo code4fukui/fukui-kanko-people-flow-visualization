@@ -16,7 +16,7 @@ import {
   PLACEMENTS,
 } from "@fukui-kanko/shared/types";
 import * as holidayJP from "@holiday-jp/holiday_jp";
-import { Bar, BarChart, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 /**
  * 指定した期間内のデータを日単位で集計（曜日・祝日名付き）
@@ -134,6 +134,7 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
   return (
     <ChartContainer config={chartConfig} className={cn("h-full w-full", className)}>
       <BarChart data={chartData} margin={{ top: 10, right: 40, left: 20, bottom: 10 }}>
+        <CartesianGrid vertical={false} />
         {(focusedAttribute === "placement"
           ? Object.values(RAINBOW_LINE_LOTS)
           : Object.values(ATTRIBUTES[focusedAttribute])
