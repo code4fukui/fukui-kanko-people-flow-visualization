@@ -44,6 +44,16 @@ export function RainbowLineChartPanel({
             : period.endDate || new Date(0))
     );
   });
+  // console.log({ data });
+
+  // const { data: aggregated, daily: aggregatedHourlyData } = getFilteredData(
+  //   type,
+  //   period,
+  //   data,
+  //   dailyData,
+  // );
+  // const statsData: AggregatedData[] =
+  //   type === "hour" ? (aggregatedHourlyData ?? []) : (aggregated ?? []);
 
   return (
     <div
@@ -119,7 +129,7 @@ export function RainbowLineChartPanel({
             />
           )}
           <div className="col-span-2">
-            <StatsSummary type={type} data={dataInRange} />
+            <StatsSummary type={type} data={dataInRange} placement={"rainbow-line-parking-lot"} />
           </div>
           <h3 className="w-full h-10 col-span-2 text-xl text-center font-bold">車両分類別</h3>
           <RainbowLineStackedBarChart

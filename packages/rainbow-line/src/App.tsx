@@ -44,7 +44,9 @@ function App() {
   const [dataLot1, setDataLot1] = useState<AggregatedData[]>([]);
   const [dataLot2, setDataLot2] = useState<AggregatedData[]>([]);
   const [processedDataLot1, setProcessedDataLot1] = useState<RainbowLineAggregatedData[]>([]);
+  // console.log({ processedDataLot1 });
   const [processedDataLot2, setProcessedDataLot2] = useState<RainbowLineAggregatedData[]>([]);
+  // console.log({ processedDataLot2 });
 
   // 本期間の状態
   const [period, setPeriod] = useState<Period>(createInitialPeriod());
@@ -72,6 +74,10 @@ function App() {
       },
       {} as Record<string, number>,
     ),
+    weekendDays: raw["weekendDays"],
+    weekendTotal: raw["weekendTotal"],
+    weekdayDays: raw["weekdayDays"],
+    weekdayTotal: raw["weekdayTotal"],
   });
 
   // フィルター（カラム名からフィルターにマッチするかどうかを判別する関数）
@@ -94,7 +100,7 @@ function App() {
     (lot1: RainbowLineAggregatedData[], lot2: RainbowLineAggregatedData[]) => {
       const selected = filters["parkingLot"];
       if (selected === "all") {
-        return [...lot1, ...lot2].reduce(
+        const reduced = [...lot1, ...lot2].reduce(
           (result, current, index, parent) =>
             reducePlacement(
               selected as
@@ -103,7 +109,14 @@ function App() {
               [result as AggregatedData[], current, index, parent],
             ),
           [] as RainbowLineAggregatedData[],
-        );
+        ) as RainbowLineAggregatedData[];
+
+        // 非加算項目（休日数/平日数/期間情報）を補正
+        return reduced.map((row, i) => ({
+          ...row,
+          weekendDays: lot1[i]?.["weekendDays"] ?? lot2[i]?.["weekendDays"],
+          weekdayDays: lot1[i]?.["weekdayDays"] ?? lot2[i]?.["weekdayDays"],
+        }));
       }
       if (selected === "rainbow-line-parking-lot-1-gate") {
         return lot1.map((row) => ({
