@@ -106,20 +106,24 @@ export function RainbowLineChartPanel({
             type={type}
             className="col-span-2 min-h-[calc(100dvh-500px)] h-full"
           />
-          <h3 className="w-full h-10 col-span-2 text-xl text-center font-bold">車両分類別</h3>
-          <RainbowLineStackedBarChart
-            data={dataInRange}
-            focusedAttribute="carCategories"
-            type={"day"}
-          />
-          <RainbowLinePieChart data={dataInRange} focusedAttribute="carCategories" />
-          <h3 className="w-full h-10 text-xl col-span-2 text-center font-bold">都道府県別</h3>
+          <h3 className="w-full h-10 text-xl col-span-2 mt-8 pt-2 border-t-2 border-gray-100 text-center font-bold">
+            都道府県別
+          </h3>
           <RainbowLineStackedBarChart
             data={dataInRange}
             focusedAttribute="prefectures"
             type={"day"}
           />
           <RainbowLinePieChart data={dataInRange} focusedAttribute="prefectures" />
+          <h3 className="w-full h-10 col-span-2 text-xl mt-8 pt-2 border-t-2 border-gray-100 text-center font-bold">
+            車両分類別
+          </h3>
+          <RainbowLineStackedBarChart
+            data={dataInRange}
+            focusedAttribute="carCategories"
+            type={"day"}
+          />
+          <RainbowLinePieChart data={dataInRange} focusedAttribute="carCategories" />
         </div>
       )}
     </div>
