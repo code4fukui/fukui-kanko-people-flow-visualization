@@ -99,7 +99,12 @@ export function RainbowLineChartPanel({
           <p className="text-lg">表示したい期間を設定してください。</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-y-4 w-full min-w-full grow pt-4 overflow-auto max-h-full">
+        <div
+          className={cn(
+            "gap-y-4 w-full min-w-full grow pt-4 overflow-auto max-h-full",
+            isCompareMode ? "flex flex-col" : "grid grid-cols-2",
+          )}
+        >
           <RainbowLineStackedBarChart
             data={dataInRange}
             focusedAttribute="placement"
