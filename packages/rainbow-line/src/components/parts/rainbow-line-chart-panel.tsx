@@ -17,6 +17,7 @@ export function RainbowLineChartPanel({
   isCompareMode,
   data,
   dailyData,
+  statsDataMonthWeek,
   className,
 }: {
   type: keyof typeof GRAPH_VIEW_TYPES;
@@ -25,6 +26,7 @@ export function RainbowLineChartPanel({
   isCompareMode: boolean;
   data: AggregatedData[];
   dailyData: AggregatedData[];
+  statsDataMonthWeek: AggregatedData[];
   className?: string;
 }) {
   const dataInRange = data.filter((row) => {
@@ -46,7 +48,7 @@ export function RainbowLineChartPanel({
   });
 
   // 「hour」「day」の時のみ利用する統計値用データ
-  const statsData: AggregatedData[] =
+  const statsDataHourDay: AggregatedData[] =
     type === "hour"
       ? (aggregateHourly(dailyData) ?? [])
       : type === "day" && period.startDate && period.endDate
@@ -129,8 +131,7 @@ export function RainbowLineChartPanel({
           <div className="col-span-2">
             <StatsSummary
               type={type}
-              data={type === "day" || type === "hour" ? statsData : dataInRange}
-              placement={"rainbow-line-parking-lot"}
+              data={type === "hour" || type === "day" ? statsDataHourDay : statsDataMonthWeek}
             />
           </div>
           <h3 className="w-full h-10 col-span-2 text-xl text-center font-bold">車両分類別</h3>

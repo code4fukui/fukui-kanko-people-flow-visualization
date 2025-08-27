@@ -14,13 +14,38 @@ function filterByRange(data: AggregatedData[], from: Date, to: Date) {
 /**
  * 指定した期間内のデータを月単位で集計
  */
-export function aggregateMonthly(data: AggregatedData[], start: Date, end: Date): AggregatedData[] {
+export function aggregateMonthly(
+  data: AggregatedData[],
+  start: Date,
+  end: Date,
+  judge?: (key: string) => boolean,
+): AggregatedData[] {
   // 12月の場合のみ開始日を12月20日に変更
   let actualStart = start;
   if (start.getMonth() === 11) {
     actualStart = new Date(start.getFullYear(), 11, 20);
   }
-  const filtered = filterByRange(data, actualStart, end);
+  let filtered = filterByRange(data, actualStart, end);
+
+  if (judge) {
+    filtered = filtered.map((row) => {
+      const filteredRow: AggregatedData = {
+        placement: row.placement,
+        "object class": row["object class"],
+        "aggregate to": row["aggregate to"],
+        [AGGREGATE_FROM_KEY]: row[AGGREGATE_FROM_KEY],
+        [TOTAL_COUNT_KEY]: row[TOTAL_COUNT_KEY],
+      };
+      Object.entries(row).forEach(([key, value]) => {
+        if (judge(key)) filteredRow[key] = value;
+      });
+      filteredRow[TOTAL_COUNT_KEY] = Object.entries(filteredRow)
+        .filter(([key]) => judge(key))
+        .reduce((sum, [, v]) => sum + Number(v), 0);
+      return filteredRow;
+    });
+  }
+
   const monthlyMap = new Map<
     string,
     AggregatedData & {
@@ -40,6 +65,7 @@ export function aggregateMonthly(data: AggregatedData[], start: Date, end: Date)
     if (!monthlyMap.has(monthKey)) {
       monthlyMap.set(monthKey, {
         ...row,
+        "aggregate from": monthKey,
         aggregateFrom: monthKey,
         aggregateTo: monthKey,
         totalCount: Number(row[TOTAL_COUNT_KEY]),
