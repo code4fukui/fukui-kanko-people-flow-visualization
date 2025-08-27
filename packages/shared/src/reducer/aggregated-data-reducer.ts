@@ -1,4 +1,3 @@
-import HolidayJp from "@holiday-jp/holiday_jp";
 import { AggregatedData, GRAPH_VIEW_TYPES, KEYOF_AGGREGATED_DATA_BASE, Placement } from "../types";
 import { getDateTimeString } from "../utils";
 
@@ -59,18 +58,6 @@ export const reducePlacement: (
   return result;
 };
 
-const isHolidayDate = (date: Date): boolean => {
-  const day = date.getDay();
-  // 土日または祝日
-  return day === 0 || day === 6 || HolidayJp.isHoliday(date);
-};
-
-const isWeekdayDate = (date: Date): boolean => {
-  // 平日: 月〜金 かつ祝日でない
-  const day = date.getDay();
-  return day >= 1 && day <= 5 && !HolidayJp.isHoliday(date);
-};
-
 export const reduceAggregateRange: (
   graphViewType: keyof typeof GRAPH_VIEW_TYPES,
   props: Parameters<Parameters<typeof Array.prototype.reduce<AggregatedData[]>>[0]>,
@@ -105,9 +92,6 @@ export const reduceAggregateRange: (
     aggregateRange.to.setMonth(aggregateRange.from.getMonth() + 1);
   }
 
-  const isHoliday = isHolidayDate(new Date(current["aggregate from"]));
-  const isWeekday = isWeekdayDate(new Date(current["aggregate from"]));
-
   // すでに同じ集計期間のデータがある場合は合計を計算
   const index = result.findIndex(
     (row) =>
@@ -117,33 +101,18 @@ export const reduceAggregateRange: (
   if (index !== -1) {
     result[index] = Object.keys(result[index]).reduce((newData, key) => {
       if (key === "placement" || key === "object class") {
+        // 数値データでないものはそのまま反映
         newData[key as keyof AggregatedData] = current[key as keyof AggregatedData];
       } else if (key === "aggregate from") {
         newData[key as keyof AggregatedData] = getDateTimeString(aggregateRange.from);
       } else if (key === "aggregate to") {
         newData[key as keyof AggregatedData] = getDateTimeString(aggregateRange.to);
-      } else if (
-        key === "weekendDays" ||
-        key === "weekendTotal" ||
-        key === "weekdayDays" ||
-        key === "weekdayTotal"
-      ) {
-        newData[key as keyof AggregatedData] = result[index][key as keyof AggregatedData];
       } else {
+        // 数値データは合計を計算
         newData[key] = Number(result[index][key] ?? 0) + Number(current[key] ?? 0);
       }
       return newData;
     }, {} as AggregatedData);
-
-    result[index]["weekendDays"] = Number(result[index]["weekendDays"] ?? 0) + (isHoliday ? 1 : 0);
-    result[index]["weekendTotal"] =
-      Number(result[index]["weekendTotal"] ?? 0) +
-      (isHoliday ? Number(current["total count"] ?? 0) : 0);
-
-    result[index]["weekdayDays"] = Number(result[index]["weekdayDays"] ?? 0) + (isWeekday ? 1 : 0);
-    result[index]["weekdayTotal"] =
-      Number(result[index]["weekdayTotal"] ?? 0) +
-      (isWeekday ? Number(current["total count"] ?? 0) : 0);
   } else {
     result.push({
       ...Object.entries(current).reduce((newData, [key, value]) => {
@@ -156,10 +125,6 @@ export const reduceAggregateRange: (
       placement: current.placement,
       "object class": current["object class"],
       "total count": Number(current["total count"]),
-      weekendDays: isHoliday ? 1 : 0,
-      weekendTotal: isHoliday ? Number(current["total count"] ?? 0) : 0,
-      weekdayDays: isWeekday ? 1 : 0,
-      weekdayTotal: isWeekday ? Number(current["total count"] ?? 0) : 0,
     });
   }
   return result;

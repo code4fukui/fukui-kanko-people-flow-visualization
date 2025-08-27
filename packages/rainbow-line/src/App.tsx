@@ -75,10 +75,6 @@ function App() {
       },
       {} as Record<string, number>,
     ),
-    weekendDays: raw["weekendDays"],
-    weekendTotal: raw["weekendTotal"],
-    weekdayDays: raw["weekdayDays"],
-    weekdayTotal: raw["weekdayTotal"],
   });
 
   // フィルター（カラム名からフィルターにマッチするかどうかを判別する関数）
