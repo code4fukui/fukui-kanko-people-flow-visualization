@@ -48,6 +48,8 @@ function App() {
   const [processedDataLot2, setProcessedDataLot2] = useState<RainbowLineAggregatedData[]>([]);
   const [filteredDataLot1, setFilteredDataLot1] = useState<AggregatedData[]>([]);
   const [filteredDataLot2, setFilteredDataLot2] = useState<AggregatedData[]>([]);
+  const [filteredDataLot1Compare, setFilteredDataLot1Compare] = useState<AggregatedData[]>([]);
+  const [filteredDataLot2Compare, setFilteredDataLot2Compare] = useState<AggregatedData[]>([]);
 
   // 本期間の状態
   const [period, setPeriod] = useState<Period>(createInitialPeriod());
@@ -115,6 +117,33 @@ function App() {
     setFilteredDataLot1(filtered1);
     setFilteredDataLot2(filtered2);
   }, [dataLot1, dataLot2, period, type, judge]);
+
+  // 比較期間の統計値用データ
+  useEffect(() => {
+    let filtered1: AggregatedData[] = [];
+    let filtered2: AggregatedData[] = [];
+
+    if (type === "month") {
+      const end = comparePeriod.endMonth
+        ? new Date(comparePeriod.endMonth.getFullYear(), comparePeriod.endMonth.getMonth() + 1, 0)
+        : undefined;
+      filtered1 =
+        comparePeriod.startMonth && end
+          ? aggregateMonthly(dataLot1, comparePeriod.startMonth, end, judge)
+          : [];
+      filtered2 =
+        comparePeriod.startMonth && end
+          ? aggregateMonthly(dataLot2, comparePeriod.startMonth, end, judge)
+          : [];
+    } else if (type === "week") {
+      const start = comparePeriod.startWeekRange?.from;
+      const end = comparePeriod.endWeekRange?.to;
+      filtered1 = start && end ? aggregateMonthly(dataLot1, start, end, judge) : [];
+      filtered2 = start && end ? aggregateMonthly(dataLot2, start, end, judge) : [];
+    }
+    setFilteredDataLot1Compare(filtered1);
+    setFilteredDataLot2Compare(filtered2);
+  }, [dataLot1, dataLot2, comparePeriod, type, judge]);
 
   const aggregatedParkingLotData = useCallback(
     (lot1: RainbowLineAggregatedData[], lot2: RainbowLineAggregatedData[]) => {
@@ -194,6 +223,10 @@ function App() {
   const getTargetStatsData = useCallback(() => {
     return aggregatedParkingLotData(filteredDataLot1, filteredDataLot2);
   }, [aggregatedParkingLotData, filteredDataLot1, filteredDataLot2]);
+
+  const getTargetStatsDataCompare = useCallback(() => {
+    return aggregatedParkingLotData(filteredDataLot1Compare, filteredDataLot2Compare);
+  }, [aggregatedParkingLotData, filteredDataLot1Compare, filteredDataLot2Compare]);
 
   const targetData = useMemo(() => getTargetData(), [getTargetData]);
   const targetDailyData = useMemo(() => getTargetDailyData(false), [getTargetDailyData]);
@@ -287,7 +320,7 @@ function App() {
             setPeriod={setComparePeriod}
             data={getTargetData() as AggregatedData[]}
             dailyData={getTargetDailyData(true) as AggregatedData[]}
-            statsDataMonthWeek={getTargetStatsData() as AggregatedData[]}
+            statsDataMonthWeek={getTargetStatsDataCompare() as AggregatedData[]}
           />
         )}
       </div>
