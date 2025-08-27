@@ -6,7 +6,7 @@ import {
   StatsSummary,
 } from "@fukui-kanko/shared/components/parts";
 import { AggregatedData, GRAPH_VIEW_TYPES, Period } from "@fukui-kanko/shared/types";
-import { aggregateHourly, cn } from "@fukui-kanko/shared/utils";
+import { aggregateDaily, aggregateHourly, cn } from "@fukui-kanko/shared/utils";
 import RainbowLineStackedBarChart from "./rainbow-line-stacked-bar-chart";
 import { RainbowLinePieChart } from "./rainbowe-line-pie-chart";
 
@@ -44,16 +44,14 @@ export function RainbowLineChartPanel({
             : period.endDate || new Date(0))
     );
   });
-  // console.log({ data });
 
-  // const { data: aggregated, daily: aggregatedHourlyData } = getFilteredData(
-  //   type,
-  //   period,
-  //   data,
-  //   dailyData,
-  // );
-  // const statsData: AggregatedData[] =
-  //   type === "hour" ? (aggregatedHourlyData ?? []) : (aggregated ?? []);
+  // 「hour」「day」の時のみ利用する統計値用データ
+  const statsData: AggregatedData[] =
+    type === "hour"
+      ? (aggregateHourly(dailyData) ?? [])
+      : type === "day" && period.startDate && period.endDate
+        ? (aggregateDaily(data, period.startDate, period.endDate) ?? [])
+        : [];
 
   return (
     <div
@@ -129,7 +127,11 @@ export function RainbowLineChartPanel({
             />
           )}
           <div className="col-span-2">
-            <StatsSummary type={type} data={dataInRange} placement={"rainbow-line-parking-lot"} />
+            <StatsSummary
+              type={type}
+              data={type === "day" || type === "hour" ? statsData : dataInRange}
+              placement={"rainbow-line-parking-lot"}
+            />
           </div>
           <h3 className="w-full h-10 col-span-2 text-xl text-center font-bold">車両分類別</h3>
           <RainbowLineStackedBarChart

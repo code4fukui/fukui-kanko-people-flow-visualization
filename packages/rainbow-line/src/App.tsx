@@ -44,9 +44,7 @@ function App() {
   const [dataLot1, setDataLot1] = useState<AggregatedData[]>([]);
   const [dataLot2, setDataLot2] = useState<AggregatedData[]>([]);
   const [processedDataLot1, setProcessedDataLot1] = useState<RainbowLineAggregatedData[]>([]);
-  // console.log({ processedDataLot1 });
   const [processedDataLot2, setProcessedDataLot2] = useState<RainbowLineAggregatedData[]>([]);
-  // console.log({ processedDataLot2 });
 
   // 本期間の状態
   const [period, setPeriod] = useState<Period>(createInitialPeriod());
