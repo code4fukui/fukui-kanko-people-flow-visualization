@@ -11,6 +11,23 @@ function filterByRange(data: AggregatedData[], from: Date, to: Date) {
   });
 }
 
+function filterRowByJudge(row: AggregatedData, judge: (key: string) => boolean): AggregatedData {
+  const filteredRow: AggregatedData = {
+    placement: row.placement,
+    "object class": row["object class"],
+    "aggregate to": row["aggregate to"],
+    [AGGREGATE_FROM_KEY]: row[AGGREGATE_FROM_KEY],
+    [TOTAL_COUNT_KEY]: row[TOTAL_COUNT_KEY],
+  };
+  Object.entries(row).forEach(([key, value]) => {
+    if (judge(key)) filteredRow[key] = value;
+  });
+  filteredRow[TOTAL_COUNT_KEY] = Object.entries(filteredRow)
+    .filter(([key]) => judge(key))
+    .reduce((sum, [, v]) => sum + Number(v), 0);
+  return filteredRow;
+}
+
 /**
  * 指定した期間内のデータを月単位で集計
  */
@@ -28,22 +45,7 @@ export function aggregateMonthly(
   let filtered = filterByRange(data, actualStart, end);
 
   if (judge) {
-    filtered = filtered.map((row) => {
-      const filteredRow: AggregatedData = {
-        placement: row.placement,
-        "object class": row["object class"],
-        "aggregate to": row["aggregate to"],
-        [AGGREGATE_FROM_KEY]: row[AGGREGATE_FROM_KEY],
-        [TOTAL_COUNT_KEY]: row[TOTAL_COUNT_KEY],
-      };
-      Object.entries(row).forEach(([key, value]) => {
-        if (judge(key)) filteredRow[key] = value;
-      });
-      filteredRow[TOTAL_COUNT_KEY] = Object.entries(filteredRow)
-        .filter(([key]) => judge(key))
-        .reduce((sum, [, v]) => sum + Number(v), 0);
-      return filteredRow;
-    });
+    filtered = filtered.map((row) => filterRowByJudge(row, judge));
   }
 
   const monthlyMap = new Map<
@@ -120,22 +122,7 @@ export function aggregateWeekly(
   }
 
   if (judge) {
-    filtered = filtered.map((row) => {
-      const filteredRow: AggregatedData = {
-        placement: row.placement,
-        "object class": row["object class"],
-        "aggregate to": row["aggregate to"],
-        [AGGREGATE_FROM_KEY]: row[AGGREGATE_FROM_KEY],
-        [TOTAL_COUNT_KEY]: row[TOTAL_COUNT_KEY],
-      };
-      Object.entries(row).forEach(([key, value]) => {
-        if (judge(key)) filteredRow[key] = value;
-      });
-      filteredRow[TOTAL_COUNT_KEY] = Object.entries(filteredRow)
-        .filter(([key]) => judge(key))
-        .reduce((sum, [, v]) => sum + Number(v), 0);
-      return filteredRow;
-    });
+    filtered = filtered.map((row) => filterRowByJudge(row, judge));
   }
 
   const weeklyAggregated: AggregatedData[] = [];
