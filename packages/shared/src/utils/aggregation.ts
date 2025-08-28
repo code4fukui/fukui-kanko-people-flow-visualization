@@ -98,59 +98,100 @@ export function aggregateWeekly(
   data: AggregatedData[],
   startWeekRange: { from: Date; to: Date },
   endWeekRange: { from: Date; to: Date },
+  judge?: (key: string) => boolean,
 ): AggregatedData[] {
-  const filtered = filterByRange(data, startWeekRange.from, endWeekRange.to);
+  let filtered = filterByRange(data, startWeekRange.from, endWeekRange.to);
+  filtered = filtered
+    .filter((row) => row[AGGREGATE_FROM_KEY])
+    .sort(
+      (a, b) =>
+        new Date(a[AGGREGATE_FROM_KEY]).getTime() - new Date(b[AGGREGATE_FROM_KEY]).getTime(),
+    );
+
+  {
+    const seen = new Set<string>();
+    filtered = filtered.filter((row) => {
+      const d = new Date(row[AGGREGATE_FROM_KEY]);
+      const key = formatDate(d, "-"); // YYYY-MM-DD
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  if (judge) {
+    filtered = filtered.map((row) => {
+      const filteredRow: AggregatedData = {
+        placement: row.placement,
+        "object class": row["object class"],
+        "aggregate to": row["aggregate to"],
+        [AGGREGATE_FROM_KEY]: row[AGGREGATE_FROM_KEY],
+        [TOTAL_COUNT_KEY]: row[TOTAL_COUNT_KEY],
+      };
+      Object.entries(row).forEach(([key, value]) => {
+        if (judge(key)) filteredRow[key] = value;
+      });
+      filteredRow[TOTAL_COUNT_KEY] = Object.entries(filteredRow)
+        .filter(([key]) => judge(key))
+        .reduce((sum, [, v]) => sum + Number(v), 0);
+      return filteredRow;
+    });
+  }
 
   const weeklyAggregated: AggregatedData[] = [];
-  let i = 0;
-  let isFirstWeek = true;
-  while (i < filtered.length) {
-    let weekRows: AggregatedData[] = [];
-    if (isFirstWeek) {
-      // 最初の週だけ他の週と範囲が異なる場合があるためfilterで抽出(例：2024/10/17からの週)
-      weekRows = filtered.filter((row) => {
-        const d = new Date(row[AGGREGATE_FROM_KEY]);
-        return d >= startWeekRange.from && d <= startWeekRange.to;
-      });
-      // 件数分インデックスを進める
-      i += weekRows.length;
-      isFirstWeek = false;
-    } else {
-      // 以降は7日ごと
-      weekRows = filtered.slice(i, i + 7);
-      i += 7;
-    }
-    if (weekRows.length === 0) continue;
-    const total = weekRows.reduce((sum, row) => sum + Number(row[TOTAL_COUNT_KEY]), 0);
-    let weekdayTotal = 0;
-    let weekendTotal = 0;
-    let weekdayDays = 0;
-    let weekendDays = 0;
-    weekRows.forEach((row) => {
-      const date = new Date(row[AGGREGATE_FROM_KEY]);
-      const dayOfWeek = date.getDay();
-      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-      const isHoliday = holidayJP.isHoliday(date);
-      const isWeekendOrHoliday = isWeekend || isHoliday;
-      if (isWeekendOrHoliday) {
-        weekendTotal += Number(row[TOTAL_COUNT_KEY]);
-        weekendDays += 1;
-      } else {
-        weekdayTotal += Number(row[TOTAL_COUNT_KEY]);
-        weekdayDays += 1;
-      }
+  let weekStart = new Date(startWeekRange.from);
+  let weekEnd = new Date(startWeekRange.to);
+  weekStart.setHours(0, 0, 0, 0);
+  weekEnd.setHours(0, 0, 0, 0);
+
+  while (weekStart.getTime() <= endWeekRange.to.getTime()) {
+    const weekRows: AggregatedData[] = filtered.filter((row) => {
+      const d = new Date(row[AGGREGATE_FROM_KEY]);
+      return d >= weekStart && d <= weekEnd;
     });
 
-    weeklyAggregated.push({
-      ...weekRows[0],
-      aggregateFrom: `${formatDate(new Date(weekRows[0][AGGREGATE_FROM_KEY]), "-")}週`,
-      aggregateTo: `${formatDate(new Date(weekRows[weekRows.length - 1][AGGREGATE_FROM_KEY]), "-")}`,
-      totalCount: total,
-      weekdayTotal,
-      weekendTotal,
-      weekdayDays,
-      weekendDays,
-    });
+    if (weekRows.length > 0) {
+      const total = weekRows.reduce((sum, row) => sum + Number(row[TOTAL_COUNT_KEY]), 0);
+      let weekdayTotal = 0;
+      let weekendTotal = 0;
+      let weekdayDays = 0;
+      let weekendDays = 0;
+      weekRows.forEach((row) => {
+        const date = new Date(row[AGGREGATE_FROM_KEY]);
+        const dayOfWeek = date.getDay();
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        const isHoliday = holidayJP.isHoliday(date);
+        const isWeekendOrHoliday = isWeekend || isHoliday;
+        if (isWeekendOrHoliday) {
+          weekendTotal += Number(row[TOTAL_COUNT_KEY]);
+          weekendDays += 1;
+        } else {
+          weekdayTotal += Number(row[TOTAL_COUNT_KEY]);
+          weekdayDays += 1;
+        }
+      });
+
+      weeklyAggregated.push({
+        ...weekRows[0],
+        aggregateFrom: `${formatDate(new Date(weekRows[0][AGGREGATE_FROM_KEY]), "-")}週`,
+        aggregateTo: `${formatDate(new Date(weekRows[weekRows.length - 1][AGGREGATE_FROM_KEY]), "-")}`,
+        totalCount: total,
+        weekdayTotal,
+        weekendTotal,
+        weekdayDays,
+        weekendDays,
+      });
+    }
+    // 次の週へ（前週の to の翌日を from にする）
+    const nextStart = new Date(weekEnd);
+    nextStart.setDate(nextStart.getDate() + 1);
+    nextStart.setHours(0, 0, 0, 0);
+    weekStart = nextStart;
+
+    const nextEnd = new Date(weekStart);
+    nextEnd.setDate(nextEnd.getDate() + 6);
+    nextEnd.setHours(0, 0, 0, 0);
+    weekEnd = nextEnd.getTime() > endWeekRange.to.getTime() ? new Date(endWeekRange.to) : nextEnd;
   }
   return weeklyAggregated;
 }

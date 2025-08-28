@@ -3,6 +3,7 @@ import {
   AggregatedData,
   AggregatedDataBase,
   aggregateMonthly,
+  aggregateWeekly,
   CAR_CATEGORIES,
   createInitialPeriod,
   getRawData,
@@ -109,10 +110,14 @@ function App() {
       filtered2 =
         period.startMonth && end ? aggregateMonthly(dataLot2, period.startMonth, end, judge) : [];
     } else if (type === "week") {
-      const start = period.startWeekRange?.from;
-      const end = period.endWeekRange?.to;
-      filtered1 = start && end ? aggregateMonthly(dataLot1, start, end, judge) : [];
-      filtered2 = start && end ? aggregateMonthly(dataLot2, start, end, judge) : [];
+      filtered1 =
+        period.startWeekRange && period.endWeekRange
+          ? aggregateWeekly(dataLot1, period.startWeekRange, period.endWeekRange, judge)
+          : [];
+      filtered2 =
+        period.startWeekRange && period.endWeekRange
+          ? aggregateWeekly(dataLot2, period.startWeekRange, period.endWeekRange, judge)
+          : [];
     }
     setFilteredDataLot1(filtered1);
     setFilteredDataLot2(filtered2);
@@ -136,10 +141,24 @@ function App() {
           ? aggregateMonthly(dataLot2, comparePeriod.startMonth, end, judge)
           : [];
     } else if (type === "week") {
-      const start = comparePeriod.startWeekRange?.from;
-      const end = comparePeriod.endWeekRange?.to;
-      filtered1 = start && end ? aggregateMonthly(dataLot1, start, end, judge) : [];
-      filtered2 = start && end ? aggregateMonthly(dataLot2, start, end, judge) : [];
+      filtered1 =
+        comparePeriod.startWeekRange && comparePeriod.endWeekRange
+          ? aggregateWeekly(
+              dataLot1,
+              comparePeriod.startWeekRange,
+              comparePeriod.endWeekRange,
+              judge,
+            )
+          : [];
+      filtered2 =
+        comparePeriod.startWeekRange && comparePeriod.endWeekRange
+          ? aggregateWeekly(
+              dataLot2,
+              comparePeriod.startWeekRange,
+              comparePeriod.endWeekRange,
+              judge,
+            )
+          : [];
     }
     setFilteredDataLot1Compare(filtered1);
     setFilteredDataLot2Compare(filtered2);
