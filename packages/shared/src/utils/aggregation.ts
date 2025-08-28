@@ -104,22 +104,12 @@ export function aggregateWeekly(
 ): AggregatedData[] {
   let filtered = filterByRange(data, startWeekRange.from, endWeekRange.to);
 
-  // 日付重複なしで日付順に並べる
-  const seen = new Set<string>();
   filtered = filtered
     .filter((row) => row[AGGREGATE_FROM_KEY])
     .sort(
       (a, b) =>
         new Date(a[AGGREGATE_FROM_KEY]).getTime() - new Date(b[AGGREGATE_FROM_KEY]).getTime(),
-    )
-    .reduce<AggregatedData[]>((acc, row) => {
-      const key = formatDate(new Date(row[AGGREGATE_FROM_KEY]), "-");
-      if (!seen.has(key)) {
-        seen.add(key);
-        acc.push(row);
-      }
-      return acc;
-    }, []);
+    );
 
   if (judge) {
     filtered = filtered.map((row) => filterRowByJudge(row, judge));

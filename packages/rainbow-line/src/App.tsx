@@ -239,10 +239,19 @@ function App() {
     () => aggregateParkingLotData(filteredDataLot1, filteredDataLot2),
     [aggregateParkingLotData, filteredDataLot1, filteredDataLot2],
   );
+  const targetStatsDenominatorCount = useMemo(
+    () => filteredDataLot1.length,
+    [filteredDataLot1.length],
+  );
 
   const targetStatsDataCompare = useMemo(
     () => aggregateParkingLotData(filteredDataLot1Compare, filteredDataLot2Compare),
     [aggregateParkingLotData, filteredDataLot1Compare, filteredDataLot2Compare],
+  );
+
+  const targetStatsDenominatorCountCompare = useMemo(
+    () => filteredDataLot1Compare.length,
+    [filteredDataLot1Compare.length],
   );
 
   const hasData = useMemo(
@@ -301,6 +310,7 @@ function App() {
             data={targetData as AggregatedData[]}
             dailyData={targetDailyData as AggregatedData[]}
             statsDataMonthWeek={targetStatsData as AggregatedData[]}
+            statsDenominatorCount={targetStatsDenominatorCount}
           />
         )}
         {compareMode && hasData && (
@@ -312,6 +322,7 @@ function App() {
             data={targetData as AggregatedData[]}
             dailyData={targetDailyDataCompare as AggregatedData[]}
             statsDataMonthWeek={targetStatsDataCompare as AggregatedData[]}
+            statsDenominatorCount={targetStatsDenominatorCountCompare}
           />
         )}
       </div>
