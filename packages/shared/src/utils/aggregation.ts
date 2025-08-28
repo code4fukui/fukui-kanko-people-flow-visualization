@@ -103,23 +103,23 @@ export function aggregateWeekly(
   judge?: (key: string) => boolean,
 ): AggregatedData[] {
   let filtered = filterByRange(data, startWeekRange.from, endWeekRange.to);
+
+  // 日付重複なしで日付順に並べる
+  const seen = new Set<string>();
   filtered = filtered
     .filter((row) => row[AGGREGATE_FROM_KEY])
     .sort(
       (a, b) =>
         new Date(a[AGGREGATE_FROM_KEY]).getTime() - new Date(b[AGGREGATE_FROM_KEY]).getTime(),
-    );
-
-  {
-    const seen = new Set<string>();
-    filtered = filtered.filter((row) => {
-      const d = new Date(row[AGGREGATE_FROM_KEY]);
-      const key = formatDate(d, "-"); // YYYY-MM-DD
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }
+    )
+    .reduce<AggregatedData[]>((acc, row) => {
+      const key = formatDate(new Date(row[AGGREGATE_FROM_KEY]), "-");
+      if (!seen.has(key)) {
+        seen.add(key);
+        acc.push(row);
+      }
+      return acc;
+    }, []);
 
   if (judge) {
     filtered = filtered.map((row) => filterRowByJudge(row, judge));
@@ -170,15 +170,17 @@ export function aggregateWeekly(
       });
     }
     // 次の週へ（前週の to の翌日を from にする）
-    const nextStart = new Date(weekEnd);
-    nextStart.setDate(nextStart.getDate() + 1);
-    nextStart.setHours(0, 0, 0, 0);
-    weekStart = nextStart;
+    weekStart = new Date(weekEnd);
+    weekStart.setDate(weekStart.getDate() + 1);
+    weekStart.setHours(0, 0, 0, 0);
 
-    const nextEnd = new Date(weekStart);
-    nextEnd.setDate(nextEnd.getDate() + 6);
-    nextEnd.setHours(0, 0, 0, 0);
-    weekEnd = nextEnd.getTime() > endWeekRange.to.getTime() ? new Date(endWeekRange.to) : nextEnd;
+    weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    weekEnd.setHours(0, 0, 0, 0);
+    if (weekEnd.getTime() > endWeekRange.to.getTime()) {
+      weekEnd = new Date(endWeekRange.to);
+      weekEnd.setHours(0, 0, 0, 0);
+    }
   }
   return weeklyAggregated;
 }
