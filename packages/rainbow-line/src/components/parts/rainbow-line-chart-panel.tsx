@@ -87,7 +87,7 @@ export function RainbowLineChartPanel({
             type={type}
             period={period}
             isCompareMode={isCompareMode}
-            data={dataInRange}
+            data={type === "hour" ? aggregateHourly(dailyData) : dataInRange}
             placement={"rainbow-line-parking-lot"}
           />
         </div>
