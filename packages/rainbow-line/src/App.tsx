@@ -66,10 +66,10 @@ function App() {
   const [dataLot2, setDataLot2] = useState<AggregatedData[]>([]);
   const [processedDataLot1, setProcessedDataLot1] = useState<RainbowLineAggregatedData[]>([]);
   const [processedDataLot2, setProcessedDataLot2] = useState<RainbowLineAggregatedData[]>([]);
-  const [filteredDataLot1, setFilteredDataLot1] = useState<AggregatedData[]>([]);
-  const [filteredDataLot2, setFilteredDataLot2] = useState<AggregatedData[]>([]);
-  const [filteredDataLot1Compare, setFilteredDataLot1Compare] = useState<AggregatedData[]>([]);
-  const [filteredDataLot2Compare, setFilteredDataLot2Compare] = useState<AggregatedData[]>([]);
+  const [statsDataLot1, setStatsDataLot1] = useState<AggregatedData[]>([]);
+  const [statsDataLot2, setStatsDataLot2] = useState<AggregatedData[]>([]);
+  const [statsDataLot1Compare, setStatsDataLot1Compare] = useState<AggregatedData[]>([]);
+  const [statsDataLot2Compare, setStatsDataLot2Compare] = useState<AggregatedData[]>([]);
 
   // 本期間の状態
   const [period, setPeriod] = useState<Period>(createInitialPeriod());
@@ -142,10 +142,10 @@ function App() {
   useEffect(() => {
     const [filtered1, filtered2] = getStatsDataForPeriod(period);
     const [filtered1Compare, filtered2Compare] = getStatsDataForPeriod(comparePeriod);
-    setFilteredDataLot1(filtered1);
-    setFilteredDataLot2(filtered2);
-    setFilteredDataLot1Compare(filtered1Compare);
-    setFilteredDataLot2Compare(filtered2Compare);
+    setStatsDataLot1(filtered1);
+    setStatsDataLot2(filtered2);
+    setStatsDataLot1Compare(filtered1Compare);
+    setStatsDataLot2Compare(filtered2Compare);
   }, [getStatsDataForPeriod, period, comparePeriod]);
 
   const aggregateParkingLotData = useCallback(
@@ -236,22 +236,19 @@ function App() {
   );
 
   const targetStatsData = useMemo(
-    () => aggregateParkingLotData(filteredDataLot1, filteredDataLot2),
-    [aggregateParkingLotData, filteredDataLot1, filteredDataLot2],
+    () => aggregateParkingLotData(statsDataLot1, statsDataLot2),
+    [aggregateParkingLotData, statsDataLot1, statsDataLot2],
   );
-  const targetStatsDenominatorCount = useMemo(
-    () => filteredDataLot1.length,
-    [filteredDataLot1.length],
-  );
+  const targetStatsDenominatorCount = useMemo(() => statsDataLot1.length, [statsDataLot1.length]);
 
   const targetStatsDataCompare = useMemo(
-    () => aggregateParkingLotData(filteredDataLot1Compare, filteredDataLot2Compare),
-    [aggregateParkingLotData, filteredDataLot1Compare, filteredDataLot2Compare],
+    () => aggregateParkingLotData(statsDataLot1Compare, statsDataLot2Compare),
+    [aggregateParkingLotData, statsDataLot1Compare, statsDataLot2Compare],
   );
 
   const targetStatsDenominatorCountCompare = useMemo(
-    () => filteredDataLot1Compare.length,
-    [filteredDataLot1Compare.length],
+    () => statsDataLot1Compare.length,
+    [statsDataLot1Compare.length],
   );
 
   const hasData = useMemo(
