@@ -90,7 +90,7 @@ function App() {
     [filters],
   );
 
-  const aggregatedParkingLotData = useCallback(
+  const aggregateParkingLotData = useCallback(
     (lot1: RainbowLineAggregatedData[], lot2: RainbowLineAggregatedData[]) => {
       const selected = filters["parkingLot"];
       if (selected === "all") {
@@ -120,8 +120,8 @@ function App() {
   );
 
   const getTargetData = useCallback(() => {
-    return aggregatedParkingLotData(processedDataLot1, processedDataLot2);
-  }, [aggregatedParkingLotData, processedDataLot1, processedDataLot2]);
+    return aggregateParkingLotData(processedDataLot1, processedDataLot2);
+  }, [aggregateParkingLotData, processedDataLot1, processedDataLot2]);
 
   const processedDailyDataLot1 = useMemo(
     () => (type === "hour" ? processRows(lot1Daily.main) : []),
@@ -144,13 +144,13 @@ function App() {
 
   const getTargetDailyData = useCallback(
     (isCompare = false) => {
-      return aggregatedParkingLotData(
+      return aggregateParkingLotData(
         isCompare ? processedDailyDataLot1Compare : processedDailyDataLot1,
         isCompare ? processedDailyDataLot2Compare : processedDailyDataLot2,
       );
     },
     [
-      aggregatedParkingLotData,
+      aggregateParkingLotData,
       processedDailyDataLot1,
       processedDailyDataLot2,
       processedDailyDataLot1Compare,
