@@ -109,7 +109,7 @@ export function RainbowLineChartPanel({
             data={dataInRange}
             focusedAttribute="placement"
             type={type}
-            className="col-span-2 min-h-[calc(100dvh-500px)] h-full"
+            className="col-span-2 min-h-[calc(100dvh-500px)] h-full z-20"
           />
           <h3 className="w-full h-10 text-xl col-span-2 mt-8 pt-2 border-t-2 border-gray-100 text-center font-bold">
             都道府県別
@@ -118,17 +118,23 @@ export function RainbowLineChartPanel({
             data={dataInRange}
             focusedAttribute="prefectures"
             type={"day"}
+            className="z-10"
           />
           <RainbowLinePieChart data={dataInRange} focusedAttribute="prefectures" />
-          <h3 className="w-full h-10 col-span-2 text-xl mt-8 pt-2 border-t-2 border-gray-100 text-center font-bold">
+          <h3 className="w-full h-10 col-span-2 text-xl mt-8 pt-2 border-t-2 border-gray-100 text-center font-bold z-10">
             車両分類別
           </h3>
           <RainbowLineStackedBarChart
             data={dataInRange}
             focusedAttribute="carCategories"
             type={"day"}
+            className="z-0"
           />
-          <RainbowLinePieChart data={dataInRange} focusedAttribute="carCategories" />
+          <RainbowLinePieChart
+            data={dataInRange}
+            focusedAttribute="carCategories"
+            className="z-0"
+          />
         </div>
       )}
     </div>
