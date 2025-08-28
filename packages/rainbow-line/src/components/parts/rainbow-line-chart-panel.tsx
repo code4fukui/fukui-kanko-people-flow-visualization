@@ -112,7 +112,7 @@ export function RainbowLineChartPanel({
             <Graph
               data={aggregateHourly(dailyData)}
               type={type}
-              className="col-span-2 min-h-[calc(100dvh-500px)] h-full"
+              className="col-span-2 min-h-[calc(100dvh-500px)] h-full z-20"
             />
           ) : (
             <RainbowLineStackedBarChart
