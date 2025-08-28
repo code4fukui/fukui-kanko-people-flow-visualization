@@ -67,12 +67,24 @@ function App() {
 
   // 本期間の状態
   const [period, setPeriod] = useState<Period>(createInitialPeriod());
-
   // 比較期間の状態
   const [comparePeriod, setComparePeriod] = useState<Period>(createInitialPeriod());
 
   const lot1Daily = useLotDailyData("rainbow-line-parking-lot-1-gate", type, period, comparePeriod);
   const lot2Daily = useLotDailyData("rainbow-line-parking-lot-2-gate", type, period, comparePeriod);
+
+  useInitialization(() => {
+    getRawData({
+      placement: "rainbow-line-parking-lot-1-gate",
+      objectClass: "LicensePlate",
+      aggregateRange: "full",
+    }).then(setDataLot1);
+    getRawData({
+      placement: "rainbow-line-parking-lot-2-gate",
+      objectClass: "LicensePlate",
+      aggregateRange: "full",
+    }).then(setDataLot2);
+  });
 
   // フィルター（カラム名からフィルターにマッチするかどうかを判別する関数）
   const judge = useCallback(
@@ -134,10 +146,7 @@ function App() {
     [judge],
   );
 
-  const getTargetData = useCallback(() => {
-    return aggregateParkingLotData(processedDataLot1, processedDataLot2);
-  }, [aggregateParkingLotData, processedDataLot1, processedDataLot2]);
-
+  // 時間データの加工
   const processedDailyDataLot1 = useMemo(
     () => (type === "hour" ? processRows(lot1Daily.main) : []),
     [type, lot1Daily.main, processRows],
@@ -147,7 +156,7 @@ function App() {
     [type, lot2Daily.main, processRows],
   );
 
-  // 比較期間の時間データ（加工済）
+  // 比較期間の時間データの加工
   const processedDailyDataLot1Compare = useMemo(
     () => (type === "hour" ? processRows(lot1Daily.compare) : []),
     [type, lot1Daily.compare, processRows],
@@ -157,42 +166,28 @@ function App() {
     [type, lot2Daily.compare, processRows],
   );
 
-  const getTargetDailyData = useCallback(
-    (isCompare = false) => {
-      return aggregateParkingLotData(
-        isCompare ? processedDailyDataLot1Compare : processedDailyDataLot1,
-        isCompare ? processedDailyDataLot2Compare : processedDailyDataLot2,
-      );
-    },
-    [
-      aggregateParkingLotData,
-      processedDailyDataLot1,
-      processedDailyDataLot2,
-      processedDailyDataLot1Compare,
-      processedDailyDataLot2Compare,
-    ],
+  // 集計結果（メモ化してそのまま渡す）
+  const targetData = useMemo(
+    () => aggregateParkingLotData(processedDataLot1, processedDataLot2),
+    [aggregateParkingLotData, processedDataLot1, processedDataLot2],
   );
 
-  const targetData = useMemo(() => getTargetData(), [getTargetData]);
-  const targetDailyData = useMemo(() => getTargetDailyData(false), [getTargetDailyData]);
+  const targetDailyData = useMemo(
+    () => aggregateParkingLotData(processedDailyDataLot1, processedDailyDataLot2),
+    [aggregateParkingLotData, processedDailyDataLot1, processedDailyDataLot2],
+  );
+
+  const targetDailyDataCompare = useMemo(
+    () => aggregateParkingLotData(processedDailyDataLot1Compare, processedDailyDataLot2Compare),
+    [aggregateParkingLotData, processedDailyDataLot1Compare, processedDailyDataLot2Compare],
+  );
+
   const hasData = useMemo(
     () => targetData.length > 0 && (type !== "hour" || targetDailyData.length > 0),
     [type, targetData, targetDailyData],
   );
 
-  useInitialization(() => {
-    getRawData({
-      placement: "rainbow-line-parking-lot-1-gate",
-      objectClass: "LicensePlate",
-      aggregateRange: "full",
-    }).then(setDataLot1);
-    getRawData({
-      placement: "rainbow-line-parking-lot-2-gate",
-      objectClass: "LicensePlate",
-      aggregateRange: "full",
-    }).then(setDataLot2);
-  });
-
+  // 元データから期間ごとの加工
   useEffect(() => {
     const baseRows = dataLot1.reduce<AggregatedData[]>(
       (result, current, index, parent) =>
@@ -240,8 +235,8 @@ function App() {
             period={period}
             setPeriod={setPeriod}
             isCompareMode={compareMode}
-            data={getTargetData() as AggregatedData[]}
-            dailyData={getTargetDailyData(false) as AggregatedData[]}
+            data={targetData as AggregatedData[]}
+            dailyData={targetDailyData as AggregatedData[]}
           />
         )}
         {compareMode && hasData && (
@@ -250,8 +245,8 @@ function App() {
             period={comparePeriod}
             isCompareMode={compareMode}
             setPeriod={setComparePeriod}
-            data={getTargetData() as AggregatedData[]}
-            dailyData={getTargetDailyData(true) as AggregatedData[]}
+            data={targetData as AggregatedData[]}
+            dailyData={targetDailyDataCompare as AggregatedData[]}
           />
         )}
       </div>
