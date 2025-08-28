@@ -4,6 +4,8 @@ import { cn, formatDate, WEEK_DAYS } from "@fukui-kanko/shared";
 import { renderTick, XAxisTickProps } from "@fukui-kanko/shared/components/parts";
 import {
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@fukui-kanko/shared/components/ui";
@@ -162,6 +164,7 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
           cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
           content={<ChartTooltipContent className="bg-white" />}
         />
+        <ChartLegend content={<ChartLegendContent />} className="max-h-12 mt-4" />
       </BarChart>
     </ChartContainer>
   );
