@@ -81,7 +81,9 @@ function App() {
         prefectures = prefectures.filter((v) => v === filters["prefecture"]);
       const carCategories =
         filters["carCategory"] === "all" ? Object.keys(CAR_CATEGORIES) : [filters["carCategory"]];
-      return prefectures.some((v) => key.includes(v)) && carCategories.some((v) => key.includes(v));
+      return (
+        prefectures.some((v) => key.startsWith(v)) && carCategories.some((v) => key.endsWith(v))
+      );
     },
     [filters],
   );
