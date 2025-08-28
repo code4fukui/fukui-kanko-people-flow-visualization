@@ -230,12 +230,6 @@ const Graph: React.FC<GraphProps> = ({
       </ChartContainer>
     );
   }
-
-  return (
-    <div>
-      <p>このタイプ（{type}）のグラフは開発中です。</p>
-    </div>
-  );
 };
 
 export { Graph };

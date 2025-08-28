@@ -1,10 +1,11 @@
 import {
   DownloadCSVButton,
+  Graph,
   MonthRangePicker,
   RangeSelector,
 } from "@fukui-kanko/shared/components/parts";
 import { AggregatedData, GRAPH_VIEW_TYPES, Period } from "@fukui-kanko/shared/types";
-import { cn } from "@fukui-kanko/shared/utils";
+import { aggregateHourly, cn } from "@fukui-kanko/shared/utils";
 import RainbowLineStackedBarChart from "./rainbow-line-stacked-bar-chart";
 import { RainbowLinePieChart } from "./rainbowe-line-pie-chart";
 
@@ -14,6 +15,7 @@ export function RainbowLineChartPanel({
   setPeriod,
   isCompareMode,
   data,
+  dailyData,
   className,
 }: {
   type: keyof typeof GRAPH_VIEW_TYPES;
@@ -21,6 +23,7 @@ export function RainbowLineChartPanel({
   setPeriod: React.Dispatch<React.SetStateAction<Period>>;
   isCompareMode: boolean;
   data: AggregatedData[];
+  dailyData: AggregatedData[];
   className?: string;
 }) {
   const dataInRange = data.filter((row) => {
@@ -84,7 +87,7 @@ export function RainbowLineChartPanel({
             type={type}
             period={period}
             isCompareMode={isCompareMode}
-            data={dataInRange}
+            data={type === "hour" ? aggregateHourly(dailyData) : dataInRange}
             placement={"rainbow-line-parking-lot"}
           />
         </div>
@@ -105,12 +108,21 @@ export function RainbowLineChartPanel({
             isCompareMode ? "flex flex-col" : "grid grid-cols-2",
           )}
         >
-          <RainbowLineStackedBarChart
-            data={dataInRange}
-            focusedAttribute="placement"
-            type={type}
-            className="col-span-2 min-h-[calc(100dvh-500px)] h-full z-20"
-          />
+          {type === "hour" ? (
+            <Graph
+              data={aggregateHourly(dailyData)}
+              type={type}
+              className="col-span-2 min-h-[calc(100dvh-500px)] h-full z-20"
+            />
+          ) : (
+            <RainbowLineStackedBarChart
+              data={dataInRange}
+              focusedAttribute="placement"
+              type={type}
+              className="col-span-2 min-h-[calc(100dvh-500px)] h-full z-20"
+            />
+          )}
+
           <h3 className="w-full h-10 text-xl col-span-2 mt-8 pt-2 border-t-2 border-gray-100 text-center font-bold">
             都道府県別
           </h3>
