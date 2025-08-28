@@ -1,6 +1,6 @@
 import { RAINBOW_LINE_LOTS } from "@/constants/parking-lots";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { cn, formatDate, WEEK_DAYS } from "@fukui-kanko/shared";
+import { cn, formatDate, getDateString, WEEK_DAYS } from "@fukui-kanko/shared";
 import { renderTick, XAxisTickProps } from "@fukui-kanko/shared/components/parts";
 import {
   ChartContainer,
@@ -26,6 +26,7 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 function aggregateDaily(
   data: AggregatedData[],
   focusedAttribute: ObjectClassAttribute | "placement",
+  type: keyof typeof GRAPH_VIEW_TYPES,
 ): AggregatedData[] {
   // 祝日の取得範囲
   const aggregateFromValues = data.map((row) => new Date(row[AGGREGATE_FROM_KEY]));
@@ -42,7 +43,7 @@ function aggregateDaily(
   return data.map((row) => {
     const date = new Date(row[AGGREGATE_FROM_KEY]);
     const totalCount = Number(row["total count"]) || 0;
-    const dayKey = formatDate(date, "-");
+    const dayKey = type === "month" ? getDateString(date).slice(0, -3) : formatDate(date, "-");
     const dayOfWeek = WEEK_DAYS[date.getDay()];
     const holidayName = holidayMap.get(dayKey) ?? "";
 
@@ -111,7 +112,7 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
   const [chartData, setChartData] = useState<AggregatedData[]>([]);
 
   useEffect(() => {
-    const dailyData = aggregateDaily(data, focusedAttribute);
+    const dailyData = aggregateDaily(data, focusedAttribute, type);
     setChartData(dailyData);
   }, [data, focusedAttribute, type]);
 

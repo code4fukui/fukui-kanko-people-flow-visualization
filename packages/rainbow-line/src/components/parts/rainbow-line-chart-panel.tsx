@@ -129,7 +129,7 @@ export function RainbowLineChartPanel({
           <RainbowLineStackedBarChart
             data={dataInRange}
             focusedAttribute="prefectures"
-            type={"day"}
+            type={type}
             className="z-10"
           />
           <RainbowLinePieChart data={dataInRange} focusedAttribute="prefectures" />
@@ -139,7 +139,7 @@ export function RainbowLineChartPanel({
           <RainbowLineStackedBarChart
             data={dataInRange}
             focusedAttribute="carCategories"
-            type={"day"}
+            type={type}
             className="z-0"
           />
           <RainbowLinePieChart
