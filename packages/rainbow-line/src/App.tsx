@@ -152,7 +152,7 @@ function App() {
     (lot1: RainbowLineAggregatedData[], lot2: RainbowLineAggregatedData[]) => {
       const selected = filters["parkingLot"];
       if (selected === "all") {
-        const reduced = [...lot1, ...lot2].reduce(
+        const combinedLotData = [...lot1, ...lot2].reduce(
           (result, current, index, parent) =>
             reducePlacement(
               selected as
@@ -164,7 +164,7 @@ function App() {
         ) as RainbowLineAggregatedData[];
 
         // 非加算項目（休日数/平日数/期間情報）を補正
-        return reduced.map((row, i) => ({
+        return combinedLotData.map((row, i) => ({
           ...row,
           weekendDays: lot1[i]?.["weekendDays"] ?? lot2[i]?.["weekendDays"],
           weekdayDays: lot1[i]?.["weekdayDays"] ?? lot2[i]?.["weekdayDays"],

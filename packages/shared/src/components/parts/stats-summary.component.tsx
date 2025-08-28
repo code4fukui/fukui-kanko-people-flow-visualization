@@ -15,11 +15,11 @@ type StatsSummaryProps = {
  * 集計データ配列から合計値と平均値を計算
  */
 function getStats(data: AggregatedData[], denominatorCount?: number) {
-  const length = typeof denominatorCount === "number" ? denominatorCount : (data?.length ?? 0);
+  const avgDenominator = denominatorCount ?? data?.length ?? 0;
   if (!data || data.length === 0) return { sum: 0, avg: 0 };
   // 集計後のデータを使うため、"totalCount"を使用
   const sum = data.reduce((acc, cur) => acc + Number(cur["totalCount"] ?? 0), 0);
-  const avg = sum / length;
+  const avg = sum / avgDenominator;
   return { sum, avg };
 }
 
