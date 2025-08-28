@@ -62,7 +62,16 @@ function convertToRainbowLineCSV(data: AggregatedData[]): string {
     "rainbow-line-parking-lot-2-gate total count",
   ];
 
-  const excludeColumns = ["object class", "weekendDays", "weekdayDays"];
+  const excludeColumns = [
+    "object class",
+    "aggregateFrom",
+    "aggregateTo",
+    "totalCount",
+    "dayOfWeek",
+    "holidayName",
+    "weekendDays",
+    "weekdayDays",
+  ];
   if ((data[0].placement as string) !== "rainbow-line-all") {
     excludeColumns.push(
       "rainbow-line-parking-lot-1-gate total count",

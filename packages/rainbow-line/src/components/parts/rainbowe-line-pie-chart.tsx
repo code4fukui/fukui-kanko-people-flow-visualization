@@ -35,17 +35,7 @@ const CustomizedLabel = (props: {
     <g>
       <text
         x={x}
-        y={y - 10}
-        fill="white"
-        textAnchor="middle"
-        dominantBaseline="central"
-        className="font-bold drop-shadow"
-      >
-        {props.percent > 0.05 ? `${(props.percent * 100).toFixed(1)}%` : undefined}
-      </text>
-      <text
-        x={x}
-        y={y + 10}
+        y={y - 8}
         fill="white"
         textAnchor="middle"
         dominantBaseline="central"
@@ -56,6 +46,16 @@ const CustomizedLabel = (props: {
             props.name as keyof (typeof ATTRIBUTES)[ObjectClassAttribute]
           ]
         }
+      </text>
+      <text
+        x={x}
+        y={y + 8}
+        fill="white"
+        textAnchor="middle"
+        dominantBaseline="central"
+        className="font-bold drop-shadow"
+      >
+        {props.percent > 0.05 ? `${(props.percent * 100).toFixed(1)}%` : undefined}
       </text>
     </g>
   ) : undefined;
@@ -78,7 +78,11 @@ export function RainbowLinePieChart({
     Object.keys(list)
       .map((listitem) => ({
         [`${listitem}`]: Object.keys(row)
-          .filter((key) => key.startsWith(listitem) || key.endsWith(listitem))
+          .filter(
+            (key) =>
+              (focusedAttribute === "prefectures" && key.startsWith(listitem)) ||
+              (focusedAttribute === "carCategories" && key.endsWith(listitem)),
+          )
           .map((key) => Number(row[key]))
           .reduce((sum, current) => sum + current, 0),
       }))
@@ -122,42 +126,33 @@ export function RainbowLinePieChart({
   const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
 
   return (
-    <div
-      className={cn(
-        "flex flex-col items-center grow w-full h-full max-h-full overflow-hidden",
-        className,
-      )}
-    >
-      <div className="flex flex-col gap-y-4 w-full min-w-full grow overflow-auto">
-        <ChartContainer config={chartConfig} className="h-full w-full min-h-0">
-          <PieChart>
-            <Pie
-              dataKey="value"
-              isAnimationActive={false}
-              data={chartData}
-              cx="50%"
-              cy="50%"
-              startAngle={90}
-              endAngle={-270}
-              fill="#8884d8"
-              labelLine={false}
-              label={(props) => CustomizedLabel({ ...props, focusedAttribute })}
-            >
-              {Object.entries(chartData).map(([k], i) => (
-                <Cell key={k} fill={colors[i % colors.length]} />
-              ))}
-            </Pie>
-            <ChartTooltip
-              cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
-              content={<ChartTooltipContent className="bg-white" />}
-              wrapperStyle={{ zIndex: "var(--tooltip-z-index)" }}
-            />
-            {Object.keys(chartData).length <= 10 ? (
-              <ChartLegend content={<ChartLegendContent />} />
-            ) : undefined}
-          </PieChart>
-        </ChartContainer>
-      </div>
-    </div>
+    <ChartContainer config={chartConfig} className={cn("h-full w-full", className)}>
+      <PieChart>
+        <Pie
+          dataKey="value"
+          isAnimationActive={false}
+          data={chartData}
+          cx="50%"
+          cy="50%"
+          startAngle={90}
+          endAngle={-270}
+          fill="#8884d8"
+          labelLine={false}
+          label={(props) => CustomizedLabel({ ...props, focusedAttribute })}
+        >
+          {Object.entries(chartData).map(([k], i) => (
+            <Cell key={k} fill={colors[i % colors.length]} />
+          ))}
+        </Pie>
+        <ChartTooltip
+          cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
+          content={<ChartTooltipContent className="bg-white" />}
+          wrapperStyle={{ zIndex: "var(--tooltip-z-index)" }}
+        />
+        {Object.keys(chartData).length <= 10 ? (
+          <ChartLegend content={<ChartLegendContent />} />
+        ) : undefined}
+      </PieChart>
+    </ChartContainer>
   );
 }
