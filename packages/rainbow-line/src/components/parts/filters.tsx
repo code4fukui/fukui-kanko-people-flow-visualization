@@ -14,7 +14,7 @@ export function FiltersSample({
   ) => void;
   defaultValues?: Record<
     (typeof FILTER_ATTRIBUTES)[number]["id"],
-    (typeof FILTER_ATTRIBUTES)[number]["items"][number]["value"]
+    Array<(typeof FILTER_ATTRIBUTES)[number]["items"][number]["value"]>
   >;
 }) {
   return (
@@ -25,7 +25,7 @@ export function FiltersSample({
           <SelectScrollable
             items={attribute.items}
             onChange={(v) => onFilterChange(attribute.id, v)}
-            defaultValue={defaultValues?.[attribute.id] || "all"}
+            defaultValue={defaultValues?.[attribute.id] || []}
             className="w-fit h-40 border-2 border-border rounded-lg flex flex-col gap-y-2"
           ></SelectScrollable>
         </li>

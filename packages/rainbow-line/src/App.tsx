@@ -48,17 +48,34 @@ const compansateProcessedData = (
 });
 
 function App() {
-  const [filters, setFilters] = useState<
+  const [filters, _setFilters] = useState<
     Record<
       (typeof FILTER_ATTRIBUTES)[number]["id"],
-      (typeof FILTER_ATTRIBUTES)[number]["items"][number]["value"]
+      Array<(typeof FILTER_ATTRIBUTES)[number]["items"][number]["value"]>
     >
   >({
-    parkingLot: "all",
-    region: "all",
-    prefecture: "all",
-    carCategory: "all",
+    parkingLot: [],
+    region: [],
+    prefecture: [],
+    carCategory: [],
   });
+  const setFilters = (
+    key: (typeof FILTER_ATTRIBUTES)[number]["id"],
+    value: (typeof FILTER_ATTRIBUTES)[number]["items"][number]["value"],
+  ) => {
+    if (filters[key].includes(value)) {
+      _setFilters({
+        ...filters,
+        [key]: filters[key].filter((v) => v !== value),
+      });
+    } else {
+      _setFilters({
+        ...filters,
+        [key]: [...filters[key], value],
+      });
+    }
+  };
+
   const [type, setType] = useState<keyof typeof GRAPH_VIEW_TYPES>("day");
   const [compareMode, setCompareMode] = useState(false);
 
@@ -96,13 +113,16 @@ function App() {
   const judge = useCallback(
     (key: string) => {
       let prefectures =
-        filters["region"] === "all"
+        filters["region"].length === 0
           ? Object.keys(PREFECTURES)
-          : REGIONS_PREFECTURES[filters["region"]].prefectures;
-      if (filters["prefecture"] !== "all")
-        prefectures = prefectures.filter((v) => v === filters["prefecture"]);
+          : filters["region"].reduce(
+              (result, current) => [...result, ...REGIONS_PREFECTURES[current].prefectures],
+              [] as (keyof typeof PREFECTURES)[],
+            );
+      if (filters["prefecture"].length > 0)
+        prefectures = prefectures.filter((v) => filters["prefecture"].includes(v));
       const carCategories =
-        filters["carCategory"] === "all" ? Object.keys(CAR_CATEGORIES) : [filters["carCategory"]];
+        filters["carCategory"].length === 0 ? Object.keys(CAR_CATEGORIES) : filters["carCategory"];
       return (
         prefectures.some((v) => key.startsWith(v)) && carCategories.some((v) => key.endsWith(v))
       );
@@ -151,11 +171,11 @@ function App() {
   const aggregateParkingLotData = useCallback(
     (lot1: RainbowLineAggregatedData[], lot2: RainbowLineAggregatedData[]) => {
       const selected = filters["parkingLot"];
-      if (selected === "all") {
+      if (selected.length === 0 || selected.length === 2) {
         const combinedLotData = [...lot1, ...lot2].reduce(
           (result, current, index, parent) =>
             reducePlacement(
-              selected as
+              "all" as
                 | Exclude<Placement, "fukui-station-east-entrance" | "tojinbo-shotaro">
                 | "all",
               [result as AggregatedData[], current, index, parent],
@@ -176,7 +196,7 @@ function App() {
           };
         });
       }
-      if (selected === "rainbow-line-parking-lot-1-gate") {
+      if (selected[0] === "rainbow-line-parking-lot-1-gate") {
         return lot1.map((row) => ({
           ...row,
           [`${selected} total count`]: row["total count"],
@@ -282,7 +302,7 @@ function App() {
         <FiltersSample
           className="w-fit row-span-2"
           defaultValues={filters}
-          onFilterChange={(k, v) => setFilters({ ...filters, [`${k}`]: v })}
+          onFilterChange={setFilters}
         />
         <TypeSelect className="self-end" type={type} onChange={setType} />
         <div className="flex items-center gap-2 h-fit">
