@@ -149,9 +149,13 @@ export function RainbowLinePieChart({
           content={<ChartTooltipContent className="bg-white" />}
           wrapperStyle={{ zIndex: "var(--tooltip-z-index)" }}
         />
-        {Object.keys(chartData).length <= 10 ? (
-          <ChartLegend content={<ChartLegendContent />} />
-        ) : undefined}
+        <ChartLegend
+          content={<ChartLegendContent />}
+          layout={"vertical"}
+          align={"right"}
+          verticalAlign={"middle"}
+          width={160}
+        />
       </PieChart>
     </ChartContainer>
   );

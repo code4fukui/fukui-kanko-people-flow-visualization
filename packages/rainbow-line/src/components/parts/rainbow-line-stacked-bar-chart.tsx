@@ -4,6 +4,8 @@ import { cn, formatDate, WEEK_DAYS } from "@fukui-kanko/shared";
 import { renderTick, XAxisTickProps } from "@fukui-kanko/shared/components/parts";
 import {
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@fukui-kanko/shared/components/ui";
@@ -24,6 +26,7 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 function aggregateDaily(
   data: AggregatedData[],
   focusedAttribute: ObjectClassAttribute | "placement",
+  type: keyof typeof GRAPH_VIEW_TYPES,
 ): AggregatedData[] {
   // 祝日の取得範囲
   const aggregateFromValues = data.map((row) => new Date(row[AGGREGATE_FROM_KEY]));
@@ -40,7 +43,8 @@ function aggregateDaily(
   return data.map((row) => {
     const date = new Date(row[AGGREGATE_FROM_KEY]);
     const totalCount = Number(row["total count"]) || 0;
-    const dayKey = formatDate(date, "-");
+    const dayKey =
+      type === "month" ? formatDate(date).replace(/-\d{2}$/, "") : formatDate(date, "-");
     const dayOfWeek = WEEK_DAYS[date.getDay()];
     const holidayName = holidayMap.get(dayKey) ?? "";
 
@@ -109,7 +113,7 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
   const [chartData, setChartData] = useState<AggregatedData[]>([]);
 
   useEffect(() => {
-    const dailyData = aggregateDaily(data, focusedAttribute);
+    const dailyData = aggregateDaily(data, focusedAttribute, type);
     setChartData(dailyData);
   }, [data, focusedAttribute, type]);
 
@@ -162,6 +166,7 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
           cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
           content={<ChartTooltipContent className="bg-white" />}
         />
+        <ChartLegend content={<ChartLegendContent />} className="max-h-12 mt-4" />
       </BarChart>
     </ChartContainer>
   );
