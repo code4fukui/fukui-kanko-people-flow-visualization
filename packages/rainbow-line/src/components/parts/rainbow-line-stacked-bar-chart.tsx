@@ -1,6 +1,6 @@
 import { RAINBOW_LINE_LOTS } from "@/constants/parking-lots";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { cn, formatDate, getDateString, WEEK_DAYS } from "@fukui-kanko/shared";
+import { cn, formatDate, WEEK_DAYS } from "@fukui-kanko/shared";
 import { renderTick, XAxisTickProps } from "@fukui-kanko/shared/components/parts";
 import {
   ChartContainer,
@@ -44,7 +44,7 @@ function aggregateDaily(
     const date = new Date(row[AGGREGATE_FROM_KEY]);
     const totalCount = Number(row["total count"]) || 0;
     const dayKey =
-      type === "month" ? getDateString(date).replace(/-\d{2}$/, "") : formatDate(date, "-");
+      type === "month" ? formatDate(date).replace(/-\d{2}$/, "") : formatDate(date, "-");
     const dayOfWeek = WEEK_DAYS[date.getDay()];
     const holidayName = holidayMap.get(dayKey) ?? "";
 
