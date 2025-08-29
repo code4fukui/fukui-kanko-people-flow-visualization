@@ -43,7 +43,8 @@ function aggregateDaily(
   return data.map((row) => {
     const date = new Date(row[AGGREGATE_FROM_KEY]);
     const totalCount = Number(row["total count"]) || 0;
-    const dayKey = type === "month" ? getDateString(date).slice(0, -3) : formatDate(date, "-");
+    const dayKey =
+      type === "month" ? getDateString(date).replace(/-\d{2}$/, "") : formatDate(date, "-");
     const dayOfWeek = WEEK_DAYS[date.getDay()];
     const holidayName = holidayMap.get(dayKey) ?? "";
 
