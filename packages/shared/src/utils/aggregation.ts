@@ -67,7 +67,7 @@ export function aggregateMonthly(
     if (!monthlyMap.has(monthKey)) {
       monthlyMap.set(monthKey, {
         ...row,
-        [AGGREGATE_FROM_KEY]: monthKey,
+        [AGGREGATE_FROM_KEY]: monthKey, //データのない日があるレインボーラインの統計値処理で使用
         aggregateFrom: monthKey,
         aggregateTo: monthKey,
         totalCount: Number(row[TOTAL_COUNT_KEY]),
@@ -150,7 +150,7 @@ export function aggregateWeekly(
 
       weeklyAggregated.push({
         ...weekRows[0],
-        [AGGREGATE_FROM_KEY]: `${formatDate(new Date(weekStart), "-")}週`,
+        [AGGREGATE_FROM_KEY]: `${formatDate(new Date(weekStart), "-")}週`, //データのない日があるレインボーラインの統計値処理で使用
         aggregateFrom: `${formatDate(new Date(weekStart), "-")}週`,
         aggregateTo: `${formatDate(new Date(weekEnd), "-")}`,
         totalCount: total,
