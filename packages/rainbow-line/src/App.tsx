@@ -163,12 +163,18 @@ function App() {
           [] as RainbowLineAggregatedData[],
         ) as RainbowLineAggregatedData[];
 
+        const lot1ByFrom = new Map(lot1.map((r) => [String(r["aggregate from"]), r]));
+        const lot2ByFrom = new Map(lot2.map((r) => [String(r["aggregate from"]), r]));
         // 非加算項目（休日数/平日数/期間情報）を補正
-        return combinedLotData.map((row, i) => ({
-          ...row,
-          weekendDays: lot1[i]?.["weekendDays"] ?? lot2[i]?.["weekendDays"],
-          weekdayDays: lot1[i]?.["weekdayDays"] ?? lot2[i]?.["weekdayDays"],
-        }));
+        return combinedLotData.map((row) => {
+          const key = String(row["aggregate from"]);
+          const src = lot1ByFrom.get(key) ?? lot2ByFrom.get(key);
+          return {
+            ...row,
+            weekendDays: src?.["weekendDays"],
+            weekdayDays: src?.["weekdayDays"],
+          };
+        });
       }
       if (selected === "rainbow-line-parking-lot-1-gate") {
         return lot1.map((row) => ({
