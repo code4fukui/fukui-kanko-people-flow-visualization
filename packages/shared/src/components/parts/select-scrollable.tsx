@@ -21,10 +21,10 @@ export function SelectScrollable<T = string | number>({
           <Button
             key={String(item.value)}
             onClick={() => {
-              if (selected?.includes(item.value)) {
+              if (item.value === "all") {
+                setSelected([]);
+              } else if (selected?.includes(item.value)) {
                 setSelected(selected.filter((v) => v !== item.value));
-                onChange(item.value);
-                return;
               } else {
                 if (selected && selected.length > 0) {
                   setSelected([...selected, item.value]);

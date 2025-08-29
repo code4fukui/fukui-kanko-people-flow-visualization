@@ -2,7 +2,7 @@ import { FILTER_ATTRIBUTES } from "@/interfaces/filter-attributes";
 import { SelectScrollable } from "@fukui-kanko/shared/components/parts";
 import { cn } from "@fukui-kanko/shared/utils";
 
-export function FiltersSample({
+export function Filters({
   className,
   onFilterChange = () => {},
   defaultValues,

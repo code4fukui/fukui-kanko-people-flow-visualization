@@ -19,7 +19,7 @@ import {
 } from "@fukui-kanko/shared";
 import { TypeSelect } from "@fukui-kanko/shared/components/parts";
 import { Checkbox, Label } from "@fukui-kanko/shared/components/ui";
-import { FiltersSample } from "./components/parts/filters";
+import { Filters } from "./components/parts/filters";
 import { Header } from "./components/parts/header";
 import { RainbowLineChartPanel } from "./components/parts/rainbow-line-chart-panel";
 import { RAINBOW_LINE_LOTS } from "./constants/parking-lots";
@@ -63,7 +63,13 @@ function App() {
     key: (typeof FILTER_ATTRIBUTES)[number]["id"],
     value: (typeof FILTER_ATTRIBUTES)[number]["items"][number]["value"],
   ) => {
-    if (filters[key].includes(value)) {
+    if (value === "all") {
+      // すべてが選択された場合は他の選択を解除
+      _setFilters({
+        ...filters,
+        [key]: [],
+      });
+    } else if (filters[key].includes(value)) {
       _setFilters({
         ...filters,
         [key]: filters[key].filter((v) => v !== value),
@@ -299,11 +305,7 @@ function App() {
     <div className="flex flex-col w-full h-[100dvh] p-4 overflow-hidden">
       <Header title="レインボーライン駐車場 入込車両データ" />
       <div className="grid grid-cols-[1fr_auto] grid-rows-2 w-fit mx-auto place-content-center gap-4 pt-4">
-        <FiltersSample
-          className="w-fit row-span-2"
-          defaultValues={filters}
-          onFilterChange={setFilters}
-        />
+        <Filters className="w-fit row-span-2" defaultValues={filters} onFilterChange={setFilters} />
         <TypeSelect className="self-end" type={type} onChange={setType} />
         <div className="flex items-center gap-2 h-fit">
           <Checkbox
