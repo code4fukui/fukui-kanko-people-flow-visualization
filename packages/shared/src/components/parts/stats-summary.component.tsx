@@ -7,19 +7,17 @@ import { PeopleIcon } from "@primer/octicons-react";
 type StatsSummaryProps = {
   type: keyof typeof GRAPH_VIEW_TYPES;
   data?: AggregatedData[];
-  denominatorCount?: number;
   className?: string;
 };
 
 /**
  * 集計データ配列から合計値と平均値を計算
  */
-function getStats(data: AggregatedData[], denominatorCount?: number) {
-  const avgDenominator = denominatorCount ?? data?.length ?? 0;
+function getStats(data: AggregatedData[]) {
   if (!data || data.length === 0) return { sum: 0, avg: 0 };
   // 集計後のデータを使うため、"totalCount"を使用
   const sum = data.reduce((acc, cur) => acc + Number(cur["totalCount"] ?? 0), 0);
-  const avg = sum / avgDenominator;
+  const avg = sum / data.length;
   return { sum, avg };
 }
 
@@ -60,13 +58,8 @@ function getWeekdayAverages(data: AggregatedData[], type: keyof typeof GRAPH_VIE
   return { weekdayAvg: 0, weekendAvg: 0 };
 }
 
-export const StatsSummary: React.FC<StatsSummaryProps> = ({
-  type,
-  data,
-  denominatorCount,
-  className,
-}) => {
-  const { sum, avg } = getStats(data ?? [], denominatorCount);
+export const StatsSummary: React.FC<StatsSummaryProps> = ({ type, data, className }) => {
+  const { sum, avg } = getStats(data ?? []);
   const { weekdayAvg, weekendAvg } = getWeekdayAverages(data ?? [], type);
   const statsData = {
     sum: Math.round(sum),

@@ -18,7 +18,6 @@ export function RainbowLineChartPanel({
   data,
   dailyData,
   statsDataMonthWeek,
-  statsDenominatorCount,
   className,
 }: {
   type: keyof typeof GRAPH_VIEW_TYPES;
@@ -139,9 +138,6 @@ export function RainbowLineChartPanel({
             <StatsSummary
               type={type}
               data={type === "hour" || type === "day" ? statsDataHourDay : statsDataMonthWeek}
-              denominatorCount={
-                type === "hour" || type === "day" ? undefined : statsDenominatorCount
-              }
             />
           </div>
           <h3 className="w-full h-10 text-xl col-span-2 mt-8 pt-2 border-t-2 border-gray-100 text-center font-bold">
