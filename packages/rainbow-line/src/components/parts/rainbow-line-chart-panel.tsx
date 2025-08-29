@@ -27,7 +27,6 @@ export function RainbowLineChartPanel({
   data: AggregatedData[];
   dailyData: AggregatedData[];
   statsDataMonthWeek: AggregatedData[];
-  statsDenominatorCount?: number;
   className?: string;
 }) {
   const dataInRange = data.filter((row) => {
