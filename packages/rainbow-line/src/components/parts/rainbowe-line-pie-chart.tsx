@@ -145,6 +145,11 @@ export function RainbowLinePieChart({
 
   const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
 
+  const getColorByName = (name: string) => {
+    const index = chartData.findIndex((item) => item.name === name);
+    return colors[index % colors.length];
+  };
+
   const shouldDimOthers = hoveredLegendKey !== undefined && !hiddenKeys.has(hoveredLegendKey);
   return (
     <ChartContainer config={chartConfig} className={cn("h-full w-full", className)}>
@@ -161,17 +166,18 @@ export function RainbowLinePieChart({
           labelLine={false}
           label={(props) => CustomizedLabel({ ...props, focusedAttribute })}
         >
-          {visibleChartData.map((data, i) => {
+          {visibleChartData.map((data) => {
             const legendKey = getLegendKey(String(data.name), instanceId);
             const isHovered = hoveredLegendKey === legendKey;
             const isDimmed = shouldDimOthers && !isHovered;
+            const color = getColorByName(String(data.name));
 
             return (
               <Cell
                 key={data.name}
-                fill={colors[i % colors.length]}
+                fill={color}
                 fillOpacity={isDimmed ? 0.3 : 1}
-                stroke={isHovered ? colors[i % colors.length] : undefined}
+                stroke={isHovered ? color : undefined}
                 strokeWidth={isHovered ? 2 : 0}
               />
             );
