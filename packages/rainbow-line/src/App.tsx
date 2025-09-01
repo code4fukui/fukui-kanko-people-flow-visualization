@@ -201,17 +201,17 @@ function App() {
             weekdayDays: src?.["weekdayDays"],
           };
         });
-      }
-      if (selected[0] === "rainbow-line-parking-lot-1-gate") {
+      } else if (selected[0] === "rainbow-line-parking-lot-1-gate") {
         return lot1.map((row) => ({
           ...row,
           [`${selected} total count`]: row["total count"],
         }));
+      } else {
+        return lot2.map((row) => ({
+          ...row,
+          [`${selected} total count`]: row["total count"],
+        }));
       }
-      return lot2.map((row) => ({
-        ...row,
-        [`${selected} total count`]: row["total count"],
-      }));
     },
     [filters],
   );
