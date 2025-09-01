@@ -1,5 +1,5 @@
 import { AggregatedData, GRAPH_VIEW_TYPES, KEYOF_AGGREGATED_DATA_BASE, Placement } from "../types";
-import { getDateTimeString } from "../utils";
+import { getDateTimeString, getMinDate } from "../utils";
 
 // データ収集場所が異なるデータが含まれているArrayに対して、
 // どちらかの場所を選択されていなければデータの集計開始時点が同じ行を合計する
@@ -58,6 +58,8 @@ export const reducePlacement: (
   return result;
 };
 
+const MIN_AGGREGATE_DATE = getMinDate();
+
 export const reduceAggregateRange: (
   graphViewType: keyof typeof GRAPH_VIEW_TYPES,
   props: Parameters<Parameters<typeof Array.prototype.reduce<AggregatedData[]>>[0]>,
@@ -65,6 +67,9 @@ export const reduceAggregateRange: (
   graphViewType,
   [result, current, _index, _parent],
 ) => {
+  if (new Date(current["aggregate from"]) < MIN_AGGREGATE_DATE) {
+    return result;
+  }
   const aggregateRange = {
     from: new Date(current["aggregate from"]),
     to: new Date(current["aggregate to"]),
@@ -90,6 +95,14 @@ export const reduceAggregateRange: (
     aggregateRange.from.setHours(0, 0, 0, 0);
     aggregateRange.to = new Date(aggregateRange.from);
     aggregateRange.to.setMonth(aggregateRange.from.getMonth() + 1);
+  }
+
+  if (aggregateRange.from < MIN_AGGREGATE_DATE) {
+    aggregateRange.from = new Date(MIN_AGGREGATE_DATE);
+    if (graphViewType === "week") {
+      aggregateRange.to = new Date(aggregateRange.from);
+      aggregateRange.to.setDate(aggregateRange.from.getDate() + 2);
+    }
   }
 
   // すでに同じ集計期間のデータがある場合は合計を計算
