@@ -11,16 +11,43 @@ function filterByRange(data: AggregatedData[], from: Date, to: Date) {
   });
 }
 
+function filterRowByJudge(row: AggregatedData, judge: (key: string) => boolean): AggregatedData {
+  const filteredRow: AggregatedData = {
+    placement: row.placement,
+    "object class": row["object class"],
+    "aggregate to": row["aggregate to"],
+    [AGGREGATE_FROM_KEY]: row[AGGREGATE_FROM_KEY],
+    [TOTAL_COUNT_KEY]: row[TOTAL_COUNT_KEY],
+  };
+  Object.entries(row).forEach(([key, value]) => {
+    if (judge(key)) filteredRow[key] = value;
+  });
+  filteredRow[TOTAL_COUNT_KEY] = Object.entries(filteredRow)
+    .filter(([key]) => judge(key))
+    .reduce((sum, [, v]) => sum + Number(v), 0);
+  return filteredRow;
+}
+
 /**
  * 指定した期間内のデータを月単位で集計
  */
-export function aggregateMonthly(data: AggregatedData[], start: Date, end: Date): AggregatedData[] {
+export function aggregateMonthly(
+  data: AggregatedData[],
+  start: Date,
+  end: Date,
+  judge?: (key: string) => boolean,
+): AggregatedData[] {
   // 12月の場合のみ開始日を12月20日に変更
   let actualStart = start;
   if (start.getMonth() === 11) {
     actualStart = new Date(start.getFullYear(), 11, 20);
   }
-  const filtered = filterByRange(data, actualStart, end);
+  let filtered = filterByRange(data, actualStart, end);
+
+  if (judge) {
+    filtered = filtered.map((row) => filterRowByJudge(row, judge));
+  }
+
   const monthlyMap = new Map<
     string,
     AggregatedData & {
@@ -40,6 +67,7 @@ export function aggregateMonthly(data: AggregatedData[], start: Date, end: Date)
     if (!monthlyMap.has(monthKey)) {
       monthlyMap.set(monthKey, {
         ...row,
+        [AGGREGATE_FROM_KEY]: monthKey, //データのない日があるレインボーラインの統計値処理で使用
         aggregateFrom: monthKey,
         aggregateTo: monthKey,
         totalCount: Number(row[TOTAL_COUNT_KEY]),
@@ -72,59 +100,78 @@ export function aggregateWeekly(
   data: AggregatedData[],
   startWeekRange: { from: Date; to: Date },
   endWeekRange: { from: Date; to: Date },
+  judge?: (key: string) => boolean,
 ): AggregatedData[] {
-  const filtered = filterByRange(data, startWeekRange.from, endWeekRange.to);
+  let filtered = filterByRange(data, startWeekRange.from, endWeekRange.to);
+
+  filtered = filtered
+    .filter((row) => row[AGGREGATE_FROM_KEY])
+    .sort(
+      (a, b) =>
+        new Date(a[AGGREGATE_FROM_KEY]).getTime() - new Date(b[AGGREGATE_FROM_KEY]).getTime(),
+    );
+
+  if (judge) {
+    filtered = filtered.map((row) => filterRowByJudge(row, judge));
+  }
 
   const weeklyAggregated: AggregatedData[] = [];
-  let i = 0;
-  let isFirstWeek = true;
-  while (i < filtered.length) {
-    let weekRows: AggregatedData[] = [];
-    if (isFirstWeek) {
-      // 最初の週だけ他の週と範囲が異なる場合があるためfilterで抽出(例：2024/10/17からの週)
-      weekRows = filtered.filter((row) => {
-        const d = new Date(row[AGGREGATE_FROM_KEY]);
-        return d >= startWeekRange.from && d <= startWeekRange.to;
-      });
-      // 件数分インデックスを進める
-      i += weekRows.length;
-      isFirstWeek = false;
-    } else {
-      // 以降は7日ごと
-      weekRows = filtered.slice(i, i + 7);
-      i += 7;
-    }
-    if (weekRows.length === 0) continue;
-    const total = weekRows.reduce((sum, row) => sum + Number(row[TOTAL_COUNT_KEY]), 0);
-    let weekdayTotal = 0;
-    let weekendTotal = 0;
-    let weekdayDays = 0;
-    let weekendDays = 0;
-    weekRows.forEach((row) => {
-      const date = new Date(row[AGGREGATE_FROM_KEY]);
-      const dayOfWeek = date.getDay();
-      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-      const isHoliday = holidayJP.isHoliday(date);
-      const isWeekendOrHoliday = isWeekend || isHoliday;
-      if (isWeekendOrHoliday) {
-        weekendTotal += Number(row[TOTAL_COUNT_KEY]);
-        weekendDays += 1;
-      } else {
-        weekdayTotal += Number(row[TOTAL_COUNT_KEY]);
-        weekdayDays += 1;
-      }
+  let weekStart = new Date(startWeekRange.from);
+  let weekEnd = new Date(startWeekRange.to);
+  weekStart.setHours(0, 0, 0, 0);
+  weekEnd.setHours(0, 0, 0, 0);
+
+  while (weekStart.getTime() <= endWeekRange.to.getTime()) {
+    const weekRows: AggregatedData[] = filtered.filter((row) => {
+      const d = new Date(row[AGGREGATE_FROM_KEY]);
+      return d >= weekStart && d <= weekEnd;
     });
 
-    weeklyAggregated.push({
-      ...weekRows[0],
-      aggregateFrom: `${formatDate(new Date(weekRows[0][AGGREGATE_FROM_KEY]), "-")}週`,
-      aggregateTo: `${formatDate(new Date(weekRows[weekRows.length - 1][AGGREGATE_FROM_KEY]), "-")}`,
-      totalCount: total,
-      weekdayTotal,
-      weekendTotal,
-      weekdayDays,
-      weekendDays,
-    });
+    if (weekRows.length > 0) {
+      const total = weekRows.reduce((sum, row) => sum + Number(row[TOTAL_COUNT_KEY]), 0);
+      let weekdayTotal = 0;
+      let weekendTotal = 0;
+      let weekdayDays = 0;
+      let weekendDays = 0;
+      weekRows.forEach((row) => {
+        const date = new Date(row[AGGREGATE_FROM_KEY]);
+        const dayOfWeek = date.getDay();
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        const isHoliday = holidayJP.isHoliday(date);
+        const isWeekendOrHoliday = isWeekend || isHoliday;
+        if (isWeekendOrHoliday) {
+          weekendTotal += Number(row[TOTAL_COUNT_KEY]);
+          weekendDays += 1;
+        } else {
+          weekdayTotal += Number(row[TOTAL_COUNT_KEY]);
+          weekdayDays += 1;
+        }
+      });
+
+      weeklyAggregated.push({
+        ...weekRows[0],
+        [AGGREGATE_FROM_KEY]: `${formatDate(new Date(weekStart), "-")}週`, //データのない日があるレインボーラインの統計値処理で使用
+        aggregateFrom: `${formatDate(new Date(weekStart), "-")}週`,
+        aggregateTo: `${formatDate(new Date(weekEnd), "-")}`,
+        totalCount: total,
+        weekdayTotal,
+        weekendTotal,
+        weekdayDays,
+        weekendDays,
+      });
+    }
+    // 次の週へ（前週の to の翌日を from にする）
+    weekStart = new Date(weekEnd);
+    weekStart.setDate(weekStart.getDate() + 1);
+    weekStart.setHours(0, 0, 0, 0);
+
+    weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    weekEnd.setHours(0, 0, 0, 0);
+    if (weekEnd.getTime() > endWeekRange.to.getTime()) {
+      weekEnd = new Date(endWeekRange.to);
+      weekEnd.setHours(0, 0, 0, 0);
+    }
   }
   return weeklyAggregated;
 }

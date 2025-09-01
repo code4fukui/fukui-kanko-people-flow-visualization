@@ -69,6 +69,8 @@ function convertToRainbowLineCSV(data: AggregatedData[]): string {
     "totalCount",
     "dayOfWeek",
     "holidayName",
+    "weekendDays",
+    "weekdayDays",
   ];
   if ((data[0].placement as string) !== "rainbow-line-all") {
     excludeColumns.push(

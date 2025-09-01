@@ -3,9 +3,10 @@ import {
   Graph,
   MonthRangePicker,
   RangeSelector,
+  StatsSummary,
 } from "@fukui-kanko/shared/components/parts";
 import { AggregatedData, GRAPH_VIEW_TYPES, Period } from "@fukui-kanko/shared/types";
-import { aggregateHourly, cn } from "@fukui-kanko/shared/utils";
+import { aggregateDaily, aggregateHourly, cn } from "@fukui-kanko/shared/utils";
 import RainbowLineStackedBarChart from "./rainbow-line-stacked-bar-chart";
 import { RainbowLinePieChart } from "./rainbowe-line-pie-chart";
 
@@ -16,6 +17,7 @@ export function RainbowLineChartPanel({
   isCompareMode,
   data,
   dailyData,
+  statsDataMonthWeek,
   className,
 }: {
   type: keyof typeof GRAPH_VIEW_TYPES;
@@ -24,6 +26,7 @@ export function RainbowLineChartPanel({
   isCompareMode: boolean;
   data: AggregatedData[];
   dailyData: AggregatedData[];
+  statsDataMonthWeek: AggregatedData[];
   className?: string;
 }) {
   const dataInRange = data.filter((row) => {
@@ -43,6 +46,14 @@ export function RainbowLineChartPanel({
             : period.endDate || new Date(0))
     );
   });
+
+  // 「hour」「day」の時のみ利用する統計値用データ
+  const statsDataHourDay: AggregatedData[] =
+    type === "hour"
+      ? (aggregateHourly(dailyData) ?? [])
+      : type === "day" && period.startDate && period.endDate
+        ? (aggregateDaily(data, period.startDate, period.endDate) ?? [])
+        : [];
 
   return (
     <div
@@ -122,7 +133,12 @@ export function RainbowLineChartPanel({
               className="col-span-2 min-h-[calc(100dvh-500px)] h-full z-20"
             />
           )}
-
+          <div className="col-span-2">
+            <StatsSummary
+              type={type}
+              data={type === "hour" || type === "day" ? statsDataHourDay : statsDataMonthWeek}
+            />
+          </div>
           <h3 className="w-full h-10 text-xl col-span-2 mt-8 pt-2 border-t-2 border-gray-100 text-center font-bold">
             都道府県別
           </h3>
