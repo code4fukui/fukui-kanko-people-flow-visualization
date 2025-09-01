@@ -97,6 +97,7 @@ export const reduceAggregateRange: (
     aggregateRange.to.setMonth(aggregateRange.from.getMonth() + 1);
   }
 
+  // 12月20日の週だけ2日
   if (aggregateRange.from < MIN_AGGREGATE_DATE) {
     aggregateRange.from = new Date(MIN_AGGREGATE_DATE);
     if (graphViewType === "week") {
