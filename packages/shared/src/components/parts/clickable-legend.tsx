@@ -1,6 +1,7 @@
 import React, { useLayoutEffect, useRef } from "react";
 import { cn, getLegendKey } from "@fukui-kanko/shared/utils";
 import type { LegendProps } from "recharts";
+import { useChart } from "../ui/chart";
 
 export type ClickableLegendProps = {
   payload?: LegendProps["payload"];
@@ -33,6 +34,7 @@ export const ClickableLegend: React.FC<ClickableLegendProps> = React.memo(
   }) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const hoverTimerRef = useRef<number | undefined>(undefined);
+    const { config } = useChart();
 
     const setHover = (key?: string) => {
       onHoverKeyChange?.(key);
@@ -85,7 +87,8 @@ export const ClickableLegend: React.FC<ClickableLegendProps> = React.memo(
       >
         {payload.map((entry) => {
           const key = getLegendKey(String(entry.dataKey), instanceSuffix);
-          const name = String(entry.value ?? key);
+          const itemConfig = config[String(entry.dataKey)];
+          const name = String(itemConfig?.label || entry.value || key);
           const color = entry.color ?? "#999";
           const isHidden = hidden.has(key);
           const hoveredIsHidden = controlledHoveredKey ? hidden.has(controlledHoveredKey) : false;
