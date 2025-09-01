@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import {
   type AggregatedData,
   ATTRIBUTES,
@@ -145,10 +146,13 @@ export function RainbowLinePieChart({
 
   const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
 
-  const getColorByName = (name: string) => {
-    const index = chartData.findIndex((item) => item.name === name);
-    return colors[index % colors.length];
-  };
+  const getColorByName = useCallback(
+    (name: string) => {
+      const index = chartData.findIndex((item) => item.name === name);
+      return colors[index % colors.length];
+    },
+    [chartData, colors],
+  );
 
   const shouldDimOthers = hoveredLegendKey !== undefined && !hiddenKeys.has(hoveredLegendKey);
   return (
