@@ -181,7 +181,6 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
           content={<ChartTooltipContent className="bg-white" />}
         />
         <ChartLegend
-          wrapperStyle={{ width: "100%" }}
           content={(props) => (
             <ClickableLegend
               payload={props.payload}
