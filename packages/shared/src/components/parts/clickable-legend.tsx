@@ -1,7 +1,7 @@
 import React, { useLayoutEffect, useRef } from "react";
+import { useChart } from "@fukui-kanko/shared/components/ui";
 import { cn, getLegendKey } from "@fukui-kanko/shared/utils";
 import type { LegendProps } from "recharts";
-import { useChart } from "../ui/chart";
 
 export type ClickableLegendProps = {
   payload?: LegendProps["payload"];
