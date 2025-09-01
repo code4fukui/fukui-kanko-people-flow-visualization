@@ -93,7 +93,7 @@ export function RainbowLinePieChart({
       ...newData,
     };
   });
-  const chartData = aggregatedData
+  let chartData = aggregatedData
     .reduce(
       (acc, row) => {
         Object.entries(row).forEach(([key, value]) => {
@@ -116,6 +116,10 @@ export function RainbowLinePieChart({
       }
       return 0; // If not numbers, keep original order
     });
+  chartData = [
+    ...chartData.filter((data) => data.name !== "Other"),
+    { name: "Other", value: chartData.find((data) => data.name === "Other")?.value ?? 0 },
+  ];
   const chartConfig: ChartConfig = {};
   Object.keys(list).forEach((key) => {
     chartConfig[key] = {
@@ -140,8 +144,8 @@ export function RainbowLinePieChart({
           labelLine={false}
           label={(props) => CustomizedLabel({ ...props, focusedAttribute })}
         >
-          {Object.entries(chartData).map(([k], i) => (
-            <Cell key={k} fill={colors[i % colors.length]} />
+          {chartData.map((data, i) => (
+            <Cell key={data.name} fill={colors[i % colors.length]} />
           ))}
         </Pie>
         <ChartTooltip

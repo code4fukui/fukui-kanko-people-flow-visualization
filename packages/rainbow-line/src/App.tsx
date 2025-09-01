@@ -19,7 +19,7 @@ import {
 } from "@fukui-kanko/shared";
 import { TypeSelect } from "@fukui-kanko/shared/components/parts";
 import { Checkbox, Label } from "@fukui-kanko/shared/components/ui";
-import { FiltersSample } from "./components/parts/filters";
+import { Filters } from "./components/parts/filters";
 import { Header } from "./components/parts/header";
 import { RainbowLineChartPanel } from "./components/parts/rainbow-line-chart-panel";
 import { RAINBOW_LINE_LOTS } from "./constants/parking-lots";
@@ -48,17 +48,40 @@ const compansateProcessedData = (
 });
 
 function App() {
-  const [filters, setFilters] = useState<
+  const [filters, _setFilters] = useState<
     Record<
       (typeof FILTER_ATTRIBUTES)[number]["id"],
-      (typeof FILTER_ATTRIBUTES)[number]["items"][number]["value"]
+      Array<(typeof FILTER_ATTRIBUTES)[number]["items"][number]["value"]>
     >
   >({
-    parkingLot: "all",
-    region: "all",
-    prefecture: "all",
-    carCategory: "all",
+    parkingLot: [],
+    region: [],
+    prefecture: [],
+    carCategory: [],
   });
+  const setFilters = (
+    key: (typeof FILTER_ATTRIBUTES)[number]["id"],
+    value: (typeof FILTER_ATTRIBUTES)[number]["items"][number]["value"],
+  ) => {
+    if (value === "all") {
+      // すべてが選択された場合は他の選択を解除
+      _setFilters({
+        ...filters,
+        [key]: [],
+      });
+    } else if (filters[key].includes(value)) {
+      _setFilters({
+        ...filters,
+        [key]: filters[key].filter((v) => v !== value),
+      });
+    } else {
+      _setFilters({
+        ...filters,
+        [key]: [...filters[key], value],
+      });
+    }
+  };
+
   const [type, setType] = useState<keyof typeof GRAPH_VIEW_TYPES>("day");
   const [compareMode, setCompareMode] = useState(false);
 
@@ -96,13 +119,16 @@ function App() {
   const judge = useCallback(
     (key: string) => {
       let prefectures =
-        filters["region"] === "all"
+        filters["region"].length === 0
           ? Object.keys(PREFECTURES)
-          : REGIONS_PREFECTURES[filters["region"]].prefectures;
-      if (filters["prefecture"] !== "all")
-        prefectures = prefectures.filter((v) => v === filters["prefecture"]);
+          : filters["region"].reduce(
+              (result, current) => [...result, ...REGIONS_PREFECTURES[current].prefectures],
+              [] as (keyof typeof PREFECTURES)[],
+            );
+      if (filters["prefecture"].length > 0)
+        prefectures = prefectures.filter((v) => filters["prefecture"].includes(v));
       const carCategories =
-        filters["carCategory"] === "all" ? Object.keys(CAR_CATEGORIES) : [filters["carCategory"]];
+        filters["carCategory"].length === 0 ? Object.keys(CAR_CATEGORIES) : filters["carCategory"];
       return (
         prefectures.some((v) => key.startsWith(v)) && carCategories.some((v) => key.endsWith(v))
       );
@@ -151,11 +177,11 @@ function App() {
   const aggregateParkingLotData = useCallback(
     (lot1: RainbowLineAggregatedData[], lot2: RainbowLineAggregatedData[]) => {
       const selected = filters["parkingLot"];
-      if (selected === "all") {
+      if (selected.length === 0 || selected.length === 2) {
         const combinedLotData = [...lot1, ...lot2].reduce(
           (result, current, index, parent) =>
             reducePlacement(
-              selected as
+              "all" as
                 | Exclude<Placement, "fukui-station-east-entrance" | "tojinbo-shotaro">
                 | "all",
               [result as AggregatedData[], current, index, parent],
@@ -175,17 +201,17 @@ function App() {
             weekdayDays: src?.["weekdayDays"],
           };
         });
-      }
-      if (selected === "rainbow-line-parking-lot-1-gate") {
+      } else if (selected[0] === "rainbow-line-parking-lot-1-gate") {
         return lot1.map((row) => ({
           ...row,
           [`${selected} total count`]: row["total count"],
         }));
+      } else {
+        return lot2.map((row) => ({
+          ...row,
+          [`${selected} total count`]: row["total count"],
+        }));
       }
-      return lot2.map((row) => ({
-        ...row,
-        [`${selected} total count`]: row["total count"],
-      }));
     },
     [filters],
   );
@@ -279,11 +305,7 @@ function App() {
     <div className="flex flex-col w-full h-[100dvh] p-4 overflow-hidden">
       <Header title="レインボーライン駐車場 入込車両データ" />
       <div className="grid grid-cols-[1fr_auto] grid-rows-2 w-fit mx-auto place-content-center gap-4 pt-4">
-        <FiltersSample
-          className="w-fit row-span-2"
-          defaultValues={filters}
-          onFilterChange={(k, v) => setFilters({ ...filters, [`${k}`]: v })}
-        />
+        <Filters className="w-fit row-span-2" defaultValues={filters} onFilterChange={setFilters} />
         <TypeSelect className="self-end" type={type} onChange={setType} />
         <div className="flex items-center gap-2 h-fit">
           <Checkbox
