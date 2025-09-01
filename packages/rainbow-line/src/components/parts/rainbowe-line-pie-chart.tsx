@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import {
   type AggregatedData,
   ATTRIBUTES,
@@ -132,10 +132,12 @@ export function RainbowLinePieChart({
     { name: "Other", value: chartData.find((data) => data.name === "Other")?.value ?? 0 },
   ];
 
-  const visibleChartData = chartData.filter((item) => {
-    const legendKey = getLegendKey(String(item.name), instanceId);
-    return !hiddenKeys.has(legendKey);
-  });
+  const visibleChartData = useMemo(() => {
+    return chartData.filter((item) => {
+      const legendKey = getLegendKey(String(item.name), instanceId);
+      return !hiddenKeys.has(legendKey);
+    });
+  }, [chartData, hiddenKeys, instanceId]);
 
   const chartConfig: ChartConfig = {};
   Object.keys(list).forEach((key) => {
