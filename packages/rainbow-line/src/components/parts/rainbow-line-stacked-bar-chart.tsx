@@ -98,6 +98,7 @@ type RainbowLineStackedBarChartProps = {
   focusedAttribute: ObjectClassAttribute | "placement";
   type: keyof typeof GRAPH_VIEW_TYPES;
   className?: string;
+  colorMap?: Record<string, string>;
 };
 
 /**
@@ -108,6 +109,7 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
   focusedAttribute,
   type,
   className,
+  colorMap = {},
 }) => {
   const [chartData, setChartData] = useState<AggregatedData[]>([]);
   const {
@@ -161,8 +163,8 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
               key={key}
               dataKey={key}
               stackId="a"
-              fill={colors[idx % colors.length]}
-              stroke={colors[idx % colors.length]}
+              fill={colorMap[key] ?? colors[idx % colors.length]}
+              stroke={colorMap[key] ?? colors[idx % colors.length]}
               strokeWidth={hoveredLegendKey === legendKey ? 1.5 : 0}
               hide={isHidden}
               fillOpacity={isDimmed ? 0.1 : 1}

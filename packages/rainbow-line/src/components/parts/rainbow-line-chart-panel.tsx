@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   DownloadCSVButton,
   Graph,
@@ -29,6 +30,8 @@ export function RainbowLineChartPanel({
   statsDataMonthWeek: AggregatedData[];
   className?: string;
 }) {
+  const [prefectureColorMap, setPrefectureColorMap] = useState<Record<string, string>>({});
+  const [carCategoryColorMap, setCarCategoryColorMap] = useState<Record<string, string>>({});
   const dataInRange = data.filter((row) => {
     const aggregatedFrom = new Date(row["aggregate from"]);
     return (
@@ -147,8 +150,13 @@ export function RainbowLineChartPanel({
             focusedAttribute="prefectures"
             type={type}
             className="z-10"
+            colorMap={prefectureColorMap}
           />
-          <RainbowLinePieChart data={dataInRange} focusedAttribute="prefectures" />
+          <RainbowLinePieChart
+            data={dataInRange}
+            focusedAttribute="prefectures"
+            onColorMapChange={setPrefectureColorMap}
+          />
           <h3 className="w-full h-10 col-span-2 text-xl mt-8 pt-2 border-t-2 border-gray-100 text-center font-bold z-10">
             車両分類別
           </h3>
@@ -157,11 +165,13 @@ export function RainbowLineChartPanel({
             focusedAttribute="carCategories"
             type={type}
             className="z-0"
+            colorMap={carCategoryColorMap}
           />
           <RainbowLinePieChart
             data={dataInRange}
             focusedAttribute="carCategories"
             className="z-0"
+            onColorMapChange={setCarCategoryColorMap}
           />
         </div>
       )}
