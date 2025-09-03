@@ -141,11 +141,23 @@ export function RainbowLinePieChart({
     ];
   }, [aggregatedData]);
 
-  const visibleChartData = useMemo(() => {
-    return chartData.filter((item) => {
+  const { visibleChartData, legendItems } = useMemo(() => {
+    const filtered = chartData.map((item) => {
       const legendKey = getLegendKey(String(item.name), instanceId);
-      return !hiddenKeys.has(legendKey);
+      const isHidden = hiddenKeys.has(legendKey);
+      const hasValue = Number(item.value) > 0;
+      return { item, isHidden, hasValue, legendKey };
     });
+
+    return {
+      visibleChartData: filtered
+        .filter(({ isHidden, hasValue }) => !isHidden && hasValue)
+        .map(({ item }) => item),
+
+      legendItems: filtered
+        .filter(({ isHidden, hasValue }) => hasValue || isHidden)
+        .map(({ item }) => item),
+    };
   }, [chartData, hiddenKeys, instanceId]);
 
   const chartConfig: ChartConfig = {};
@@ -214,7 +226,7 @@ export function RainbowLinePieChart({
         <ChartLegend
           content={() => (
             <ClickableLegend
-              payload={chartData.map((item) => ({
+              payload={legendItems.map((item) => ({
                 dataKey: String(item.name),
                 value: String(item.name),
                 color:
