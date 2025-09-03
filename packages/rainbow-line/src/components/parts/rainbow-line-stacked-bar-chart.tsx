@@ -93,6 +93,8 @@ const chartConfig = {
   ),
 };
 
+const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
+
 type RainbowLineStackedBarChartProps = {
   data: AggregatedData[];
   focusedAttribute: ObjectClassAttribute | "placement";
@@ -142,7 +144,27 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
     return ticks;
   }, [data, type]);
 
-  const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
+  const legendItems = useMemo(() => {
+    const keys =
+      focusedAttribute === "placement"
+        ? Object.values(RAINBOW_LINE_LOTS)
+        : Object.values(ATTRIBUTES[focusedAttribute]);
+    return keys
+      .map((key, idx) => {
+        const legendKey = getLegendKey(key, instanceId);
+        const isHidden = hiddenKeys.has(legendKey);
+        const total = chartData.reduce((sum, row) => sum + (Number(row[key]) || 0), 0);
+        const hasValue = total > 0;
+        return {
+          key,
+          legendKey,
+          isHidden,
+          hasValue,
+          color: colorMap[key] ?? colors[idx % colors.length],
+        };
+      })
+      .filter(({ isHidden, hasValue }) => hasValue || isHidden);
+  }, [focusedAttribute, chartData, hiddenKeys, instanceId, colorMap]);
 
   return (
     <ChartContainer config={chartConfig} className={cn("h-full w-full", className)}>
@@ -183,9 +205,13 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
           content={<ChartTooltipContent className="bg-white" />}
         />
         <ChartLegend
-          content={(props) => (
+          content={() => (
             <ClickableLegend
-              payload={props.payload}
+              payload={legendItems.map((item) => ({
+                dataKey: item.key,
+                value: item.key,
+                color: item.color,
+              }))}
               hidden={hiddenKeys}
               onToggle={toggleKey}
               instanceSuffix={instanceId}
