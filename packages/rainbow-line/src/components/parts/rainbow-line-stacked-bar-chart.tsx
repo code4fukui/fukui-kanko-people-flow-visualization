@@ -193,6 +193,7 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
               }}
               hoveredKey={hoveredLegendKey}
               onHoverKeyChange={setHoveredLegendKeyStable}
+              config={chartConfig}
               className="max-h-12 mt-4 pt-3"
             />
           )}
