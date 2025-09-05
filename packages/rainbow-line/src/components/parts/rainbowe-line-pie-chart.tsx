@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   type AggregatedData,
   ATTRIBUTES,
@@ -19,6 +19,7 @@ import {
 import { Cell, Pie, PieChart } from "recharts";
 
 const RADIAN = Math.PI / 180;
+const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
 const CustomizedLabel = (props: {
   cx: number;
   cy: number;
@@ -68,10 +69,12 @@ export function RainbowLinePieChart({
   data,
   focusedAttribute,
   className,
+  onColorMapChange,
 }: {
   data: AggregatedData[];
   focusedAttribute: ObjectClassAttribute;
   className?: string;
+  onColorMapChange: (colorMap: Record<string, string>) => void;
 }) {
   const {
     instanceId,
@@ -82,55 +85,61 @@ export function RainbowLinePieChart({
     setHoveredLegendKeyStable,
   } = useLegendControl();
   const list = ATTRIBUTES[focusedAttribute];
-  const aggregatedData = data.map((row) => {
-    const newData: Record<string, string | number> = {
-      "aggregate from": row["aggregate from"],
-    };
-    Object.keys(list)
-      .map((listitem) => ({
-        [`${listitem}`]: Object.keys(row)
-          .filter(
-            (key) =>
-              (focusedAttribute === "prefectures" && key.startsWith(listitem)) ||
-              (focusedAttribute === "carCategories" && key.endsWith(listitem)),
-          )
-          .map((key) => Number(row[key]))
-          .reduce((sum, current) => sum + current, 0),
-      }))
-      .forEach((item) => {
-        newData[Object.keys(item)[0]] = item[Object.keys(item)[0]];
+  const aggregatedData = useMemo(
+    () =>
+      data.map((row) => {
+        const newData: Record<string, string | number> = {
+          "aggregate from": row["aggregate from"],
+        };
+        Object.keys(list)
+          .map((listitem) => ({
+            [`${listitem}`]: Object.keys(row)
+              .filter(
+                (key) =>
+                  (focusedAttribute === "prefectures" && key.startsWith(listitem)) ||
+                  (focusedAttribute === "carCategories" && key.endsWith(listitem)),
+              )
+              .map((key) => Number(row[key]))
+              .reduce((sum, current) => sum + current, 0),
+          }))
+          .forEach((item) => {
+            newData[Object.keys(item)[0]] = item[Object.keys(item)[0]];
+          });
+        return {
+          ...newData,
+        };
+      }),
+    [data, focusedAttribute, list],
+  );
+  const chartData = useMemo(() => {
+    const base = aggregatedData
+      .reduce(
+        (acc, row) => {
+          Object.entries(row).forEach(([key, value]) => {
+            if (key === "aggregate from") return; // Skip the date key
+            const index = acc.findIndex((item) => item.name === key);
+            if (index === -1) {
+              acc.push({ value: Number(value), name: key });
+              return;
+            } else {
+              acc[index].value = Number(acc[index].value) + Number(value);
+            }
+          });
+          return acc;
+        },
+        [] as Record<string, string | number>[],
+      )
+      .sort((a, b) => {
+        if (typeof a.value === "number" && typeof b.value === "number") {
+          return b.value - a.value; // Sort by value in descending order
+        }
+        return 0; // If not numbers, keep original order
       });
-    return {
-      ...newData,
-    };
-  });
-  let chartData = aggregatedData
-    .reduce(
-      (acc, row) => {
-        Object.entries(row).forEach(([key, value]) => {
-          if (key === "aggregate from") return; // Skip the date key
-          const index = acc.findIndex((item) => item.name === key);
-          if (index === -1) {
-            acc.push({ value: Number(value), name: key });
-            return;
-          } else {
-            acc[index].value = Number(acc[index].value) + Number(value);
-          }
-        });
-        return acc;
-      },
-      [] as Record<string, string | number>[],
-    )
-    .sort((a, b) => {
-      if (typeof a.value === "number" && typeof b.value === "number") {
-        return b.value - a.value; // Sort by value in descending order
-      }
-      return 0; // If not numbers, keep original order
-    });
-  chartData = [
-    ...chartData.filter((data) => data.name !== "Other"),
-    { name: "Other", value: chartData.find((data) => data.name === "Other")?.value ?? 0 },
-  ];
+    return [
+      ...base.filter((data) => data.name !== "Other"),
+      { name: "Other", value: base.find((data) => data.name === "Other")?.value ?? 0 },
+    ];
+  }, [aggregatedData]);
 
   const visibleChartData = useMemo(() => {
     return chartData.filter((item) => {
@@ -146,15 +155,23 @@ export function RainbowLinePieChart({
     };
   });
 
-  const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
+  const colorMap = useMemo(() => {
+    return chartData.reduce<Record<string, string>>((acc, item, idx) => {
+      acc[attributeValueText(focusedAttribute, String(item.name))] = colors[idx % colors.length];
+      return acc;
+    }, {});
+  }, [chartData, focusedAttribute]);
 
-  const getColorByName = useCallback(
-    (name: string) => {
-      const index = chartData.findIndex((item) => item.name === name);
-      return colors[index % colors.length];
-    },
-    [chartData, colors],
-  );
+  const lastSentRef = useRef<string>("");
+  useEffect(() => {
+    const nextStr = JSON.stringify(colorMap);
+    if (nextStr !== lastSentRef.current) {
+      lastSentRef.current = nextStr;
+      onColorMapChange?.(colorMap);
+    }
+  }, [colorMap, onColorMapChange]);
+
+  const getColorByName = (name: string) => colorMap[name] ?? "#ccc";
 
   const shouldDimOthers = hoveredLegendKey !== undefined && !hiddenKeys.has(hoveredLegendKey);
   return (
@@ -176,7 +193,7 @@ export function RainbowLinePieChart({
             const legendKey = getLegendKey(String(data.name), instanceId);
             const isHovered = hoveredLegendKey === legendKey;
             const isDimmed = shouldDimOthers && !isHovered;
-            const color = getColorByName(String(data.name));
+            const color = getColorByName(attributeValueText(focusedAttribute, String(data.name)));
 
             return (
               <Cell
@@ -197,10 +214,11 @@ export function RainbowLinePieChart({
         <ChartLegend
           content={() => (
             <ClickableLegend
-              payload={chartData.map((item, index) => ({
+              payload={chartData.map((item) => ({
                 dataKey: String(item.name),
                 value: String(item.name),
-                color: colors[index % colors.length],
+                color:
+                  getColorByName(attributeValueText(focusedAttribute, String(item.name))) ?? "#ccc",
                 type: "rect" as const,
               }))}
               hidden={hiddenKeys}
