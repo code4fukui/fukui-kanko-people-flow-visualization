@@ -1,15 +1,18 @@
+import { useCallback, useMemo } from "react";
 import {
   type AggregatedData,
   ATTRIBUTES,
   attributeValueText,
   cn,
+  getLegendKey,
   type ObjectClassAttribute,
+  useLegendControl,
 } from "@fukui-kanko/shared";
+import { ClickableLegend } from "@fukui-kanko/shared/components/parts";
 import {
   ChartConfig,
   ChartContainer,
   ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@fukui-kanko/shared/components/ui";
@@ -70,6 +73,14 @@ export function RainbowLinePieChart({
   focusedAttribute: ObjectClassAttribute;
   className?: string;
 }) {
+  const {
+    instanceId,
+    legendScrollTopRef,
+    hiddenKeys,
+    toggleKey,
+    hoveredLegendKey,
+    setHoveredLegendKeyStable,
+  } = useLegendControl();
   const list = ATTRIBUTES[focusedAttribute];
   const aggregatedData = data.map((row) => {
     const newData: Record<string, string | number> = {
@@ -120,6 +131,14 @@ export function RainbowLinePieChart({
     ...chartData.filter((data) => data.name !== "Other"),
     { name: "Other", value: chartData.find((data) => data.name === "Other")?.value ?? 0 },
   ];
+
+  const visibleChartData = useMemo(() => {
+    return chartData.filter((item) => {
+      const legendKey = getLegendKey(String(item.name), instanceId);
+      return !hiddenKeys.has(legendKey);
+    });
+  }, [chartData, hiddenKeys, instanceId]);
+
   const chartConfig: ChartConfig = {};
   Object.keys(list).forEach((key) => {
     chartConfig[key] = {
@@ -129,13 +148,22 @@ export function RainbowLinePieChart({
 
   const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
 
+  const getColorByName = useCallback(
+    (name: string) => {
+      const index = chartData.findIndex((item) => item.name === name);
+      return colors[index % colors.length];
+    },
+    [chartData, colors],
+  );
+
+  const shouldDimOthers = hoveredLegendKey !== undefined && !hiddenKeys.has(hoveredLegendKey);
   return (
     <ChartContainer config={chartConfig} className={cn("h-full w-full", className)}>
       <PieChart>
         <Pie
           dataKey="value"
           isAnimationActive={false}
-          data={chartData}
+          data={visibleChartData}
           cx="50%"
           cy="50%"
           startAngle={90}
@@ -144,9 +172,22 @@ export function RainbowLinePieChart({
           labelLine={false}
           label={(props) => CustomizedLabel({ ...props, focusedAttribute })}
         >
-          {chartData.map((data, i) => (
-            <Cell key={data.name} fill={colors[i % colors.length]} />
-          ))}
+          {visibleChartData.map((data) => {
+            const legendKey = getLegendKey(String(data.name), instanceId);
+            const isHovered = hoveredLegendKey === legendKey;
+            const isDimmed = shouldDimOthers && !isHovered;
+            const color = getColorByName(String(data.name));
+
+            return (
+              <Cell
+                key={data.name}
+                fill={color}
+                fillOpacity={isDimmed ? 0.3 : 1}
+                stroke={isHovered ? color : undefined}
+                strokeWidth={isHovered ? 2 : 0}
+              />
+            );
+          })}
         </Pie>
         <ChartTooltip
           cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
@@ -154,7 +195,27 @@ export function RainbowLinePieChart({
           wrapperStyle={{ zIndex: "var(--tooltip-z-index)" }}
         />
         <ChartLegend
-          content={<ChartLegendContent />}
+          content={() => (
+            <ClickableLegend
+              payload={chartData.map((item, index) => ({
+                dataKey: String(item.name),
+                value: String(item.name),
+                color: colors[index % colors.length],
+                type: "rect" as const,
+              }))}
+              hidden={hiddenKeys}
+              onToggle={toggleKey}
+              instanceSuffix={instanceId}
+              savedScrollTop={legendScrollTopRef.current}
+              onScrollPersist={(top) => {
+                legendScrollTopRef.current = top;
+              }}
+              hoveredKey={hoveredLegendKey}
+              onHoverKeyChange={setHoveredLegendKeyStable}
+              config={chartConfig}
+              className="max-h-32 pt-3"
+            />
+          )}
           layout={"vertical"}
           align={"right"}
           verticalAlign={"middle"}

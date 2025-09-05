@@ -1,11 +1,10 @@
 import { RAINBOW_LINE_LOTS } from "@/constants/parking-lots";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { cn, formatDate, WEEK_DAYS } from "@fukui-kanko/shared";
-import { renderTick, XAxisTickProps } from "@fukui-kanko/shared/components/parts";
+import { cn, formatDate, getLegendKey, useLegendControl, WEEK_DAYS } from "@fukui-kanko/shared";
+import { ClickableLegend, renderTick, XAxisTickProps } from "@fukui-kanko/shared/components/parts";
 import {
   ChartContainer,
   ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@fukui-kanko/shared/components/ui";
@@ -111,6 +110,14 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
   className,
 }) => {
   const [chartData, setChartData] = useState<AggregatedData[]>([]);
+  const {
+    instanceId,
+    legendScrollTopRef,
+    hiddenKeys,
+    toggleKey,
+    hoveredLegendKey,
+    setHoveredLegendKeyStable,
+  } = useLegendControl();
 
   useEffect(() => {
     const dailyData = aggregateDaily(data, focusedAttribute, type);
@@ -143,6 +150,11 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
           ? Object.values(RAINBOW_LINE_LOTS)
           : Object.values(ATTRIBUTES[focusedAttribute])
         ).map((key, idx) => {
+          const legendKey = getLegendKey(key, instanceId);
+          const isHidden = hiddenKeys.has(legendKey);
+          const shouldDimOthers =
+            hoveredLegendKey !== undefined && !hiddenKeys.has(hoveredLegendKey);
+          const isDimmed = shouldDimOthers && hoveredLegendKey !== legendKey;
           return (
             <Bar
               isAnimationActive={false}
@@ -151,7 +163,9 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
               stackId="a"
               fill={colors[idx % colors.length]}
               stroke={colors[idx % colors.length]}
-              strokeWidth={0}
+              strokeWidth={hoveredLegendKey === legendKey ? 1.5 : 0}
+              hide={isHidden}
+              fillOpacity={isDimmed ? 0.1 : 1}
             />
           );
         })}
@@ -166,7 +180,24 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
           cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
           content={<ChartTooltipContent className="bg-white" />}
         />
-        <ChartLegend content={<ChartLegendContent />} className="max-h-12 mt-4" />
+        <ChartLegend
+          content={(props) => (
+            <ClickableLegend
+              payload={props.payload}
+              hidden={hiddenKeys}
+              onToggle={toggleKey}
+              instanceSuffix={instanceId}
+              savedScrollTop={legendScrollTopRef.current}
+              onScrollPersist={(top) => {
+                legendScrollTopRef.current = top;
+              }}
+              hoveredKey={hoveredLegendKey}
+              onHoverKeyChange={setHoveredLegendKeyStable}
+              config={chartConfig}
+              className="max-h-12 mt-4 pt-3"
+            />
+          )}
+        />
       </BarChart>
     </ChartContainer>
   );
