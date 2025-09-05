@@ -230,6 +230,7 @@ export function RainbowLinePieChart({
               }}
               hoveredKey={hoveredLegendKey}
               onHoverKeyChange={setHoveredLegendKeyStable}
+              config={chartConfig}
               className="max-h-32 pt-3"
             />
           )}
