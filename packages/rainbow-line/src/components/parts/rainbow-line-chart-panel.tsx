@@ -34,19 +34,20 @@ export function RainbowLineChartPanel({
   const [carCategoryColorMap, setCarCategoryColorMap] = useState<Record<string, string>>({});
   const dataInRange = data.filter((row) => {
     const aggregatedFrom = new Date(row["aggregate from"]);
+    // 月表示の場合は月単位での比較を行う（日付は無視）
+    if (type === "month" && period.startMonth && period.endMonth) {
+      const rowDate = new Date(aggregatedFrom.getFullYear(), aggregatedFrom.getMonth(), 1);
+      const startDate = new Date(period.startMonth.getFullYear(), period.startMonth.getMonth(), 1);
+      const endDate = new Date(period.endMonth.getFullYear(), period.endMonth.getMonth(), 1);
+      return rowDate >= startDate && rowDate <= endDate;
+    }
     return (
       aggregatedFrom >=
         (type === "week"
           ? period.startWeekRange?.from || new Date(0)
-          : type === "month"
-            ? period.startMonth || new Date(0)
-            : period.startDate || new Date(0)) &&
+          : period.startDate || new Date(0)) &&
       aggregatedFrom <=
-        (type === "week"
-          ? period.endWeekRange?.to || new Date(0)
-          : type === "month"
-            ? period.endMonth || new Date(0)
-            : period.endDate || new Date(0))
+        (type === "week" ? period.endWeekRange?.to || new Date(0) : period.endDate || new Date(0))
     );
   });
 
