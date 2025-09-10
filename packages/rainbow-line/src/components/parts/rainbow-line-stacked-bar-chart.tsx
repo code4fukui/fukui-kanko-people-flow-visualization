@@ -1,9 +1,10 @@
 import { RAINBOW_LINE_LOTS } from "@/constants/parking-lots";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { cn, formatDate, WEEK_DAYS } from "@fukui-kanko/shared";
-import { renderTick, XAxisTickProps } from "@fukui-kanko/shared/components/parts";
+import { cn, formatDate, getLegendKey, useLegendControl, WEEK_DAYS } from "@fukui-kanko/shared";
+import { ClickableLegend, renderTick, XAxisTickProps } from "@fukui-kanko/shared/components/parts";
 import {
   ChartContainer,
+  ChartLegend,
   ChartTooltip,
   ChartTooltipContent,
 } from "@fukui-kanko/shared/components/ui";
@@ -16,7 +17,7 @@ import {
   PLACEMENTS,
 } from "@fukui-kanko/shared/types";
 import * as holidayJP from "@holiday-jp/holiday_jp";
-import { Bar, BarChart, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 /**
  * 指定した期間内のデータを日単位で集計（曜日・祝日名付き）
@@ -24,6 +25,7 @@ import { Bar, BarChart, XAxis, YAxis } from "recharts";
 function aggregateDaily(
   data: AggregatedData[],
   focusedAttribute: ObjectClassAttribute | "placement",
+  type: keyof typeof GRAPH_VIEW_TYPES,
 ): AggregatedData[] {
   // 祝日の取得範囲
   const aggregateFromValues = data.map((row) => new Date(row[AGGREGATE_FROM_KEY]));
@@ -40,7 +42,8 @@ function aggregateDaily(
   return data.map((row) => {
     const date = new Date(row[AGGREGATE_FROM_KEY]);
     const totalCount = Number(row["total count"]) || 0;
-    const dayKey = formatDate(date, "-");
+    const dayKey =
+      type === "month" ? formatDate(date).replace(/-\d{2}$/, "") : formatDate(date, "-");
     const dayOfWeek = WEEK_DAYS[date.getDay()];
     const holidayName = holidayMap.get(dayKey) ?? "";
 
@@ -64,8 +67,13 @@ function aggregateDaily(
       focusedAttribute === "placement" ? RAINBOW_LINE_LOTS : ATTRIBUTES[focusedAttribute];
     Object.keys(list).forEach((listitem) => {
       data[list[listitem as keyof typeof list]] = Object.keys(row)
-        // TODO: 厳密でないフィルタなので、もっと壊れづらいものを考える
-        .filter((key) => key.startsWith(listitem) || key.endsWith(listitem))
+        .filter((key) =>
+          focusedAttribute === "placement"
+            ? key.startsWith(listitem) || key.endsWith(listitem)
+            : focusedAttribute === "prefectures"
+              ? key.startsWith(listitem)
+              : key.endsWith(listitem),
+        )
         .map((key) => Number(row[key]))
         .reduce((sum, current) => (sum += Number(current)), 0);
     });
@@ -85,11 +93,14 @@ const chartConfig = {
   ),
 };
 
+const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
+
 type RainbowLineStackedBarChartProps = {
   data: AggregatedData[];
   focusedAttribute: ObjectClassAttribute | "placement";
   type: keyof typeof GRAPH_VIEW_TYPES;
   className?: string;
+  colorMap?: Record<string, string>;
 };
 
 /**
@@ -100,11 +111,20 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
   focusedAttribute,
   type,
   className,
+  colorMap = {},
 }) => {
   const [chartData, setChartData] = useState<AggregatedData[]>([]);
+  const {
+    instanceId,
+    legendScrollTopRef,
+    hiddenKeys,
+    toggleKey,
+    hoveredLegendKey,
+    setHoveredLegendKeyStable,
+  } = useLegendControl();
 
   useEffect(() => {
-    const dailyData = aggregateDaily(data, focusedAttribute);
+    const dailyData = aggregateDaily(data, focusedAttribute, type);
     setChartData(dailyData);
   }, [data, focusedAttribute, type]);
 
@@ -124,24 +144,52 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
     return ticks;
   }, [data, type]);
 
-  const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
+  const legendItems = useMemo(() => {
+    const keys =
+      focusedAttribute === "placement"
+        ? Object.values(RAINBOW_LINE_LOTS)
+        : Object.values(ATTRIBUTES[focusedAttribute]);
+    return keys
+      .map((key, idx) => {
+        const legendKey = getLegendKey(key, instanceId);
+        const isHidden = hiddenKeys.has(legendKey);
+        const total = chartData.reduce((sum, row) => sum + (Number(row[key]) || 0), 0);
+        const hasValue = total > 0;
+        return {
+          key,
+          legendKey,
+          isHidden,
+          hasValue,
+          color: colorMap[key] ?? colors[idx % colors.length],
+        };
+      })
+      .filter(({ isHidden, hasValue }) => hasValue || isHidden);
+  }, [focusedAttribute, chartData, hiddenKeys, instanceId, colorMap]);
 
   return (
     <ChartContainer config={chartConfig} className={cn("h-full w-full", className)}>
       <BarChart data={chartData} margin={{ top: 10, right: 40, left: 20, bottom: 10 }}>
+        <CartesianGrid vertical={false} />
         {(focusedAttribute === "placement"
           ? Object.values(RAINBOW_LINE_LOTS)
           : Object.values(ATTRIBUTES[focusedAttribute])
         ).map((key, idx) => {
+          const legendKey = getLegendKey(key, instanceId);
+          const isHidden = hiddenKeys.has(legendKey);
+          const shouldDimOthers =
+            hoveredLegendKey !== undefined && !hiddenKeys.has(hoveredLegendKey);
+          const isDimmed = shouldDimOthers && hoveredLegendKey !== legendKey;
           return (
             <Bar
               isAnimationActive={false}
               key={key}
               dataKey={key}
               stackId="a"
-              fill={colors[idx % colors.length]}
-              stroke={colors[idx % colors.length]}
-              strokeWidth={0}
+              fill={colorMap[key] ?? colors[idx % colors.length]}
+              stroke={colorMap[key] ?? colors[idx % colors.length]}
+              strokeWidth={hoveredLegendKey === legendKey ? 1.5 : 0}
+              hide={isHidden}
+              fillOpacity={isDimmed ? 0.1 : 1}
             />
           );
         })}
@@ -155,6 +203,28 @@ export const RainbowLineStackedBarChart: React.FC<RainbowLineStackedBarChartProp
         <ChartTooltip
           cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
           content={<ChartTooltipContent className="bg-white" />}
+        />
+        <ChartLegend
+          content={() => (
+            <ClickableLegend
+              payload={legendItems.map((item) => ({
+                dataKey: item.key,
+                value: item.key,
+                color: item.color,
+              }))}
+              hidden={hiddenKeys}
+              onToggle={toggleKey}
+              instanceSuffix={instanceId}
+              savedScrollTop={legendScrollTopRef.current}
+              onScrollPersist={(top) => {
+                legendScrollTopRef.current = top;
+              }}
+              hoveredKey={hoveredLegendKey}
+              onHoverKeyChange={setHoveredLegendKeyStable}
+              config={chartConfig}
+              className="max-h-12 mt-4 pt-3"
+            />
+          )}
         />
       </BarChart>
     </ChartContainer>

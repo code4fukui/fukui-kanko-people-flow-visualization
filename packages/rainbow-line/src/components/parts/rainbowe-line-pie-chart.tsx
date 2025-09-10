@@ -1,21 +1,25 @@
+import { useEffect, useMemo, useRef } from "react";
 import {
   type AggregatedData,
   ATTRIBUTES,
   attributeValueText,
   cn,
+  getLegendKey,
   type ObjectClassAttribute,
+  useLegendControl,
 } from "@fukui-kanko/shared";
+import { ClickableLegend } from "@fukui-kanko/shared/components/parts";
 import {
   ChartConfig,
   ChartContainer,
   ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@fukui-kanko/shared/components/ui";
 import { Cell, Pie, PieChart } from "recharts";
 
 const RADIAN = Math.PI / 180;
+const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
 const CustomizedLabel = (props: {
   cx: number;
   cy: number;
@@ -35,17 +39,7 @@ const CustomizedLabel = (props: {
     <g>
       <text
         x={x}
-        y={y - 10}
-        fill="white"
-        textAnchor="middle"
-        dominantBaseline="central"
-        className="font-bold drop-shadow"
-      >
-        {props.percent > 0.05 ? `${(props.percent * 100).toFixed(1)}%` : undefined}
-      </text>
-      <text
-        x={x}
-        y={y + 10}
+        y={y - 8}
         fill="white"
         textAnchor="middle"
         dominantBaseline="central"
@@ -57,6 +51,16 @@ const CustomizedLabel = (props: {
           ]
         }
       </text>
+      <text
+        x={x}
+        y={y + 8}
+        fill="white"
+        textAnchor="middle"
+        dominantBaseline="central"
+        className="font-bold drop-shadow"
+      >
+        {props.percent > 0.05 ? `${(props.percent * 100).toFixed(1)}%` : undefined}
+      </text>
     </g>
   ) : undefined;
 };
@@ -65,53 +69,97 @@ export function RainbowLinePieChart({
   data,
   focusedAttribute,
   className,
+  onColorMapChange,
 }: {
   data: AggregatedData[];
   focusedAttribute: ObjectClassAttribute;
   className?: string;
+  onColorMapChange: (colorMap: Record<string, string>) => void;
 }) {
+  const {
+    instanceId,
+    legendScrollTopRef,
+    hiddenKeys,
+    toggleKey,
+    hoveredLegendKey,
+    setHoveredLegendKeyStable,
+  } = useLegendControl();
   const list = ATTRIBUTES[focusedAttribute];
-  const aggregatedData = data.map((row) => {
-    const newData: Record<string, string | number> = {
-      "aggregate from": row["aggregate from"],
-    };
-    Object.keys(list)
-      .map((listitem) => ({
-        [`${listitem}`]: Object.keys(row)
-          .filter((key) => key.startsWith(listitem) || key.endsWith(listitem))
-          .map((key) => Number(row[key]))
-          .reduce((sum, current) => sum + current, 0),
-      }))
-      .forEach((item) => {
-        newData[Object.keys(item)[0]] = item[Object.keys(item)[0]];
+  const aggregatedData = useMemo(
+    () =>
+      data.map((row) => {
+        const newData: Record<string, string | number> = {
+          "aggregate from": row["aggregate from"],
+        };
+        Object.keys(list)
+          .map((listitem) => ({
+            [`${listitem}`]: Object.keys(row)
+              .filter(
+                (key) =>
+                  (focusedAttribute === "prefectures" && key.startsWith(listitem)) ||
+                  (focusedAttribute === "carCategories" && key.endsWith(listitem)),
+              )
+              .map((key) => Number(row[key]))
+              .reduce((sum, current) => sum + current, 0),
+          }))
+          .forEach((item) => {
+            newData[Object.keys(item)[0]] = item[Object.keys(item)[0]];
+          });
+        return {
+          ...newData,
+        };
+      }),
+    [data, focusedAttribute, list],
+  );
+  const chartData = useMemo(() => {
+    const base = aggregatedData
+      .reduce(
+        (acc, row) => {
+          Object.entries(row).forEach(([key, value]) => {
+            if (key === "aggregate from") return; // Skip the date key
+            const index = acc.findIndex((item) => item.name === key);
+            if (index === -1) {
+              acc.push({ value: Number(value), name: key });
+              return;
+            } else {
+              acc[index].value = Number(acc[index].value) + Number(value);
+            }
+          });
+          return acc;
+        },
+        [] as Record<string, string | number>[],
+      )
+      .sort((a, b) => {
+        if (typeof a.value === "number" && typeof b.value === "number") {
+          return b.value - a.value; // Sort by value in descending order
+        }
+        return 0; // If not numbers, keep original order
       });
-    return {
-      ...newData,
-    };
-  });
-  const chartData = aggregatedData
-    .reduce(
-      (acc, row) => {
-        Object.entries(row).forEach(([key, value]) => {
-          if (key === "aggregate from") return; // Skip the date key
-          const index = acc.findIndex((item) => item.name === key);
-          if (index === -1) {
-            acc.push({ value: Number(value), name: key });
-            return;
-          } else {
-            acc[index].value = Number(acc[index].value) + Number(value);
-          }
-        });
-        return acc;
-      },
-      [] as Record<string, string | number>[],
-    )
-    .sort((a, b) => {
-      if (typeof a.value === "number" && typeof b.value === "number") {
-        return b.value - a.value; // Sort by value in descending order
-      }
-      return 0; // If not numbers, keep original order
+    return [
+      ...base.filter((data) => data.name !== "Other"),
+      { name: "Other", value: base.find((data) => data.name === "Other")?.value ?? 0 },
+    ];
+  }, [aggregatedData]);
+
+  const { visibleChartData, legendItems } = useMemo(() => {
+    const filtered = chartData.map((item) => {
+      const legendKey = getLegendKey(String(item.name), instanceId);
+      const isHidden = hiddenKeys.has(legendKey);
+      const hasValue = Number(item.value) > 0;
+      return { item, isHidden, hasValue, legendKey };
     });
+
+    return {
+      visibleChartData: filtered
+        .filter(({ isHidden, hasValue }) => !isHidden && hasValue)
+        .map(({ item }) => item),
+
+      legendItems: filtered
+        .filter(({ isHidden, hasValue }) => hasValue || isHidden)
+        .map(({ item }) => item),
+    };
+  }, [chartData, hiddenKeys, instanceId]);
+
   const chartConfig: ChartConfig = {};
   Object.keys(list).forEach((key) => {
     chartConfig[key] = {
@@ -119,45 +167,91 @@ export function RainbowLinePieChart({
     };
   });
 
-  const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
+  const colorMap = useMemo(() => {
+    return chartData.reduce<Record<string, string>>((acc, item, idx) => {
+      acc[attributeValueText(focusedAttribute, String(item.name))] = colors[idx % colors.length];
+      return acc;
+    }, {});
+  }, [chartData, focusedAttribute]);
 
+  const lastSentRef = useRef<string>("");
+  useEffect(() => {
+    const nextStr = JSON.stringify(colorMap);
+    if (nextStr !== lastSentRef.current) {
+      lastSentRef.current = nextStr;
+      onColorMapChange?.(colorMap);
+    }
+  }, [colorMap, onColorMapChange]);
+
+  const getColorByName = (name: string) => colorMap[name] ?? "#ccc";
+
+  const shouldDimOthers = hoveredLegendKey !== undefined && !hiddenKeys.has(hoveredLegendKey);
   return (
-    <div
-      className={cn(
-        "flex flex-col items-center grow w-full h-full max-h-full overflow-hidden",
-        className,
-      )}
-    >
-      <div className="flex flex-col gap-y-4 w-full min-w-full grow overflow-auto">
-        <ChartContainer config={chartConfig} className="h-full w-full min-h-0">
-          <PieChart>
-            <Pie
-              dataKey="value"
-              isAnimationActive={false}
-              data={chartData}
-              cx="50%"
-              cy="50%"
-              startAngle={90}
-              endAngle={-270}
-              fill="#8884d8"
-              labelLine={false}
-              label={(props) => CustomizedLabel({ ...props, focusedAttribute })}
-            >
-              {Object.entries(chartData).map(([k], i) => (
-                <Cell key={k} fill={colors[i % colors.length]} />
-              ))}
-            </Pie>
-            <ChartTooltip
-              cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
-              content={<ChartTooltipContent className="bg-white" />}
-              wrapperStyle={{ zIndex: "var(--tooltip-z-index)" }}
+    <ChartContainer config={chartConfig} className={cn("h-full w-full", className)}>
+      <PieChart>
+        <Pie
+          dataKey="value"
+          isAnimationActive={false}
+          data={visibleChartData}
+          cx="50%"
+          cy="50%"
+          startAngle={90}
+          endAngle={-270}
+          fill="#8884d8"
+          labelLine={false}
+          label={(props) => CustomizedLabel({ ...props, focusedAttribute })}
+        >
+          {visibleChartData.map((data) => {
+            const legendKey = getLegendKey(String(data.name), instanceId);
+            const isHovered = hoveredLegendKey === legendKey;
+            const isDimmed = shouldDimOthers && !isHovered;
+            const color = getColorByName(attributeValueText(focusedAttribute, String(data.name)));
+
+            return (
+              <Cell
+                key={data.name}
+                fill={color}
+                fillOpacity={isDimmed ? 0.3 : 1}
+                stroke={isHovered ? color : undefined}
+                strokeWidth={isHovered ? 2 : 0}
+              />
+            );
+          })}
+        </Pie>
+        <ChartTooltip
+          cursor={{ fillOpacity: 0.4, stroke: "hsl(var(--primary))" }}
+          content={<ChartTooltipContent className="bg-white" />}
+          wrapperStyle={{ zIndex: "var(--tooltip-z-index)" }}
+        />
+        <ChartLegend
+          content={() => (
+            <ClickableLegend
+              payload={legendItems.map((item) => ({
+                dataKey: String(item.name),
+                value: String(item.name),
+                color:
+                  getColorByName(attributeValueText(focusedAttribute, String(item.name))) ?? "#ccc",
+                type: "rect" as const,
+              }))}
+              hidden={hiddenKeys}
+              onToggle={toggleKey}
+              instanceSuffix={instanceId}
+              savedScrollTop={legendScrollTopRef.current}
+              onScrollPersist={(top) => {
+                legendScrollTopRef.current = top;
+              }}
+              hoveredKey={hoveredLegendKey}
+              onHoverKeyChange={setHoveredLegendKeyStable}
+              config={chartConfig}
+              className="max-h-32 pt-3"
             />
-            {Object.keys(chartData).length <= 10 ? (
-              <ChartLegend content={<ChartLegendContent />} />
-            ) : undefined}
-          </PieChart>
-        </ChartContainer>
-      </div>
-    </div>
+          )}
+          layout={"vertical"}
+          align={"right"}
+          verticalAlign={"middle"}
+          width={160}
+        />
+      </PieChart>
+    </ChartContainer>
   );
 }

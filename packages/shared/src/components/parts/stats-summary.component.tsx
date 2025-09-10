@@ -7,6 +7,7 @@ import { PeopleIcon } from "@primer/octicons-react";
 type StatsSummaryProps = {
   type: keyof typeof GRAPH_VIEW_TYPES;
   data?: AggregatedData[];
+  className?: string;
 };
 
 /**
@@ -57,7 +58,7 @@ function getWeekdayAverages(data: AggregatedData[], type: keyof typeof GRAPH_VIE
   return { weekdayAvg: 0, weekendAvg: 0 };
 }
 
-export const StatsSummary: React.FC<StatsSummaryProps> = ({ type, data }) => {
+export const StatsSummary: React.FC<StatsSummaryProps> = ({ type, data, className }) => {
   const { sum, avg } = getStats(data ?? []);
   const { weekdayAvg, weekendAvg } = getWeekdayAverages(data ?? [], type);
   const statsData = {
@@ -74,7 +75,7 @@ export const StatsSummary: React.FC<StatsSummaryProps> = ({ type, data }) => {
       : Math.max(statsData.avg, statsData.weekdayAvg, statsData.weekendAvg, 1);
 
   return (
-    <div className="flex justify-center">
+    <div className={cn("flex justify-center", className)}>
       <div
         className={cn(
           "grid gap-3 mt-2 mb-4 w-full max-w-md",

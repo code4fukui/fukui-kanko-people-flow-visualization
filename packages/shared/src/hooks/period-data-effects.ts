@@ -4,6 +4,7 @@ import {
   getFilteredData,
   getRawData,
   GRAPH_VIEW_TYPES,
+  ObjectClass,
   Period,
   Placement,
 } from "@fukui-kanko/shared";
@@ -40,40 +41,57 @@ export function useFilteredData(
  * 時間別データを取得・更新するフック
  */
 export function useDailyDataEffect(
+  objectClass: ObjectClass,
   placement: Placement,
   type: keyof typeof GRAPH_VIEW_TYPES,
   period: Period,
   setDailyData: (data: AggregatedData[]) => void,
-  setIsLoading: (loading: boolean) => void,
+  setIsLoading?: (loading: boolean) => void,
 ) {
   useEffect(() => {
     if (type !== "hour") {
-      setIsLoading(false);
+      setIsLoading?.(false);
       return;
     }
     let isCurrent = true;
     const fetchData = async () => {
       if (period.startDate && period.endDate) {
-        setIsLoading(true);
-        const results: AggregatedData[] = [];
-        const current = new Date(period.startDate);
+        setIsLoading?.(true);
+
+        const start = new Date(period.startDate);
         const end = new Date(period.endDate);
 
-        while (current <= end) {
-          // 1時間ごとに取得
-          const rawData = await getRawData({
-            objectClass: "Person",
-            placement,
-            aggregateRange: "daily", // 1時間毎のデータはdailyに含まれています
-            date: new Date(current),
-          });
-          results.push(...rawData);
-          current.setDate(current.getDate() + 1);
+        // 取得対象日の配列を作成
+        const dates: Date[] = [];
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          dates.push(new Date(d));
         }
 
-        if (isCurrent) {
-          setDailyData(results);
-          setIsLoading(false);
+        try {
+          // 各日を並列で取得（順序は dates の順に維持されます）
+          const all = await Promise.all(
+            dates.map((date) =>
+              getRawData({
+                objectClass,
+                placement,
+                aggregateRange: "daily", // 1時間毎のデータはdailyに含まれています
+                date,
+              }),
+            ),
+          );
+          const results = all.flat();
+
+          if (isCurrent) {
+            setDailyData(results);
+          }
+        } catch (e) {
+          if (isCurrent) {
+            // eslint-disable-next-line no-console
+            console.error("データの取得に失敗しました:", e);
+            setDailyData([]);
+          }
+        } finally {
+          if (isCurrent) setIsLoading?.(false);
         }
       }
     };
@@ -81,5 +99,5 @@ export function useDailyDataEffect(
     return () => {
       isCurrent = false;
     };
-  }, [type, period.startDate, period.endDate]);
+  }, [type, period.startDate, period.endDate, objectClass, placement]);
 }

@@ -11,6 +11,8 @@ export type ClickableLegendProps = {
   onScrollPersist?: (top: number) => void;
   hoveredKey?: string;
   onHoverKeyChange?: (key?: string) => void;
+  config?: Record<string, { label?: React.ReactNode }>;
+  className?: string;
 };
 
 /**
@@ -28,6 +30,8 @@ export const ClickableLegend: React.FC<ClickableLegendProps> = React.memo(
     onScrollPersist,
     hoveredKey: controlledHoveredKey,
     onHoverKeyChange,
+    config,
+    className,
   }) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const hoverTimerRef = useRef<number | undefined>(undefined);
@@ -73,14 +77,18 @@ export const ClickableLegend: React.FC<ClickableLegendProps> = React.memo(
     return (
       <div
         ref={containerRef}
-        className="flex flex-wrap items-center justify-center gap-4 max-h-[4.5rem] overflow-y-auto"
+        className={cn(
+          "flex flex-wrap items-center justify-center gap-4 max-h-[4.5rem] overflow-y-auto",
+          className,
+        )}
         onScroll={handleScroll}
         onPointerLeave={cancelHover}
         onPointerCancel={cancelHover}
       >
         {payload.map((entry) => {
           const key = getLegendKey(String(entry.dataKey), instanceSuffix);
-          const name = String(entry.value ?? key);
+          const itemConfig = config ? config[String(entry.dataKey)] : undefined;
+          const name = String(itemConfig?.label || entry.value || key);
           const color = entry.color ?? "#999";
           const isHidden = hidden.has(key);
           const hoveredIsHidden = controlledHoveredKey ? hidden.has(controlledHoveredKey) : false;

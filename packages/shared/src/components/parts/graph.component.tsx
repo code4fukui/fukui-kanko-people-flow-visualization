@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useId, useRef, useState } from "react";
-import { AggregatedData } from "@fukui-kanko/shared";
+import React, { useCallback } from "react";
+import { AggregatedData, useLegendControl } from "@fukui-kanko/shared";
 import { ClickableLegend } from "@fukui-kanko/shared/components/parts";
 import {
   ChartContainer,
@@ -8,7 +8,7 @@ import {
   ChartTooltipContent,
 } from "@fukui-kanko/shared/components/ui";
 import { GRAPH_VIEW_TYPES } from "@fukui-kanko/shared/types";
-import { cn, getLegendKey, HOVER_CLEAR_DELAY_MS, WEEK_DAYS } from "@fukui-kanko/shared/utils";
+import { cn, getLegendKey, WEEK_DAYS } from "@fukui-kanko/shared/utils";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 type GraphProps = {
@@ -98,50 +98,18 @@ const Graph: React.FC<GraphProps> = ({
   type,
   className,
 }) => {
-  const instanceId = useId();
+  const {
+    instanceId,
+    legendScrollTopRef,
+    hiddenKeys,
+    toggleKey,
+    hoveredLegendKey,
+    setHoveredLegendKeyStable,
+  } = useLegendControl();
   const tickRenderer = useCallback(
     (props: XAxisTickProps) => renderTick(props, data, xKey),
     [data, xKey],
   );
-
-  const legendScrollTopRef = useRef(0);
-
-  const [hiddenKeys, setHiddenKeys] = useState<Set<string>>(new Set());
-  const toggleKey = useCallback((key: string) => {
-    setHiddenKeys((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  }, []);
-
-  const [hoveredLegendKey, setHoveredLegendKey] = useState<string | undefined>(undefined);
-  const hoverClearTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-
-  const setHoveredLegendKeyStable = useCallback((key?: string) => {
-    if (hoverClearTimerRef.current !== undefined) {
-      clearTimeout(hoverClearTimerRef.current);
-      hoverClearTimerRef.current = undefined;
-    }
-    if (key === undefined) {
-      hoverClearTimerRef.current = setTimeout(() => {
-        setHoveredLegendKey(undefined);
-        hoverClearTimerRef.current = undefined;
-      }, HOVER_CLEAR_DELAY_MS);
-    } else {
-      setHoveredLegendKey(key);
-    }
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (hoverClearTimerRef.current !== undefined) {
-        clearTimeout(hoverClearTimerRef.current);
-        hoverClearTimerRef.current = undefined;
-      }
-    };
-  }, []);
 
   if (type === "hour") {
     // 日付ごとにグループ化し、xKeyを時間のみに変換
@@ -230,12 +198,6 @@ const Graph: React.FC<GraphProps> = ({
       </ChartContainer>
     );
   }
-
-  return (
-    <div>
-      <p>このタイプ（{type}）のグラフは開発中です。</p>
-    </div>
-  );
 };
 
 export { Graph };
