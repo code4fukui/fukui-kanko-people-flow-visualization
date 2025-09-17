@@ -17,10 +17,9 @@ import {
   useInitialization,
   useLotDailyData,
 } from "@fukui-kanko/shared";
-import { TypeSelect } from "@fukui-kanko/shared/components/parts";
+import { Header, TypeSelect } from "@fukui-kanko/shared/components/parts";
 import { Checkbox, Label } from "@fukui-kanko/shared/components/ui";
 import { Filters } from "./components/parts/filters";
-import { Header } from "./components/parts/header";
 import { RainbowLineChartPanel } from "./components/parts/rainbow-line-chart-panel";
 import { RAINBOW_LINE_LOTS } from "./constants/parking-lots";
 import { FILTER_ATTRIBUTES } from "./interfaces/filter-attributes";
