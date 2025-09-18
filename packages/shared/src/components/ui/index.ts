@@ -6,3 +6,4 @@ export * from "./label";
 export * from "./popover";
 export * from "./scroll-area";
 export * from "./select";
+export * from "./tooltip";
