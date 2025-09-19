@@ -16,9 +16,7 @@ export function Header({ title }: { title: string }) {
             className="bg-gray-300 text-black"
             arrowClassName="bg-gray-300 fill-gray-300"
           >
-            <p className="font-sans">
-              ※機器の不具合によりデータが正常に反映されない可能性があります
-            </p>
+            <p className="font-sans">※機器の不具合によりデータが正常に反映されない日があります</p>
           </TooltipContent>
         </Tooltip>
       </div>
