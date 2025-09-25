@@ -230,7 +230,7 @@ export default function App() {
               setDateRange(v);
             }}
             disabled={{
-              before: new Date("2024-10-17"),
+              before: new Date("2024-12-20"),
               after: (() => {
                 const from = new Date();
                 from.setDate(from.getDate() - 1);
