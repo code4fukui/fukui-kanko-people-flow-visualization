@@ -173,6 +173,12 @@ function App() {
     setStatsDataLot2Compare(filtered2Compare);
   }, [getStatsDataForPeriod, period, comparePeriod]);
 
+  const sortByDate = useCallback(<T extends RainbowLineAggregatedData>(data: T[]): T[] => {
+    return [...data].sort(
+      (a, b) => new Date(a["aggregate from"]).getTime() - new Date(b["aggregate from"]).getTime(),
+    );
+  }, []);
+
   const aggregateParkingLotData = useCallback(
     (lot1: RainbowLineAggregatedData[], lot2: RainbowLineAggregatedData[]) => {
       const selected = filters["parkingLot"];
@@ -191,7 +197,7 @@ function App() {
         const lot1ByFrom = new Map(lot1.map((r) => [String(r["aggregate from"]), r]));
         const lot2ByFrom = new Map(lot2.map((r) => [String(r["aggregate from"]), r]));
         // 非加算項目（休日数/平日数/期間情報）を補正
-        return combinedLotData.map((row) => {
+        const result = combinedLotData.map((row) => {
           const key = String(row["aggregate from"]);
           const src = lot1ByFrom.get(key) ?? lot2ByFrom.get(key);
           return {
@@ -200,19 +206,22 @@ function App() {
             weekdayDays: src?.["weekdayDays"],
           };
         });
+        return sortByDate(result as RainbowLineAggregatedData[]);
       } else if (selected[0] === "rainbow-line-parking-lot-1-gate") {
-        return lot1.map((row) => ({
+        const result = lot1.map((row) => ({
           ...row,
           [`${selected} total count`]: row["total count"],
         }));
+        return sortByDate(result);
       } else {
-        return lot2.map((row) => ({
+        const result = lot2.map((row) => ({
           ...row,
           [`${selected} total count`]: row["total count"],
         }));
+        return sortByDate(result);
       }
     },
-    [filters],
+    [filters, sortByDate],
   );
 
   const processRows = useCallback(
