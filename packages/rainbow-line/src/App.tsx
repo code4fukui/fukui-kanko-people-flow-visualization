@@ -312,6 +312,10 @@ function App() {
   return (
     <div className="flex flex-col w-full h-[100dvh] p-4 overflow-hidden">
       <Header title="レインボーライン駐車場 入込車両データ" />
+      {/* 警告バナー */}
+      <div className="mx-auto w-fit px-4 py-2 mb-2 bg-yellow-50 border-yellow-400 text-yellow-800 rounded">
+        <p className="font-semibold">⚠️ 機器の故障によりしばらくの間データの反映がされません。</p>
+      </div>
       <div className="grid grid-cols-[1fr_auto] grid-rows-2 w-fit mx-auto place-content-center gap-4 pt-4">
         <Filters className="w-fit row-span-2" defaultValues={filters} onFilterChange={setFilters} />
         <TypeSelect className="self-end" type={type} onChange={setType} />
