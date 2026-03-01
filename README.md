@@ -1,92 +1,149 @@
-# 福井県観光DX AIカメラオープンデータ 可視化ウェブアプリケーション
+# 福井県観光DX AIカメラオープンデータ可視化ウェブアプリケーション
 
-福井県観光DXで収集したAIカメラのオープンデータを元に、データの可視化をするウェブアプリケーション群
+このリポジトリは、福井県観光DXプロジェクトで収集されたAIカメラによる人流データの可視化を目的としたモノレポです。複数のVite+Reactアプリケーションと、共通コンポーネントライブラリを含みます。
 
-[アプリを開く](https://code4fukui.github.io/fukui-kanko-people-flow-visualization/)(毎朝1時頃　更新)
+[アプリを開く](https://code4fukui.github.io/fukui-kanko-people-flow-visualization/)（毎日1時更新）
 
-[<img src="pagelink-qr.png" alt="GitHub Pages へのQR" width="200"/>](https://code4fukui.github.io/fukui-kanko-people-flow-visualization/)
+---
 
 ## プロジェクト構成
 
-このプロジェクトはモノレポ構成で、複数のVite+Reactアプリケーションを管理しています。
-
 ```
-fukui-kanko-visualization/
+fukui-kanko-people-flow-visualization/
 ├── packages/
-│   ├── whole/               # 包括的データ可視化アプリ
-│   ├── shared/              # 共有コンポーネント・ユーティリティ
-│   └── (新しいアプリ)        # 今後追加予定
-├── data/                    # gitサブモジュール（データ）
-└── ...
+│   ├── whole/           # 全エリアの包括的可視化アプリ
+│   ├── landing-page/    # プロジェクトのランディングページ
+│   ├── fukui-terminal/  # 福井駅東口エリア可視化
+│   ├── tojinbo/         # 東尋坊エリア可視化
+│   ├── rainbow-line/    # レインボーライン駐車場可視化
+│   └── shared/          # 共通コンポーネント・ユーティリティ・フック・型
+├── data/                # データサブモジュール（人流データ）
+└── tools/               # ユーティリティスクリプト
 ```
 
-## 開発者向け資料
+## モノレポアプリ一覧
 
-### 開発サーバーの起動
+### 1. `whole`
+
+- **目的:** 全エリアの人流・関連データの包括的可視化
+- **機能:** インタラクティブなグラフ、日付範囲選択、お気に入りシリーズ、データエクスポート・共有
+- **技術:** React, Vite, Tailwind CSS, Radix UI, Recharts
+
+### 2. `landing-page`
+
+- **目的:** 各アプリへのナビゲーション・エントリーポイント
+- **機能:** サブアプリへのリンク、レスポンシブデザイン
+- **技術:** React, Vite, Tailwind CSS
+
+### 3. `fukui-terminal`
+
+- **目的:** 福井駅東口エリアの可視化
+- **機能:** 期間別グラフ、データ比較モード
+- **技術:** React, Vite, Tailwind CSS, Recharts
+
+### 4. `tojinbo`
+
+- **目的:** 東尋坊エリアの可視化
+- **機能:** fukui-terminalと同様、エリア固有データ
+- **技術:** React, Vite, Tailwind CSS, Recharts
+
+### 5. `rainbow-line`
+
+- **目的:** レインボーライン駐車場の可視化
+- **機能:** 駐車場フィルタ、集計・日別データ表示
+- **技術:** React, Vite, Tailwind CSS, Recharts
+
+### 6. `shared`
+
+- **目的:** 全アプリ共通のUIコンポーネント、フック、ユーティリティ、型、定数、リデューサー
+
+## データ
+
+- データは `data/people-flow-data` ディレクトリのgitサブモジュールで管理
+- 開発・ビルド時に各アプリの `public` ディレクトリへコピー
+
+## 開発
+
+### 前提条件
+
+- [pnpm](https://pnpm.io/)（推奨）
+- Node.js 18+
+
+### 依存関係インストール
 
 ```bash
-# 包括的データ可視化アプリの開発サーバーを起動
-pnpm dev
-
-# または直接指定
-pnpm --filter whole dev
-
-# 全アプリの開発サーバーを同時起動
-pnpm dev:all
-
-# メインアプリ（landing + whole）のみ同時起動
-pnpm dev:main
-
-# 個別のアプリを起動
-pnpm dev:landing        # ランディングページ
-pnpm dev:whole          # 包括的データ可視化アプリ
-pnpm dev:fukui-terminal # 福井駅周辺データ可視化アプリ
-pnpm dev:tojinbo        # 東尋坊データ可視化アプリ
-pnpm dev:rainbow-line   # レインボーラインデータ可視化アプリ
+pnpm install
 ```
 
-ブラウザで各アプリのポートを開くことで起動された開発サーバーのビルド結果を閲覧できます：
+### 開発サーバー起動
+
+- 全アプリ・データサーバー起動:
+  ```bash
+  pnpm dev
+  ```
+- メインアプリ（whole）のみ起動:
+  ```bash
+  pnpm dev:whole
+  ```
+- 特定アプリのみ起動（例: fukui-terminal）:
+  ```bash
+  pnpm dev:fukui-terminal
+  ```
+- ランディングページのみ起動:
+  ```bash
+  pnpm dev:landing
+  ```
+- 全アプリ同時起動:
+  ```bash
+  pnpm dev:all
+  ```
+
+### アクセスURL
 
 - ランディングページ: [http://localhost:3004](http://localhost:3004)
-- 包括的データ可視化: [http://localhost:3000](http://localhost:3000)
-- 福井駅周辺: [http://localhost:3001](http://localhost:3001)
+- whole（メイン）: [http://localhost:3000](http://localhost:3000)
+- 福井ターミナル: [http://localhost:3001](http://localhost:3001)
 - 東尋坊: [http://localhost:3002](http://localhost:3002)
 - レインボーライン: [http://localhost:3003](http://localhost:3003)
-
-**ローカル開発時のナビゲーション:**
-ランディングページ（http://localhost:3004）から各アプリへのリンクは、開発環境では自動的に適切なポートに遷移します。各アプリは新しいタブで開きます。
 
 ### ビルド
 
 ```bash
-# 包括的データ可視化アプリのビルド
 pnpm build
-
-# 全アプリのビルド（並列実行）
-pnpm build:all
-
-# メインアプリ（landing + whole）のみビルド
-pnpm build:main
-
-# 個別のアプリをビルド
-pnpm build:landing        # ランディングページ
-pnpm build:whole          # 包括的データ可視化アプリ
-pnpm build:fukui-terminal # 福井駅周辺データ可視化アプリ
-pnpm build:tojinbo        # 東尋坊データ可視化アプリ
-pnpm build:rainbow-line   # レインボーラインデータ可視化アプリ
 ```
 
-### gitサブモジュールの更新
-
-手元で最新データに更新したいときはサブモジュールで利用しているデータをupdateする必要があります。
+### Lint
 
 ```bash
-git submodule update --remote
+pnpm lint
 ```
 
-### 新しいアプリの追加
+### データサブモジュール
 
-1. `packages/` ディレクトリに新しいアプリのディレクトリを作成
-2. Vite+Reactプロジェクトをセットアップ
-3. 共有リソースが必要な場合は `packages/shared` から import
-4. ルートの `package.json` にスクリプトを追加
+データサブモジュールを更新し、最新データをコピーするには:
+
+```bash
+pnpm submodule
+```
+
+## デプロイ
+
+- `tools/` ディレクトリの `upload.sh` でGitHub Pagesへデプロイ
+- データのみアップロードは `pnpm upload:data`
+
+## ライセンス
+
+詳細は [LICENSE](LICENSE) を参照
+
+---
+
+## 謝辞
+
+- 福井県観光DXプロジェクト
+- Code for Fukui
+
+---
+
+## お問い合わせ
+
+質問やコントリビューションはGitHubでissueやpull requestをお願いします。
