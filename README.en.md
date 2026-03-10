@@ -51,7 +51,7 @@ fukui-kanko-people-flow-visualization/
 
 ### 4. `tojinbo`
 
-- **Purpose:** Visualization for the Tojinbo Shotaro area.
+- **Purpose:** Visualization for the Tojinbo area.
 - **Features:**
   - Similar to `fukui-terminal`, with area-specific data
 - **Tech:** React, Vite, Tailwind CSS, Recharts
@@ -78,7 +78,8 @@ fukui-kanko-people-flow-visualization/
 ## Data
 
 - Data is managed as a git submodule in the `data/people-flow-data` directory.
-- Data is copied into the relevant app's `public` directory during development and build.
+- For the `whole` app, data is copied into its `public` directory during development and build.
+- Other apps load data from the data server (run via `serve:data` on port 4000) instead of copying it into `public`.
 
 ## Development
 
@@ -111,10 +112,6 @@ pnpm install
   ```bash
   pnpm dev:landing
   ```
-- Start all apps simultaneously:
-  ```bash
-  pnpm dev:all
-  ```
 
 ### Accessing Apps
 
@@ -146,8 +143,9 @@ pnpm submodule
 
 ## Deployment
 
-- The project is deployed to GitHub Pages via the `upload.sh` script in the `tools/` directory.
-- Data can be uploaded separately with `pnpm upload:data`.
+- The GitHub Pages site is deployed automatically by the workflow defined in `.github/workflows/pages.yml` on the `main` branch of the upstream repository.
+- The `tools/upload.sh` script deploys the built application to an S3/CloudFront environment.
+- A dry-run of the data upload can be executed with `pnpm upload:data` (no actual upload is performed by default).
 
 ## License
 
