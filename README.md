@@ -60,7 +60,8 @@ fukui-kanko-people-flow-visualization/
 ## データ
 
 - データは `data/people-flow-data` ディレクトリのgitサブモジュールで管理
-- 開発・ビルド時に各アプリの `public` ディレクトリへコピー
+- 開発・ビルド時に `packages/whole/public` ディレクトリへコピーされ、`whole` アプリで参照される
+- 他のアプリは、ローカル開発時には `http://localhost:4000/` のデータサーバーからデータを取得する
 
 ## 開発
 
@@ -93,10 +94,6 @@ pnpm install
   ```bash
   pnpm dev:landing
   ```
-- 全アプリ同時起動:
-  ```bash
-  pnpm dev:all
-  ```
 
 ### アクセスURL
 
@@ -128,8 +125,9 @@ pnpm submodule
 
 ## デプロイ
 
-- `tools/` ディレクトリの `upload.sh` でGitHub Pagesへデプロイ
-- データのみアップロードは `pnpm upload:data`
+- GitHub Pages へのデプロイは `.github/workflows/pages.yml` による自動デプロイで行われます
+- `tools/` ディレクトリの `upload.sh` は S3/CloudFront へのデプロイに使用します
+- `pnpm upload:data` はデータのみの S3 アップロード内容を dry-run で確認します（実際のアップロードは `tools/upload.sh` を適切なオプションで直接実行）
 
 ## ライセンス
 
