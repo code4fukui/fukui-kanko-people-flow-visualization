@@ -1,128 +1,168 @@
-# Fukui Prefecture Tourism DX AI Camera Open Data Visualization
+# Fukui Prefecture Tourism DX AI Camera Open Data Visualization Web Application
 
 > 日本語のREADMEはこちらです: [README.ja.md](README.ja.md)
 
-**福井県観光DX AIカメラオープンデータ可視化ウェブアプリケーション**
 
-This repository contains a web application for visualizing people flow and related data collected by AI cameras as part of the Fukui Prefecture Tourism DX initiative. The project is structured as a pnpm monorepo, comprising multiple Vite+React applications and a shared component library.
+This repository provides a monorepo for visualizing people flow and related data collected via AI cameras as part of the Fukui Prefecture Tourism DX initiative. The project consists of multiple Vite+React applications, each focused on a specific visualization or feature, and a shared component library for code reuse.
 
-[
-![Deploy to GitHub Pages](https://github.com/code4fukui/fukui-kanko-people-flow-visualization/actions/workflows/pages.yml/badge.svg)
-](https://github.com/code4fukui/fukui-kanko-people-flow-visualization/actions/workflows/pages.yml)
-[
-![Update Submodule](https://github.com/code4fukui/fukui-kanko-people-flow-visualization/actions/workflows/submodule.yml/badge.svg)
-](https://github.com/code4fukui/fukui-kanko-people-flow-visualization/actions/workflows/submodule.yml)
+[Open the Application](https://code4fukui.github.io/fukui-kanko-people-flow-visualization/) (updated daily at 1:00 AM JST)
 
 ---
 
-## ✨ Live Application
-
-[**Open the Application**](https://code4fukui.github.io/fukui-kanko-people-flow-visualization/)
-
-*The data is updated daily at approximately 1:00 AM JST.*
-
-## 🚀 Features
-
-- **Comprehensive Visualization**: An interactive dashboard (`whole`) to explore aggregated data across all locations with features like date range selection, favorite series, and data export.
-- **Area-Specific Dashboards**: Dedicated applications for visualizing data from specific tourist spots, including Fukui Station, Tojinbo, and the Rainbow Line scenic road.
-- **Monorepo Architecture**: A scalable pnpm workspace that organizes multiple applications and a shared library for maximum code reuse and maintainability.
-- **Shared Component Library**: A centralized `@fukui-kanko/shared` package provides UI components, hooks, and utilities to ensure a consistent user experience across all apps.
-- **Automated Data Pipeline**: People flow data is managed as a Git submodule and updated daily via a scheduled GitHub Action.
-- **CI/CD**: Automated deployment to GitHub Pages for the main branch and S3/CloudFront for development branches.
-
-## 🛠️ Technology Stack
-
-- **Framework**: React 18, Vite
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS, Radix UI
-- **Charting**: Recharts
-- **Package Manager**: pnpm (workspaces)
-- **Linting/Formatting**: ESLint, Prettier
-- **CI/CD**: GitHub Actions
-
-## 📂 Project Structure
-
-The repository is a monorepo containing several packages:
+## Project Structure
 
 ```
 fukui-kanko-people-flow-visualization/
 ├── packages/
-│   ├── whole/           # Main comprehensive visualization app
-│   ├── landing-page/    # Project landing page
+│   ├── whole/           # Comprehensive data visualization app
+│   ├── landing-page/    # Landing page for the project
 │   ├── fukui-terminal/  # Fukui Station area visualization
 │   ├── tojinbo/         # Tojinbo area visualization
 │   ├── rainbow-line/    # Rainbow Line parking lot visualization
-│   └── shared/          # Shared components, hooks, and utilities
-├── data/                # Git submodule for people flow data
-└── tools/               # Utility and deployment scripts
+│   └── shared/          # Shared components, utilities, hooks, and types
+├── data/                # Data submodule (people flow data)
+└── tools/               # Utility scripts
 ```
 
-## 🏁 Getting Started
+## Monorepo Applications
+
+### 1. `whole`
+
+- **Purpose:** Main, comprehensive visualization of people flow and related data across all monitored areas.
+- **Features:**
+  - Interactive graphs and charts
+  - Date range selection
+  - Starred/favorite series
+  - Data export and sharing
+- **Tech:** React, Vite, Tailwind CSS, Radix UI, Recharts
+
+### 2. `landing-page`
+
+- **Purpose:** Entry point and navigation for the visualization suite.
+- **Features:**
+  - Links to each sub-application
+  - Responsive design
+- **Tech:** React, Vite, Tailwind CSS
+
+### 3. `fukui-terminal`
+
+- **Purpose:** Visualization focused on the Fukui Station East Entrance area.
+- **Features:**
+  - Period-based graphs
+  - Data comparison mode
+- **Tech:** React, Vite, Tailwind CSS, Recharts
+
+### 4. `tojinbo`
+
+- **Purpose:** Visualization for the Tojinbo area.
+- **Features:**
+  - Similar to `fukui-terminal`, with area-specific data
+- **Tech:** React, Vite, Tailwind CSS, Recharts
+
+### 5. `rainbow-line`
+
+- **Purpose:** Visualization for Rainbow Line parking lots.
+- **Features:**
+  - Parking lot-specific filters
+  - Aggregated and daily data views
+- **Tech:** React, Vite, Tailwind CSS, Recharts
+
+### 6. `shared`
+
+- **Purpose:** Shared library of UI components, hooks, utilities, types, and constants for all apps.
+- **Exports:**
+  - Components (UI, parts)
+  - Hooks
+  - Utilities
+  - Types
+  - Constants
+  - Reducers
+
+## Data
+
+- Data is managed as a git submodule in the `data/people-flow-data` directory.
+- For the `whole` app, data is copied into its `public` directory during development and build.
+- Other apps load data from the data server (run via `serve:data` on port 4000) instead of copying it into `public`.
+
+## Development
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18 or later)
-- [pnpm](https://pnpm.io/) (v9 or later)
+- [pnpm](https://pnpm.io/) (recommended)
+- Node.js 18+
 
-### Installation
-
-Clone the repository and install dependencies. The `--recursive` flag is needed to initialize the `data` submodule.
+### Install dependencies
 
 ```bash
-git clone --recursive https://github.com/code4fukui/fukui-kanko-people-flow-visualization.git
-cd fukui-kanko-people-flow-visualization
 pnpm install
 ```
 
-### Running the Development Servers
+### Start development servers
 
-You can run all applications simultaneously or start a specific one. A local data server will also be started on port `4000`.
+- Start all apps and data server:
+  ```bash
+  pnpm dev
+  ```
+- Start only the main app (`whole`):
+  ```bash
+  pnpm dev:whole
+  ```
+- Start a specific app (e.g., `fukui-terminal`):
+  ```bash
+  pnpm dev:fukui-terminal
+  ```
+- Start landing page only:
+  ```bash
+  pnpm dev:landing
+  ```
+
+### Accessing Apps
+
+- Landing Page: [http://localhost:3004](http://localhost:3004)
+- Whole (main): [http://localhost:3000](http://localhost:3000)
+- Fukui Terminal: [http://localhost:3001](http://localhost:3001)
+- Tojinbo: [http://localhost:3002](http://localhost:3002)
+- Rainbow Line: [http://localhost:3003](http://localhost:3003)
+
+### Build
 
 ```bash
-# Start all apps and the data server
-pnpm dev
-
-# Start only the main 'whole' application
-pnpm dev:whole
-
-# Start only the Fukui Station application
-pnpm dev:fukui-terminal
+pnpm build
 ```
 
-Once running, the applications will be available at the following local URLs:
+### Lint
 
-- **Landing Page**: [http://localhost:3004](http://localhost:3004)
-- **Whole (Main App)**: [http://localhost:3000](http://localhost:3000)
-- **Fukui Terminal**: [http://localhost:3001](http://localhost:3001)
-- **Tojinbo**: [http://localhost:3002](http://localhost:3002)
-- **Rainbow Line**: [http://localhost:3003](http://localhost:3003)
+```bash
+pnpm lint
+```
 
-### Available Scripts
+### Data Submodule
 
-| Command          | Description                                                              |
-| ---------------- | ------------------------------------------------------------------------ |
-| `pnpm dev`       | Starts all applications and the local data server in development mode.   |
-| `pnpm build`     | Builds all applications for production.                                  |
-| `pnpm lint`      | Lints and checks for code quality issues across the entire monorepo.     |
-| `pnpm submodule` | Manually updates the data submodule to fetch the latest people flow data. |
+To update the data submodule and copy the latest data:
 
-## 📊 Data Handling
+```bash
+pnpm submodule
+```
 
-- The people flow data is managed as a Git submodule located in the `data/people-flow-data` directory.
-- For local development, data is served from `http://localhost:4000`.
-- The `whole` application copies the data into its `public` directory during development and build steps for direct access.
-- The data submodule is automatically updated daily on the `main` branch by the [`.github/workflows/submodule.yml`](.github/workflows/submodule.yml) workflow.
+## Deployment
 
-## 🚀 Deployment
+- The GitHub Pages site is deployed automatically by the workflow defined in `.github/workflows/pages.yml` on the `main` branch of the upstream repository.
+- The `tools/upload.sh` script deploys the built application to an S3/CloudFront environment.
+- A dry-run of the data upload can be executed with `pnpm upload:data` (no actual upload is performed by default).
 
-- The main application is automatically deployed to GitHub Pages from the `main` branch via the [`.github/workflows/pages.yml`](.github/workflows/pages.yml) workflow.
-- The `tools/upload.sh` script is available for manual deployments to an S3/CloudFront environment, typically used for staging or development previews from forked repositories.
+## License
 
-## 🙏 Acknowledgements
+See [LICENSE](LICENSE).
+
+---
+
+## Acknowledgements
 
 - Fukui Prefecture Tourism DX Project
 - Code for Fukui
 
-## 📄 License
+---
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+## Contact
+
+For questions or contributions, please open an issue or pull request on GitHub.
