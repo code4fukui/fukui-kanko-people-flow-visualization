@@ -1,8 +1,10 @@
 # 福井県観光DX AIカメラオープンデータ可視化
 
+[English](README.md)
+
 **福井県観光DX AIカメラオープンデータ可視化ウェブアプリケーション**
 
-このリポジトリには、福井県観光DXの取り組みの一環としてAIカメラによって収集された人流や関連データを可視化するウェブアプリケーションが含まれています。このプロジェクトは、複数のVite+Reactアプリケーションと共有コンポーネントライブラリを含むpnpmモノレポとして構成されています。
+このリポジトリには、福井県観光DXイニシアチブの一環としてAIカメラで収集された人の流れや関連データを可視化するウェブアプリケーションが含まれています。このプロジェクトは、複数のVite+Reactアプリケーションと共有コンポーネントライブラリを含むpnpmモノレポとして構成されています。
 
 [
 ![Deploy to GitHub Pages](https://github.com/code4fukui/fukui-kanko-people-flow-visualization/actions/workflows/pages.yml/badge.svg)
@@ -21,12 +23,12 @@
 
 ## 🚀 特徴
 
-- **包括的な可視化**: すべての地点にわたる集約データをインタラクティブに探索するためのダッシュボード（`whole`）。日付範囲の選択、お気に入りシリーズ、データエクスポートなどの機能を備えています。
-- **地域別ダッシュボード**: 福井駅、東尋坊、レインボーラインなどの特定の観光スポットのデータを可視化する専用アプリケーション。
-- **モノレポアーキテクチャ**: 複数のアプリケーションと共有ライブラリをpnpmワークスペースで整理し、コードの再利用性と保守性を最大化したスケーラブルな構造。
-- **共有コンポーネントライブラリ**: `@fukui-kanko/shared` パッケージがUIコンポーネント、フック、ユーティリティを提供し、すべてのアプリで一貫したユーザー体験を確保します。
-- **自動化されたデータパイプライン**: 人流データはGitサブモジュールとして管理され、スケジュールされたGitHub Actionsを通じて毎日更新されます。
-- **CI/CD**: `main` ブランチはGitHub Pagesへの自動デプロイ、開発ブランチはS3/CloudFrontへのデプロイを実現します。
+- **包括的な可視化**: すべての場所にわたる集約データをインタラクティブなダッシュボード(`whole`)で確認可能。日付範囲選択、お気に入りシリーズ、データエクスポートなどの機能が搭載されています。
+- **地域別ダッシュボード**: 福井駅、東尋坊、レインボーラインなどの特定観光地のデータを可視化する専用アプリケーション。
+- **モノレポアーキテクチャ**: 複数のアプリケーションと共有ライブラリを整理し、コード再利用とメンテナビリティを最大化するスケーラブルなpnpmワークスペース。
+- **共有コンポーネントライブラリ**: `@fukui-kanko/shared`パッケージがUIコンポーネント、フック、ユーティリティを提供し、すべてのアプリで一貫したユーザー体験を確保します。
+- **自動化されたデータパイプライン**: 人の流れデータはGitサブモジュールとして管理され、スケジュールされたGitHub Actionを通じて毎日更新されます。
+- **CI/CD**: メインブランチはGitHub Pagesへの自動デプロイ、開発ブランチはS3/CloudFrontへのデプロイが実装されています。
 
 ## 🛠️ 技術スタック
 
@@ -35,92 +37,134 @@
 - **スタイリング**: Tailwind CSS, Radix UI
 - **チャート**: Recharts
 - **パッケージマネージャー**: pnpm (ワークスペース)
-- **リンター / フォーマッター**: ESLint, Prettier
+- **リンタ/フォーマッター**: ESLint, Prettier
 - **CI/CD**: GitHub Actions
 
 ## 📂 プロジェクト構造
 
-このリポジトリは複数のパッケージを含むモノレポです:
-
 ```
 fukui-kanko-people-flow-visualization/
 ├── packages/
-│   ├── whole/           # メインの包括的な可視化アプリケーション
+│   ├── whole/           # メインの包括的可視化アプリ
 │   ├── landing-page/    # プロジェクトのランディングページ
 │   ├── fukui-terminal/  # 福井駅周辺の可視化
-│   ├── tojinbo/         # 東尋坊周辺の可視化
+│   ├── tojinbo/         # 東尋坊エリアの可視化
 │   ├── rainbow-line/    # レインボーライン駐車場の可視化
 │   └── shared/          # 共有コンポーネント、フック、ユーティリティ
-├── data/                # 人流データのGitサブモジュール
+├── data/                # 人の流れデータのGitサブモジュール
 └── tools/               # ユーティリティとデプロイスクリプト
 ```
 
 ## 🏁 はじめに
 
-### 前提条件
+### 必要な環境
 
-- [Node.js](https://nodejs.org/) (v18以降)
-- [pnpm](https://pnpm.io/) (v9以降)
+- [Node.js](https://nodejs.org/) (18+)
+- [pnpm](https://pnpm.io/) (ワークスペース対応のパッケージマネージャー)
 
-### インストール
-
-リポジトリをクローンし、依存関係をインストールします。`data` サブモジュールを初期化するために `--recursive` フラグが必要です。
+### 依存関係のインストール
 
 ```bash
-git clone --recursive https://github.com/code4fukui/fukui-kanko-people-flow-visualization.git
-cd fukui-kanko-people-flow-visualization
 pnpm install
 ```
 
-### 開発サーバーの起動
+### 開発を開始
 
-すべてのアプリケーションを同時に起動するか、特定のアプリケーションのみを起動できます。ローカルデータサーバーもポート `4000` で起動されます。
+- すべてのアプリとデータサーバーを起動:
+  ```bash
+  pnpm dev
+  ```
+- メインアプリ(`whole`)のみ起動:
+  ```bash
+  pnpm dev:whole
+  ```
+- 特定のアプリ（例: `fukui-terminal`）のみ起動:
+  ```bash
+  pnpm dev:fukui-terminal
+  ```
+- ランディングページのみ起動:
+  ```bash
+  pnpm dev:landing
+  ```
+
+### アプリへのアクセス
+
+- ランディングページ: [http://localhost:3004](http://localhost:3004)
+- Whole (メイン): [http://localhost:3000](http://localhost:3000)
+- 福井ターミナル: [http://localhost:3001](http://localhost:3001)
+- 東尋坊: [http://localhost:3002](http://localhost:3002)
+- レインボーライン: [http://localhost:3003](http://localhost:3003)
+
+### データサーバー
+
+ローカルで生データを提供する（`whole`以外のアプリが必要）:
 
 ```bash
-# すべてのアプリとデータサーバーを起動
-pnpm dev
-
-# メインの 'whole' アプリケーションのみ起動
-pnpm dev:whole
-
-# 福井駅アプリケーションのみ起動
-pnpm dev:fukui-terminal
+pnpm serve:data
 ```
 
-起動後、アプリケーションは以下のローカルURLで利用可能です:
+### データサブモジュールの更新
 
-- **Landing Page**: [http://localhost:3004](http://localhost:3004)
-- **Whole (メインアプリ)**: [http://localhost:3000](http://localhost:3000)
-- **Fukui Terminal**: [http://localhost:3001](http://localhost:3001)
-- **Tojinbo**: [http://localhost:3002](http://localhost:3002)
-- **Rainbow Line**: [http://localhost:3003](http://localhost:3003)
+最新の人の流れデータを取得するには:
 
-### 利用可能なスクリプト
+```bash
+pnpm submodule
+```
 
-| コマンド | 説明 |
-| --- | --- |
-| `pnpm dev` | 開発モードですべてのアプリケーションとローカルデータサーバーを起動します。 |
-| `pnpm build` | すべてのアプリケーションを本番用にビルドします。 |
-| `pnpm lint` | モノレポ全体でコード品質の問題をチェックします。 |
-| `pnpm submodule` | データサブモジュールを手動で更新し、最新の人流データを取得します。 |
+### ビルド
 
-## 📊 データの取り扱い
+```bash
+pnpm build
+```
 
-- 人流データは `data/people-flow-data` ディレクトリにあるGitサブモジュールとして管理されています。
-- ローカル開発では、データは `http://localhost:4000` から提供されます。
-- `whole` アプリケーションは、開発およびビルド時にデータを `public` ディレクトリにコピーし、直接アクセスできるようにします。
-- データサブモジュールは、`main` ブランチにおいて [`.github/workflows/submodule.yml`](.github/workflows/submodule.yml) ワークフローにより毎日自動的に更新されます。
+### リント
+
+```bash
+pnpm lint
+```
+
+## 📦 モノレポアプリケーション
+
+### 1. `whole`
+
+- **目的**: すべての場所にわたる集約データのメインダッシュボード。
+- **特徴**: インタラクティブなグラフ、日付範囲選択、データエクスポート、お気に入りシリーズ。
+- **技術**: React, Vite, Tailwind CSS, Recharts, Radix UI.
+
+### 2. `landing-page`
+
+- **目的**: すべてのサブアプリケーションへのナビゲーションエントリポイント。
+- **特徴**: レスポンシブデザイン、QRコードリンク。
+- **技術**: React, Vite, Tailwind CSS.
+
+### 3. `fukui-terminal`
+
+- **目的**: 福井駅東口の可視化。
+- **特徴**: 期間ベースのグラフ、データ比較。
+- **技術**: React, Vite, Tailwind CSS, Recharts.
+
+### 4. `tojinbo`
+
+- **目的**: 東尋坊エリアの可視化。
+- **特徴**: 地域特化型データ分析。
+- **技術**: React, Vite, Tailwind CSS, Recharts.
+
+### 5. `rainbow-line`
+
+- **目的**: レインボーライン景勝道路沿線の駐車場利用率分析。
+- **特徴**: 駐車場フィルター、集約/日別ビュー。
+- **技術**: React, Vite, Tailwind CSS, Recharts.
+
+### 6. `shared`
+
+- **目的**: 再利用可能なコンポーネント、フック、ユーティリティ。
+- **エクスポート**: UIコンポーネント、データユーティリティ、型、定数。
 
 ## 🚀 デプロイ
 
-- メインアプリケーションは、[`.github/workflows/pages.yml`](.github/workflows/pages.yml) ワークフローを通じて `main` ブランチからGitHub Pagesに自動デプロイされます。
-- `tools/upload.sh` スクリプトは、S3/CloudFront環境への手動デプロイに利用可能で、通常はフォークされたリポジトリからのステージングや開発プレビューに使用されます。
+- `main`ブランチは`.github/workflows/pages.yml`を通じてGitHub Pagesに自動デプロイされます。
+- 開発ブランチは`tools/upload.sh`を使用してS3/CloudFrontにデプロイされます。
 
-## 🙏 謝辞
+## 📜 ライセンス
 
-- 福井県観光DXプロジェクト
-- Code for Fukui
-
-## 📄 ライセンス
-
-このプロジェクトは MIT License の下でライセンスされています。詳細は [LICENSE](LICENSE) を参照してください。
+このプロジェクトは[MITライセンス](LICENSE)に従って提供されています。

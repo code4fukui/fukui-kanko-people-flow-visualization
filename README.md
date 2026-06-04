@@ -1,103 +1,74 @@
-# Fukui Prefecture Tourism DX AI Camera Open Data Visualization Web Application
+# Fukui Prefecture Tourism DX AI Camera Open Data Visualization
 
 > 日本語のREADMEはこちらです: [README.ja.md](README.ja.md)
 
+**福井県観光DX AIカメラオープンデータ可視化ウェブアプリケーション**
 
-This repository provides a monorepo for visualizing people flow and related data collected via AI cameras as part of the Fukui Prefecture Tourism DX initiative. The project consists of multiple Vite+React applications, each focused on a specific visualization or feature, and a shared component library for code reuse.
+This repository contains a web application for visualizing people flow and related data collected by AI cameras as part of the Fukui Prefecture Tourism DX initiative. The project is structured as a pnpm monorepo, comprising multiple Vite+React applications and a shared component library.
 
-[Open the Application](https://code4fukui.github.io/fukui-kanko-people-flow-visualization/) (updated daily at 1:00 AM JST)
+[
+![Deploy to GitHub Pages](https://github.com/code4fukui/fukui-kanko-people-flow-visualization/actions/workflows/pages.yml/badge.svg)
+](https://github.com/code4fukui/fukui-kanko-people-flow-visualization/actions/workflows/pages.yml)
+[
+![Update Submodule](https://github.com/code4fukui/fukui-kanko-people-flow-visualization/actions/workflows/submodule.yml/badge.svg)
+](https://github.com/code4fukui/fukui-kanko-people-flow-visualization/actions/workflows/submodule.yml)
 
 ---
 
-## Project Structure
+## ✨ Live Application
+
+[**Open the Application**](https://code4fukui.github.io/fukui-kanko-people-flow-visualization/)
+
+*The data is updated daily at approximately 1:00 AM JST.*
+
+## 🚀 Features
+
+- **Comprehensive Visualization**: An interactive dashboard (`whole`) to explore aggregated data across all locations with features like date range selection, favorite series, and data export.
+- **Area-Specific Dashboards**: Dedicated applications for visualizing data from specific tourist spots, including Fukui Station, Tojinbo, and the Rainbow Line scenic road.
+- **Monorepo Architecture**: A scalable pnpm workspace that organizes multiple applications and a shared library for maximum code reuse and maintainability.
+- **Shared Component Library**: A centralized `@fukui-kanko/shared` package provides UI components, hooks, and utilities to ensure a consistent user experience across all apps.
+- **Automated Data Pipeline**: People flow data is managed as a Git submodule and updated daily via a scheduled GitHub Action.
+- **CI/CD**: Automated deployment to GitHub Pages for the main branch and S3/CloudFront for development branches.
+
+## 🛠️ Technology Stack
+
+- **Framework**: React 18, Vite
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS, Radix UI
+- **Charting**: Recharts
+- **Package Manager**: pnpm (workspaces)
+- **Linting/Formatting**: ESLint, Prettier
+- **CI/CD**: GitHub Actions
+
+## 📂 Project Structure
 
 ```
 fukui-kanko-people-flow-visualization/
 ├── packages/
-│   ├── whole/           # Comprehensive data visualization app
-│   ├── landing-page/    # Landing page for the project
+│   ├── whole/           # Main comprehensive visualization app
+│   ├── landing-page/    # Project landing page
 │   ├── fukui-terminal/  # Fukui Station area visualization
 │   ├── tojinbo/         # Tojinbo area visualization
 │   ├── rainbow-line/    # Rainbow Line parking lot visualization
-│   └── shared/          # Shared components, utilities, hooks, and types
-├── data/                # Data submodule (people flow data)
-└── tools/               # Utility scripts
+│   └── shared/          # Shared components, hooks, and utilities
+├── data/                # Git submodule for people flow data
+└── tools/               # Utility and deployment scripts
 ```
 
-## Monorepo Applications
-
-### 1. `whole`
-
-- **Purpose:** Main, comprehensive visualization of people flow and related data across all monitored areas.
-- **Features:**
-  - Interactive graphs and charts
-  - Date range selection
-  - Starred/favorite series
-  - Data export and sharing
-- **Tech:** React, Vite, Tailwind CSS, Radix UI, Recharts
-
-### 2. `landing-page`
-
-- **Purpose:** Entry point and navigation for the visualization suite.
-- **Features:**
-  - Links to each sub-application
-  - Responsive design
-- **Tech:** React, Vite, Tailwind CSS
-
-### 3. `fukui-terminal`
-
-- **Purpose:** Visualization focused on the Fukui Station East Entrance area.
-- **Features:**
-  - Period-based graphs
-  - Data comparison mode
-- **Tech:** React, Vite, Tailwind CSS, Recharts
-
-### 4. `tojinbo`
-
-- **Purpose:** Visualization for the Tojinbo area.
-- **Features:**
-  - Similar to `fukui-terminal`, with area-specific data
-- **Tech:** React, Vite, Tailwind CSS, Recharts
-
-### 5. `rainbow-line`
-
-- **Purpose:** Visualization for Rainbow Line parking lots.
-- **Features:**
-  - Parking lot-specific filters
-  - Aggregated and daily data views
-- **Tech:** React, Vite, Tailwind CSS, Recharts
-
-### 6. `shared`
-
-- **Purpose:** Shared library of UI components, hooks, utilities, types, and constants for all apps.
-- **Exports:**
-  - Components (UI, parts)
-  - Hooks
-  - Utilities
-  - Types
-  - Constants
-  - Reducers
-
-## Data
-
-- Data is managed as a git submodule in the `data/people-flow-data` directory.
-- For the `whole` app, data is copied into its `public` directory during development and build.
-- Other apps load data from the data server (run via `serve:data` on port 4000) instead of copying it into `public`.
-
-## Development
+## 🏁 Getting Started
 
 ### Prerequisites
 
-- [pnpm](https://pnpm.io/) (recommended)
-- Node.js 18+
+- [Node.js](https://nodejs.org/) (18+)
+- [pnpm](https://pnpm.io/) (workspace-aware package manager)
 
-### Install dependencies
+### Install Dependencies
 
 ```bash
 pnpm install
 ```
 
-### Start development servers
+### Start Development
 
 - Start all apps and data server:
   ```bash
@@ -124,6 +95,22 @@ pnpm install
 - Tojinbo: [http://localhost:3002](http://localhost:3002)
 - Rainbow Line: [http://localhost:3003](http://localhost:3003)
 
+### Data Server
+
+To serve raw data locally (required for non-`whole` apps):
+
+```bash
+pnpm serve:data
+```
+
+### Update Data Submodule
+
+To fetch the latest people flow data:
+
+```bash
+pnpm submodule
+```
+
 ### Build
 
 ```bash
@@ -136,33 +123,48 @@ pnpm build
 pnpm lint
 ```
 
-### Data Submodule
+## 📦 Monorepo Applications
 
-To update the data submodule and copy the latest data:
+### 1. `whole`
 
-```bash
-pnpm submodule
-```
+- **Purpose**: Main dashboard for aggregated data across all locations.
+- **Features**: Interactive graphs, date range selection, data export, starred series.
+- **Tech**: React, Vite, Tailwind CSS, Recharts, Radix UI.
 
-## Deployment
+### 2. `landing-page`
 
-- The GitHub Pages site is deployed automatically by the workflow defined in `.github/workflows/pages.yml` on the `main` branch of the upstream repository.
-- The `tools/upload.sh` script deploys the built application to an S3/CloudFront environment.
-- A dry-run of the data upload can be executed with `pnpm upload:data` (no actual upload is performed by default).
+- **Purpose**: Entry point with navigation to all sub-applications.
+- **Features**: Responsive design, QR code linking.
+- **Tech**: React, Vite, Tailwind CSS.
 
-## License
+### 3. `fukui-terminal`
 
-See [LICENSE](LICENSE).
+- **Purpose**: Visualization for Fukui Station East Entrance.
+- **Features**: Period-based graphs, data comparison.
+- **Tech**: React, Vite, Tailwind CSS, Recharts.
 
----
+### 4. `tojinbo`
 
-## Acknowledgements
+- **Purpose**: Visualization for Tojinbo coastal area.
+- **Features**: Area-specific data analysis.
+- **Tech**: React, Vite, Tailwind CSS, Recharts.
 
-- Fukui Prefecture Tourism DX Project
-- Code for Fukui
+### 5. `rainbow-line`
 
----
+- **Purpose**: Parking lot usage analysis along the Rainbow Line scenic road.
+- **Features**: Parking lot filters, aggregated/daily views.
+- **Tech**: React, Vite, Tailwind CSS, Recharts.
 
-## Contact
+### 6. `shared`
 
-For questions or contributions, please open an issue or pull request on GitHub.
+- **Purpose**: Reusable components, hooks, and utilities.
+- **Exports**: UI components, data utilities, types, constants.
+
+## 🚀 Deployment
+
+- GitHub Pages is automatically deployed for the `main` branch via `.github/workflows/pages.yml`.
+- Development branches are deployed to S3/CloudFront using `tools/upload.sh`.
+
+## 📜 License
+
+This project is licensed under the terms of the [MIT License](LICENSE).
